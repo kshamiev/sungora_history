@@ -1,0 +1,144 @@
+.block-link-with-ico{
+  display: inline-block;
+  width: 130px;
+  background-color: #2ec16e;
+  font-weight: 700;
+  color: #fff;
+  .box-shadow(2px 2px 0 0 #228f51);
+  padding: 10px 75px 10px 15px;
+  margin: 0 10px 10px 0;
+  position: relative;
+  min-height: 70px;
+  vertical-align: top;
+  text-decoration: none;
+  
+  &:after{
+    content: '';
+    display: block;
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    background: url("img/block_link_corner.png") no-repeat scroll 0 0;
+    width: 25px;
+    height: 26px;
+  }
+
+  &:hover{
+    text-decoration: none;
+    color: #fff;
+    .box-shadow(0px 0px 0 3px #228f51 inset);
+    &:after{
+      background-position: right 0;
+      bottom: 0px;
+      right: 0px;
+    }
+  }
+  &_yellow{
+    background: #ffc52a;
+    .box-shadow(2px 2px 0 0 #cd9f27);
+    &:after{
+      background-position: 0 -26px;
+    }
+    &:hover{
+      .box-shadow(0px 0px 0 3px #cd9f27 inset);
+      &:after{
+        background-position: right -26px;
+      }
+    }
+  }
+  &_red{
+    background: #e74b3c;
+    .box-shadow(2px 2px 0 0 #c43c2f);
+    &:after{
+      background-position: 0 -52px;
+    }
+    &:hover{
+      .box-shadow(0px 0px 0 3px #c43c2f inset);
+      &:after{
+        background-position: right -52px;
+      }
+    }
+  }
+  &_orange{
+    background: #f98c23;
+    .box-shadow(2px 2px 0 0 #b7702b);
+    &:after{
+      background-position: 0 -78px;
+    }
+    &:hover{
+      .box-shadow(0px 0px 0 3px #b7702b inset);
+      &:after{
+        background-position: right -78px;
+      }
+    }
+  }
+  &_purple{
+    background: #725194;
+    .box-shadow(2px 2px 0 0 #5b3d79);
+    &:after{
+      background-position: 0 -104px;
+    }
+    &:hover{
+      .box-shadow(0px 0px 0 3px #5b3d79 inset);
+      &:after{
+        background-position: right -104px;
+      }
+    }
+  }
+  &_green{
+    background: #45c29a;
+    .box-shadow(2px 2px 0 0 #339072);
+    &:after{
+      background-position: 0 -130px;
+    }
+    &:hover{
+      .box-shadow(0px 0px 0 3px #339072 inset);
+      &:after{
+        background-position: right -130px;
+      }
+    }
+  }
+  &_blue{
+    background: #008aff;
+    .box-shadow(2px 2px 0 0 #2568a2);
+    &:after{
+      background-position: 0 -156px;
+    }
+    &:hover{
+      .box-shadow(0px 0px 0 3px #2568a2 inset);
+      &:after{
+        background-position: right -156px;
+      }
+    }
+  }
+  &__icon{
+    width: 51px;
+    height: 50px;
+    display: block;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: url('img/ico_block_link.png') no-repeat scroll 0 0;
+    &_sms{
+      background-position: 0 0;
+    }
+    &_mail{
+      background-position: 0 -64px;
+    }
+    &_courier{
+      background-position: 0 -144px;
+    }
+    &_print{
+      background-position: 0 -221px;
+    }
+    &_box{
+      background-position: 0 -304px;
+    }
+    &_personal{
+      background-position: 0 -377px;
+    }
+    &_phone{
+      background-position: 0 -458px;
+    }
+  }
+}

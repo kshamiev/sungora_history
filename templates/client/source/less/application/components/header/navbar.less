@@ -1,0 +1,86 @@
+.navbar-fixed-top .navbar-inner,
+.navbar-static-top .navbar-inner{
+  box-shadow: none;
+  background: #fff;
+  border-bottom: 1px solid #dddddd;
+}
+.navbar-fixed-top{
+  /*position: relative;*/
+}
+.navbar .nav > li > a{
+  color: #282d30;
+}
+.navbar .nav > .active > a,
+.navbar .nav > .active > a:hover,
+.navbar .nav > .active > a:focus,
+.navbar .nav > li > a:focus,
+.navbar .nav > li > a:hover{
+  color: #008aff;
+}
+.logo{
+  width: 163px;
+  height: 36px;
+  background: url("img/logo.png") no-repeat scroll 30px 12px;
+  display: block;
+  float: left;
+  padding: 12px 30px 11px;
+}
+
+.navbar{
+  .nav{
+    .active a,
+    .active a:hover{
+      background-color: transparent;
+      box-shadow: none;
+    }
+    &.main-menu a{
+      font-weight: 300;
+      text-transform: uppercase;
+      font-size: 14px;
+      padding: 19px 15px;
+    }
+    &.block-support{
+      li.dropdown.open > .dropdown-toggle, .navbar .nav li.dropdown.active > .dropdown-toggle,
+      li.dropdown.open.active > .dropdown-toggle{
+        background-color: transparent;
+      }
+      .block-support__link{
+        font-size: 14px;
+        font-weight: 800;
+        padding: 19px 15px 19px 35px;
+      }
+      .block-support__link_consult{
+        background-image: url('img/ico_back_header.png');
+        background-position: 0 17px;
+        background-repeat: no-repeat;
+
+        &:hover{
+          background-position: 0 -109px;
+        }
+      }
+      .block-support__link_tech-support{
+        background-image: url('img/ico_back_header.png');
+        background-position: -177px 17px;
+        background-repeat: no-repeat;
+        &:hover{
+          background-position: -177px -109px;
+        }
+      }
+      .block-support__link_user{
+        background-image: url('img/ico_back_header.png');
+        background-position: -346px 17px;
+        background-repeat: no-repeat;
+        &:hover{
+          background-position: -346px -109px;
+        }
+      }
+    }
+  }
+  .btn-left-menu{
+    float: left;
+  }
+  &-register{
+    width: 990px;
+    margin: 0 auto;
+  }
+}

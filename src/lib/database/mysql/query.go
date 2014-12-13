@@ -1,0 +1,29 @@
+// mysql запросы приложения к БД
+package mysql
+
+var Query = make(map[string][]string)
+
+func init() {
+	Query = map[string][]string{
+		`base/controllers`: []string{
+			"UPDATE `Controllers` SET `Position` = `Position` - 1 WHERE `Position` > ?;",
+			"UPDATE `Controllers` SET `Position` = `Position` + 1 WHERE `Position` > ?;",
+			"UPDATE `Controllers` SET `Position` = ? WHERE `Id` = ?;",
+			"DELETE FROM GroupsUri WHERE Controllers_Id = ? AND Groups_Id = ?;",
+			"SELECT MAX(Position) as Max FROM `Controllers`;",
+		},
+		`base/uri`: []string{
+			"UPDATE `Uri` SET `Position` = `Position` - 1 WHERE `Position` > ?;",
+			"UPDATE `Uri` SET `Position` = `Position` + 1 WHERE `Position` > ?;",
+			"UPDATE `Uri` SET `Position` = ? WHERE `Id` = ?;",
+			"DELETE FROM GroupsUri WHERE Uri_Id = ? AND Controllers_Id = ?;",
+			"DELETE FROM GroupsUri WHERE Uri_Id = ? AND Groups_Id = ?;",
+			"SELECT MAX(Position) as Max FROM `Uri`;",
+		},
+		`base/users`: []string{
+			"INSERT UsersGroups SET `Users_Id` = ?, `Groups_Id` = ?;",
+			"DELETE FROM UsersGroups WHERE Users_Id = ? AND Groups_Id = ?;",
+			"UPDATE Users SET `DateOnline` = ?, `Token` = ? WHERE Id = ?;",
+		},
+	}
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{.Title}}</title>
+<meta name="keywords" content="{{.Keywords}}" />
+<meta name="description" content="{{.Description}}" />
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="/zegota.css"/>
+</head>
+<body class="container">
+<div class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="navbar-nav nav">
+      <li><a href="/">Главная</a></li>
+      <li><a href="/project">О проекте</a></li>
+      <li><a href="/Www">Www</a></li>
+    </ul>
+    <profile-toolbar></profile-toolbar>
+    <registration-toolbar></registration-toolbar>
+    <recovery-toolbar></recovery-toolbar>
+    <login-toolbar></login-toolbar>
+  </div>
+</div>
+
+<div class="row">
+    <div class="span12">
+        <div class="well"><p align="center">{{.Content}}</p></div>
+    </div>
+</div>
+{{.BuildInfo}}
+<script type="text/javascript" src="/jquery.js"></script>
+<script type="text/javascript" src="/angular.js"></script>
+<script type="text/javascript" src="/zegota.js"></script>
+<script type="text/javascript">
+  angular.bootstrap(document, ['zegotaUsr']);
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<ul class="navbar-nav nav">
+    <li ng-show="isAuthenticated()">
+        <a class="block-support__link block-support__link_tech-support" href>Поддержка</a>
+    </li>
+
+    <li ng-hide="isAuthenticated()" class="login">
+        <a class="dropdown-toggle block-support__link block-support__link_user" ng-click="login()">Войти</a>
+    </li>
+
+    <li ng-show="isAuthenticated()" class="dropdown">
+        <a href="#" class="dropdown-toggle block-support__link block-support__link_user" data-toggle="dropdown">
+            {{currentUser.LastName}} {{currentUser.Name.substring(0,1)}}.
+        </a>
+        <ul class="dropdown-menu">
+            <li><a ng-click="logout()">Выход</a></li>
+        </ul>
+    </li>
+</ul>

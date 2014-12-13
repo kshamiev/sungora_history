@@ -1,0 +1,100 @@
+//
+// modals.layers
+// @see http://mgcrea.github.io/angular-motion/##slide
+// @see http://mgcrea.github.io/angular-strap/
+// @see https://github.com/mgcrea/angular-motion/blob/master/src/slide/slide.less
+// --------------------------------------------------
+
+
+
+.modal {
+	&-layer {
+		position: fixed;
+        top: 0px !important;
+        bottom: 0px;
+        right: -390px;
+        left: auto;
+        height: 100%;
+        margin: 0 !important;
+		border: 0;
+        .opacity(0);
+        .translate(0, 0);
+        border-spacing: 0px;
+        max-width: 390px;
+        width: 100%;
+        .border-radius(0px);
+
+        &.extended-search{
+          right: -750px;
+          max-width: 750px;
+        }
+
+		&.fade {
+          .transition(e('right .3s ease-in-out, opacity .3s ease-in-out'));
+		}
+		&.fade.in {
+          right: 0px ;
+		}
+
+        .modal-body{
+          overflow: visible;
+          padding-left: 30px;
+          padding-right: 30px;
+        }
+
+        .modal-header{
+          padding-top: 50px;
+          padding-left: 30px;
+          padding-right: 30px;
+        }
+        .close{
+          top: 46px;
+          width: 25px;
+          height: 25px;
+          padding: 0px;
+          line-height: normal;
+//          .box-sizing(border-box);
+          background: url("img/ico_modal_close.png") no-repeat scroll 0 0;
+          font-size: 0px;
+          .opacity(100);
+
+          &:hover{
+            background-position: 0 bottom;
+          }
+        }
+        .chatter{
+          color: #282d30;
+          margin-bottom: 20px;
+          font-size: 14px;
+          b{
+            font-weight: 700;
+          }
+          .span3{
+            color: #282d30;
+          }
+        }
+        .periods{
+          min-width: 390px;
+          .select2-container{
+            display: block;
+            overflow: hidden;
+          }
+          .btn-unstyled{
+            float: right;
+            padding-top: 4px;
+            padding-bottom: 4px;
+          }
+        }
+
+      .modal-dialog{
+        overflow: auto;
+        height: 100%;
+        .modal-content{
+          position: relative;
+          overflow: hidden;
+          min-height: 100%;
+        }
+      }
+
+	}
+}

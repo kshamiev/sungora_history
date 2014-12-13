@@ -2,10 +2,29 @@
 *.o
 *.a
 *.so
+*.conf
+*.log
+
+# External dependences
+src/github.com
+src/code.google.com
+src/speter.net
+src/bitbucket.org
+src/gopkg.in
+
+# IDE
+.project
+.settings
+.idea
 
 # Folders
 _obj
 _test
+bin
+pkg
+run
+dev
+log
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -21,4 +40,3 @@ _testmain.go
 
 *.exe
 *.test
-*.prof

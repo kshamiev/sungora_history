@@ -1,0 +1,84 @@
+.chat{
+  background: #f4fbff;
+  border: 1px solid #c1d5e2;
+  padding: 15px;
+  font-size: 12px;
+  .border-radius(3px);
+
+  &__bbl{
+    width: 95%;
+    background: #fafafa;
+    color: #516572;
+    border: 1px solid #c1d5e2;
+    .border-radius(3px);
+    line-height: normal;
+    padding: 10px;
+    margin-bottom: 23px;
+    clear: both;
+    position: relative;
+//    .box-sizing(border-box);
+
+    &:before{
+      content: '';
+      display: block;
+      position: absolute;
+      width: 10px;
+      height: 7px;
+      background: url("img/chat_arrows.png") no-repeat scroll 0 0;
+      left: 10px;
+      top: -7px;
+    }
+
+    &_me{
+      color: #fff;
+      background: #008aff;
+      border: none;
+      float: right;
+      &:before{
+        left: 100%;
+        top: 10px;
+        width: 5px;
+        height: 10px;
+        background-position: right 0;
+      }
+    }
+  }
+
+  .name{
+    color: #516572;
+    margin-bottom: 10px;
+    b{
+      font-weight: 600;
+    }
+  }
+  .separator{
+    height: 1px;
+    background: #c1d5e2;
+    clear: both;
+    margin: 10px -15px;
+  }
+
+  textarea{
+    border: 1px solid #c1d5e2;
+    .border-radius(3px);
+    resize: none;
+    margin: 0px;
+  }
+
+  .inp-type-file{
+    position: relative;
+    width: 22px;
+    height: 23px;
+    background: url("img/ico_inp_type_file.png") no-repeat scroll 0 0;
+    overflow: hidden;
+
+    input{
+      position: absolute;
+      .opacity(0);
+      font-size: 100px;
+      left: 0px;
+      top: 0px;
+      cursor: pointer;
+    }
+  }
+}

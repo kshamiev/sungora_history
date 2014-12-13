@@ -1,0 +1,122 @@
+.dropdown-datepicker{
+  font-size: 15px;
+  background: none;
+  padding-top: 10px;
+  .box-shadow(none);
+  margin-left: -30px;
+
+  table{
+    background: none;
+    margin: 0 auto;
+
+    thead tr:first-child th{
+      padding-bottom: 10px;
+    }
+  }
+  & > li{
+    background: #fff;
+    .border-radius(4px);
+    padding: 15px;
+    position: relative;
+    min-width: 262px;
+
+    &:before{
+      content: "";
+      display: block;
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      margin-left: -11px;
+      width: 22px;
+      height: 16px;
+      background: #fff;
+      transform:             rotate( 118deg ) skew( -35deg );
+      -moz-transform:    rotate( 118deg ) skew( -35deg );
+      -ms-transform:     rotate( 118deg ) skew( -35deg );
+      -o-transform:      rotate( 118deg ) skew( -35deg );
+      -webkit-transform: rotate( 118deg ) skew( -35deg );
+      width:  20px;
+      .box-shadow(0 0 4px 0 rgba(11,12,12, .3));
+      z-index: -1;
+    }
+    &:after{
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      bottom: 0px;
+      right: 0px;
+      .border-radius(4px);
+      .box-shadow(0 0 4px 0 rgba(11,12,12, .3));
+      z-index: -2;
+    }
+  }
+  button{
+    margin: 0px;
+    padding: 0px;
+    background: none;
+    border: none;
+    box-shadow: none;
+    text-align: center;
+  }
+  th{
+    text-transform: uppercase;
+    color: #282d30;
+    text-align: center;
+    strong{
+      text-transform: uppercase;
+    }
+  }
+  td, th{
+    min-width: 28px;
+    padding: 0 4px;
+
+    button{
+//      .box-sizing(border-box);
+      color: #2c3134;
+      font-weight: 300;
+      min-width: 28px;
+      height: 28px;
+      line-height: 26px;
+      vertical-align: top;
+      .border-radius(14px);
+      outline: none;
+
+      &:hover{
+        background: none;
+        color: #1795ff;
+      }
+      padding: 0 5px;
+    }
+    .btn-info{
+      border: 1px solid #1795ff;
+      .border-radius(14px);
+      color: #1795ff;
+      text-shadow: none;
+    }
+  }
+  .nav-arrow{
+    display: inline-block;
+    width: 7px;
+    height: 12px;
+    background: url("img/ico_arr_calendar.png") no-repeat scroll 0 0;
+    &_left{
+      &:hover{
+        background-position: 0 bottom;
+      }
+    }
+    &_right{
+      background-position: right bottom;
+      &:hover{
+        background-position: right 0;
+      }
+    }
+  }
+  button:hover .nav-arrow_left{
+    background-position: 0 bottom;
+  }
+  button:hover .nav-arrow_right{
+    background-position: right 0;;
+  }
+}

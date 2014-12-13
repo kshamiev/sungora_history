@@ -1,0 +1,53 @@
+<div class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="cancelProfile()">&times;</button>
+        <h3>Профиль</h3>
+      </div>
+      <form novalidate name="profileForm">
+        <div class="modal-body">
+
+          <div class="alert alert-error" ng-show="profileError">
+            {[{profileError}]}
+          </div>
+
+          <div class="alert alert-success" ng-show="profileSuccess">
+            {[{profileSuccess}]}
+          </div>
+
+          <fieldset>
+            <div class="form-group">
+              <label class="control-label" for="inputProfName">Имя</label>
+              <input autocomplete="off" id="inputProfName" name="inputProfName" class="form-control" type="text" ng-model="model.Name">
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="inputProfMiddleName">Отчество</label>
+              <input autocomplete="off" id="inputProfMiddleName" name="inputProfMiddleName" class="form-control" type="text" ng-model="model.MiddleName">
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="inputProfLastName">Фамилия</label>
+              <input autocomplete="off" id="inputProfLastName" name="inputProfLastName" class="form-control" type="text" ng-model="model.LastName">
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="inputProfPassword">Пароль</label>
+              <input autocomplete="off" id="inputProfPassword" name="inputProfPassword" class="form-control" type="password" ng-model="model.Password">
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="inputRegLastName">Подтверждение</label>
+              <input autocomplete="off" id="inputProfPasswordR" name="inputProfPasswordR" class="form-control" type="password" ng-model="model.PasswordR">
+            </div>
+
+            <div class="form-group">
+              <button class="btn btn-primary btn-block" ng-click="submitUserData()" ng-disabled="profileFormForm.$invalid" type="submit">Соxранить</button>
+            </div>
+          </fieldset>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

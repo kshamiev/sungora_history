@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{.Title}}</title>
+<meta name="keywords" content="{{.Keywords}}" />
+<meta name="description" content="{{.Description}}" />
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="zegota.css"/>
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="angular.js"></script>
+    <script type="text/javascript" src="zegota.js"></script>
+</head>
+<body ng-app="zegota" class="container">
+{{.Content}}
+{{.BuildInfo}}
+</body>
+</html>

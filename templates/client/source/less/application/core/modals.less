@@ -1,0 +1,158 @@
+//
+// Modals
+// --------------------------------------------------
+
+// Background
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: @zindexModalBackdrop;
+  background-color: #282d30;
+  // Fade for backdrop
+  &.fade { opacity: 0; }
+}
+
+.modal-backdrop,
+.modal-backdrop.fade.in {
+  .opacity(30);
+}
+
+// Base modal
+.modal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  z-index: @zindexModal;
+  width: 400px;
+  margin-left: -200px;
+  background-color: @white;
+
+  .border-radius(6px);
+  .box-shadow(0 0px 10px 0 rgba(0,0,0,0.5));
+  .background-clip(padding-box);
+  // Remove focus outline from opened modal
+  outline: none;
+
+  &.fade {
+    .transition(e('opacity .3s linear, top .3s ease-out'));
+    top: -25%;
+  }
+  &.fade.in { top: 10%; }
+  form{
+    margin: 0px;
+  }
+  &:not(.modal-layer) input{
+    font-size: 16px;
+    margin-bottom: 15px;
+    padding-top: 7px;
+    padding-bottom: 6px;
+    height: 35px;
+    color: #282d30;
+    .border-radius(3px);
+  }
+  &__error{
+    margin-bottom: 15px;
+    color: #e74b3c;
+    font-size: 13px;
+    font-weight: 300;
+  }
+  &__form-element{
+    margin: 0 0 15px 0;
+  }
+  /*a:not(.btn){
+    color: #656565;
+    font-size: 14px;
+    text-decoration: underline;
+    &:hover{
+      text-decoration: none;
+    }
+  }*/
+  .form-label__big{
+    font-size: 16px;
+    color: #282d30;
+    margin-bottom: 0px;
+  }
+  &__text{
+    font-size: 13px;
+    line-height: normal;
+    color: #282d30;
+  }
+  .modal-outer{
+    position: absolute;
+    top: 100%;
+    margin-top: 20px;
+    color: #dddddd;
+    text-align: center;
+    width: 100%;
+    left: 0;
+
+    a{
+      color: #dddddd;
+      text-decoration: underline;
+      &:hover{
+        text-decoration: none;
+      }
+    }
+  }
+}
+.modal-header {
+  padding: 20px 30px 20px;
+  // Close icon
+  .close {
+    position: absolute;
+    right: 8px;
+    margin-top: 2px;
+    top: 4px;
+    line-height: 14px;
+  }
+  // Heading
+  h3 {
+    margin: 0 0 -20px 0;
+    line-height: 30px;
+    text-align: center;
+    &.register_heading{
+      margin-bottom: 10px;
+    }
+  }
+  h4{
+    margin: 0px;
+  }
+}
+
+// Body (where all modal content resides)
+.modal-body {
+  position: relative;
+  overflow-y: auto;
+  //max-height: 400px;
+  padding: 15px 50px;
+}
+// Remove bottom margin if need be
+.modal-form {
+  margin-bottom: 0;
+}
+
+// Footer (for actions)
+.modal-footer {
+  padding: 14px 30px 15px;
+  margin-bottom: 0;
+  .border-radius(0 0 6px 6px);
+  .clearfix(); // clear it in case folks use .pull-* classes on buttons
+
+  // Properly space out buttons
+  .btn + .btn {
+    margin-left: 5px;
+    margin-bottom: 0; // account for input[type="submit"] which gets the bottom margin like all other inputs
+  }
+  // but override that for button groups
+  .btn-group .btn + .btn {
+    margin-left: -1px;
+  }
+  // and override it for block buttons as well
+  .btn-block + .btn-block {
+    margin-left: 0;
+  }
+}
+

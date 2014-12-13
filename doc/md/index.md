@@ -4,7 +4,7 @@
 [tutorial](/docs/tutorial.html) ::
 [api](/docs/api.html) ::
 [sample](/sample) ::
-[download](/https://github.com/kshamiev/sungora)
+[download](https://github.com/kshamiev/sungora)
 
 # Описание проекта "CMF sungora""
 ***
@@ -50,4 +50,4 @@ X.X.X или R.A.B
 [tutorial](/docs/tutorial.html) ::
 [api](/docs/api.html) ::
 [sample](/sample) ::
-[download](/https://github.com/kshamiev/sungora)
+[download](https://github.com/kshamiev/sungora)

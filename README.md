@@ -71,13 +71,13 @@ IDE:
 
 ###### install
 находясь в корневой папке проекта (репозитория):
-go install -a src/application.go src/modules.go
+`go install -a src/application.go src/modules.go`
 
 или
 
 ###### build (этот способ не требует переменной GOBIN)
 находясь в папке src проекта (репозитория):
-go buid -o ../bin/application[.exe]
+`go buid -o ../bin/application[.exe]`
 
 --
 

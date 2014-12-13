@@ -53,13 +53,11 @@ git clone https://github.com/kshamiev/sungora projectName
 	go get bitbucket.org/kardianos/service
 	go get github.com/dchest/captcha
 	go get github.com/robfig/config
-	go get github.com/ziutek/mymysql/autorc
-	go get github.com/ziutek/mymysql/godrv
-	go get github.com/ziutek/mymysql/thrsafe
+	go get github.com/ziutek/mymysql/mysql
 	go get gopkg.in/fsnotify.v1
-	go get code.google.com/p/winsvc/eventlog
-	go get code.google.com/p/winsvc/mgr
-	go get code.google.com/p/winsvc/svc
+	go get code.google.com/p/winsvc/winapi
+
+Возможно после инсталяции будет выведено сообщение о невозможности собрать инсталируемую либу (не обращаем внимания).
 
 ### Development
 Производим необходимкю нам работу над проектом.

@@ -77,7 +77,7 @@ IDE:
 
 ###### build (этот способ не требует переменной GOBIN)
 находясь в папке src проекта (репозитория):
-`go buid -o ../bin/application[.exe]`
+`go build -o ../bin/application[.exe]`
 
 --
 

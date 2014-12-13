@@ -124,7 +124,7 @@ func goAppStart(args *typConfig.CmdArgs) {
 	// Setting to use the maximum number of sockets and cores
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Checking the available memory
-	if err = ensuring.CheckMemory(1024 * 0.3); err != nil {
+	if err = ensuring.CheckMemory(1024 * 0.5); err != nil {
 		logs.Fatal(900, err.Error())
 		return
 	}

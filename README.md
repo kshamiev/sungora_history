@@ -1,4 +1,5 @@
-# CMF sungora (in language go and framework angularJS)
+# CMF sungora
+(in language go and framework angularJS)
 
 [www.sungora.ru](http://sungora.ru)
 
@@ -74,9 +75,13 @@ IDE:
 находясь в корневой папке проекта (репозитория):
 go install -a src/application.go src/modules.go
 
+или
+
 ###### build (этот способ не требует переменной GOBIN)
 находясь в папке src проекта (репозитория):
 go buid -o ../bin/application[.exe]
+
+--
 
 Получаем исполняемый бинарный файл. Переходим в папку `bim`
 

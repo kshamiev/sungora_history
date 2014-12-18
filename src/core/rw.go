@@ -48,7 +48,7 @@ func NewRWSimple(w http.ResponseWriter, r *http.Request) *RW {
 	if len(l) > 2 {
 		self.DocumentFolder = l[0] + `.` + l[1] + `.` + l[2]
 	} else {
-		self.DocumentFolder = r.Host
+		self.DocumentFolder = `www.` + r.Host
 	}
 	self.DocumentRoot = Config.View.Path + `/` + self.DocumentFolder
 	return self
@@ -68,26 +68,13 @@ func NewRW(w http.ResponseWriter, r *http.Request, uri *typDb.Uri, uriSegment ma
 	if len(l) > 2 {
 		self.DocumentFolder = l[0] + `.` + l[1] + `.` + l[2]
 	} else {
-		self.DocumentFolder = r.Host
+		self.DocumentFolder = `www.` + r.Host
 	}
 	self.DocumentRoot = Config.View.Path + `/` + self.DocumentFolder
 	//// токен
 	if _, ok := uriSegment[`token`]; ok == true {
 		self.Token = uriSegment[`token`]
 	}
-	//if _, ok := uriSegment[`token`]; ok == true {
-	//	self.Token = uriSegment[`token`]
-	//} else {
-	//	if l, ok := self.UriParams[`access-token`]; ok == true && l[0] != "" {
-	//		self.Token = l[0]
-	//	} else if self.Request.Header.Get(`X-Access-Token`) != `` {
-	//		self.Token = self.Request.Header.Get(`X-Access-Token`)
-	//	} else {
-	//		if cookie, err := self.Request.Cookie(Config.Auth.TokenCookie); err == nil {
-	//			self.Token = cookie.Value
-	//		}
-	//	}
-	//}
 	// язык запроса
 	if _, ok := uriSegment[`lang`]; ok == true {
 		self.Lang = uriSegment[`lang`]

@@ -277,7 +277,7 @@ func responseStatic(w http.ResponseWriter, r *http.Request) bool {
 	if len(l) > 2 {
 		pathAbs = core.Config.View.Path + `/` + l[0] + `.` + l[1] + `.` + l[2] + r.URL.Path
 	} else {
-		pathAbs = core.Config.View.Path + `/` + r.Host + r.URL.Path
+		pathAbs = core.Config.View.Path + `/www.` + r.Host + r.URL.Path
 	}
 	pathAbs = strings.TrimRight(pathAbs, `/`)
 	if fi, e := os.Stat(pathAbs); e == nil {

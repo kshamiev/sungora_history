@@ -176,6 +176,8 @@ func executeController(rw *core.RW, session *core.Session, c *typDb.Controllers)
 	}
 	rw.Logs.ModuleName = l[0]
 
+	//var ctrValue = *ctr
+	//ctr = &ctrValue
 	ctr.Init(rw, session, c)
 	objValue := reflect.ValueOf(ctr)
 	met := objValue.MethodByName(l[2])

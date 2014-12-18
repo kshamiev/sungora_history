@@ -1,6 +1,4 @@
-// TODO
-// Проверит итерации выполнения контроллеров мультизапросы
-// Посмотреть рефлексию на предмет разницы методов CanSet IsValid
+// Точка входа в программу, запуск на выполнение
 package main
 
 import (
@@ -49,7 +47,7 @@ func main() {
 		return
 	}
 
-	// Запуск в выбранном режиме
+	// Запуск приложения в выбранном режиме
 	switch args.Mode {
 	case "install":
 		err = s.Install()
@@ -97,8 +95,11 @@ func main() {
 	}
 }
 
-var chanelAppStop = make(chan os.Signal, 1)
-var chanelAppControl = make(chan os.Signal, 1)
+// Каналы управления запуском и остановом приложения
+var (
+	chanelAppStop    = make(chan os.Signal, 1)
+	chanelAppControl = make(chan os.Signal, 1)
+)
 
 // goAppStop Stop an application
 func goAppStop() {
@@ -107,19 +108,14 @@ func goAppStop() {
 }
 
 // goAppStart Launch an application
-func goAppStart(args *typConfig.CmdArgs) {
-
+func goAppStart(args *typConfig.CmdArgs) (err error) {
 	defer func() {
 		chanelAppStop <- os.Interrupt
 	}()
 
-	var err error
-
 	// Запуск и остановка службы логирования
 	logs.GoStart()
 	defer logs.GoClose()
-
-	//logs.Dumper(core.Config)
 
 	// Setting to use the maximum number of sockets and cores
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -172,7 +168,7 @@ func goAppStart(args *typConfig.CmdArgs) {
 		server.GoStop(fmt.Sprintf(`server%d`, i))
 	}
 
-	// Этот вариант кушает ресурсы больше
+	// Этот вариант оставлен для возможной реализации обновления без перезагрузки приложения
 	// The correctness of the application is closed by a signal
 	//var appExit bool
 	//signal.Notify(chanelServerExit, os.Interrupt)

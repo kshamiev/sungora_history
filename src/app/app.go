@@ -1,16 +1,21 @@
-// app общеее (настраиваемое) пространство данных и функциоанала приложения
+// app Область данных приложения, Модули приложения, Роутинг.
 package app
 
 import (
 	"sort"
+
 	typDb "types/db"
 )
 
+// Данные приложения (БД) представленные в памяти
 var Data = new(data)
 
-// Данные (БД) представленные в памяти
-// Именя свойств структуры должны соответствовать именам моделей
-// Обычно имена типов и моделей совпадают.
+// Данные приложения (БД) представленные в памяти
+// Именя свойств структуры должны соответствовать именам моделей (если таковые имеются)
+// Тип свойства обычно является типом описывающим структуру данных в БД.
+// Обычно имена типов и моделей совпадают (когда всего одна модель).
+// db:"cross" - для стуктур не имеющий свойства - поля Id
+// db:"-" - игнорирование (централизовано не обрабатывать)
 type data struct {
 	Controllers []*typDb.Controllers  ``
 	GroupsUri   []*typDb.GroupsUri    `db:"cross"`
@@ -23,20 +28,25 @@ type data struct {
 	MaxPostion  map[string]int32      `db:"-"`
 }
 
+// Роутинг
 var Routes = RouteList{}
 
+// Структура роутинга (для сортировки)
 type RouteList []*Route
 
+// Структура роутинга
 type Route struct {
 	Id     uint64 // Идентификатор Uri
-	Uri    string // Uri.Uri
-	Domain string // Домен или regexp описывающий домен
+	Uri    string // адрес запроса без домена (/page/page == Uri.Uri)
+	Domain string // Строка описывающий домен или его часть (shop.funtik.ru, shop, funtik.ru)
 }
 
+// Len() int Сортировка
 func (self RouteList) Len() int {
 	return len(self)
 }
 
+// Less(int, int) bool Сортировка
 func (self RouteList) Less(i, j int) bool {
 	if len(self[i].Uri) > len(self[j].Uri) {
 		return true
@@ -47,10 +57,12 @@ func (self RouteList) Less(i, j int) bool {
 	return false
 }
 
+// Swap(int, int) Сортировка
 func (self RouteList) Swap(i, j int) {
 	self[i], self[j] = self[j], self[i]
 }
 
+// ReInitRoute() Инициализация роутинга (после изменения разделов Uri и в момент запуска приложения)
 func ReInitRoute() {
 	var data RouteList
 	for i := range Data.Uri {

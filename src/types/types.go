@@ -1,29 +1,31 @@
-// types Базовый и общий функционал для работы с типами.
+// Базовый и общий функционал для работы с типами.
 // Реализует хранение и получение сценариев для типов проецирующих структуру БД в программе.
+// Реализует вспомогательные функции общего назначегия по работе с типами (к примеру копирование).
 package types
 
 import (
-	"lib/logs"
 	"reflect"
 	"strings"
+
+	"lib/logs"
 )
 
 // Хранилище всех сценариев. Инициализируется при запуске программы. (init())
 var scenarioMap = make(map[string]map[string]*Scenario)
 
-// Scenario Сценарий типа проецирующего сущность в БД (таблица, коллекция, файл)
+// Сценарий типа проецирующего сущность в БД (таблица, коллекция, файл)
 type Scenario struct {
 	Name        string      // Имя сценария
 	Description string      // Описание сценария
-	Property    []Property  // Список опций (свойств сущностей)
-	Sample      interface{} // Примеры
+	Property    []Property  // Свойства типа
+	Sample      interface{} // Пример
 }
 
 // Описание конкретного свойства в сценарии типа
 type Property struct {
 	Name        string            // Название свойства
 	Title       string            // Заголовок свойства
-	AliasDb     string            // Алиас свойства для запросов в БД
+	AliasDb     string            // Алиас свойства для запросов в БД (только для чтения, не менять)
 	Required    string            // Свойство обязательно для заполнения
 	Readonly    string            // Свойство для чтения
 	Default     string            // Значение по умолчанию
@@ -36,10 +38,10 @@ type Property struct {
 	Placeholder string            // Подсказка в пустом поле формы
 	Tab         int8              // Вкладка
 	Column      int8              // Колонка
-	Uri         string            // uri по работе с данным свойством
+	Uri         string            // uri от текущего, по работе с данным свойством (для данных по связям)
 }
 
-// GetScenarioList Получение списка всех сценариев источника
+// Получение списка всех сценариев источника
 func GetScenarioList(source string) (scenarioList []string) {
 	if _, ok := scenarioMap[source]; ok == false {
 		return
@@ -50,7 +52,7 @@ func GetScenarioList(source string) (scenarioList []string) {
 	return
 }
 
-// SetScenario Сохранение сценария
+// Сохранение сценария (как правило в момент инциализации, запуска программы)
 func SetScenario(source string, scenario map[string]Scenario) {
 	scRoot, ok := scenario[`root`]
 	if ok == false {
@@ -203,12 +205,11 @@ func SetScenario(source string, scenario map[string]Scenario) {
 	}
 }
 
-// GetScenario Получение выбранного сценария
+// Получение выбранного сценария для выбранного источника
 func GetScenario(source, scenarioName string) (scenario *Scenario, err error) {
 	var ok bool
 	source = strings.ToLower(source)
 	scenarioName = strings.ToLower(scenarioName)
-	//scenarioName = lib.String.Capitalize(scenarioName)
 	if scenario, ok = scenarioMap[source][scenarioName]; ok == false {
 		return nil, logs.Error(160, source, scenarioName).Error
 	}

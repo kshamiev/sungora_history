@@ -172,7 +172,7 @@ func goAppStart(args *typConfig.CmdArgs) {
 		server.GoStop(fmt.Sprintf(`server%d`, i))
 	}
 
-	// Этот вариант кушает ресурсы больше?
+	// Этот вариант кушает ресурсы больше
 	// The correctness of the application is closed by a signal
 	//var appExit bool
 	//signal.Notify(chanelServerExit, os.Interrupt)

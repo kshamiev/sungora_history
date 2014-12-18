@@ -1,15 +1,9 @@
-// mysql Библиотека работы с БД Mysql.
+// Библиотека работы с БД Mysql.
 //
 // Непосредственная работа с БД. Выполнение запросов.
 // Работа с БД Mysql в парадигме ORM.
 // Отложенное выполнение запросов к БД.
 // Генерация идентификаторов объектов к БД.
-// Инженеринг структуры БД в типы.
-// @author Konstantin Shamiev aka ilosa <konstantin@shamiev.ru>
-// @version $Id$
-// @link http://www.domain.com/
-// @copyright <COPYRIGHT>
-// @license http://www.domain.com/license/
 package mysql
 
 import (

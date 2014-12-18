@@ -1,8 +1,3 @@
-/*
-Модели базового модуля приложения
-
-@author Konstantin Shamiev aka ilosa <konstantin@shamiev.ru>
-*/
 package model
 
 import (

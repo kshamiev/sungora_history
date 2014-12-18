@@ -1,10 +1,3 @@
-// lib
-// @author Konstantin Shamiev aka ilosa <konstantin@shamiev.ru>
-// @version $Id$
-// @link http://www.domain.com/
-// @copyright <COPYRIGHT>
-// @license http://www.domain.com/license/
-//
 // Утилита. Работе с датой и временем
 package times
 

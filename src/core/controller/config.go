@@ -7,5 +7,5 @@ import (
 // Конфигурация контроллеров (Controllers)
 var ConfigControllers = make(map[string]typDb.Controllers)
 
-// Конфигурация роутинга (Uri)
+// Конфигурация разделов (Uri)
 var ConfigUri = make(map[string]typDb.Uri)

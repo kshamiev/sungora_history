@@ -14,6 +14,8 @@ import (
 	typReq "types/request"
 )
 
+// Init() (error)
+// Инициализация данных и проверки
 func Init() (err error) {
 	// Инициализация системных данных
 	if core.Config.Main.UseDb > 0 {
@@ -28,6 +30,8 @@ func Init() (err error) {
 	return
 }
 
+// CheckControllers() ([]*typDb.Controllers)
+// Проверка корректности и работспособности контроллеров
 func CheckControllers() (data []*typDb.Controllers) {
 	for _, c := range app.Data.Controllers {
 		// путь до контроллера и его метода в неправильном формате
@@ -56,7 +60,8 @@ func CheckControllers() (data []*typDb.Controllers) {
 	return data
 }
 
-// LoadDataFromDb Инициализация системных данных (с использованием БД)
+// LoadDataFromDb() (error)
+// Инициализация данных (с использованием БД)
 func loadDataFromDb() (err error) {
 	var controllersId = make(map[string]uint64)
 	var uriId = make(map[string]uint64)
@@ -272,7 +277,8 @@ func loadDataFromDb() (err error) {
 	return
 }
 
-// LoadDataFromMemory Инициализация системных данных (без использования БД)
+// LoadDataFromMemory() (error)
+// Инициализация данных (без использования БД)
 func loadDataFromMemory() (err error) {
 	var controllersId = make(map[string]uint64)
 	var uriId = make(map[string]uint64)

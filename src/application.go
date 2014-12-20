@@ -11,7 +11,6 @@ import (
 
 	"core"
 	coreConfig "core/config"
-	"core/controller"
 	"core/server"
 	"lib/database"
 	"lib/ensuring"
@@ -143,7 +142,7 @@ func goAppStart(args *typConfig.CmdArgs) (err error) {
 	}
 
 	// Инициализация системных данных
-	if err = controller.Init(); err != nil {
+	if err = coreConfig.InitApp(); err != nil {
 		//logs.Fatal(930, err.Error())
 		return
 	}

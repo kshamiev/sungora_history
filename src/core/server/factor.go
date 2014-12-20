@@ -11,7 +11,6 @@ import (
 
 	"app"
 	"core"
-	"core/controller"
 	"lib/database"
 	"lib/logs"
 	typConfig "types/config"
@@ -162,34 +161,37 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // executeController Выполнение контроллеров
-func executeController(rw *core.RW, session *core.Session, c *typDb.Controllers) (err error) {
+func executeController(rw *core.RW, s *core.Session, c *typDb.Controllers) (err error) {
 	defer core.RecoverErr(&err)
 
+	// путь до контроллера и его метода в неправильном формате
 	l := strings.Split(c.Path, `/`)
-	if len(l) != 3 { // путь до контроллера и его метода в неправильном формате
+	if len(l) != 3 {
 		return logs.Error(172, c.Path).Error
 	}
 
-	ctr, ok := controller.Controllers[l[0]+`/`+l[1]]
-	if false == ok { // нет такого контроллера
+	// нет такого контроллера
+	ctrF, ok := app.Controller[l[0]+`/`+l[1]]
+	if false == ok {
 		return logs.Error(173, l[0], l[1]).Error
 	}
 	rw.Logs.ModuleName = l[0]
 
-	//var ctrValue = *ctr
-	//ctr = &ctrValue
-	ctr.Init(rw, session, c)
+	// нет такого метода
+	var ctr = ctrF(rw, s, c)
 	objValue := reflect.ValueOf(ctr)
 	met := objValue.MethodByName(l[2])
-	if met.IsValid() == false { // нет такого метода
+	if met.IsValid() == false {
 		return logs.Error(174, l[0], l[1], l[2]).Error
 	}
+
 	// оставлено для примера передачи параметров в метод
 	var params []interface{}
 	var in = make([]reflect.Value, 0)
 	for i := range params {
 		in = append(in, reflect.ValueOf(params[i]))
 	}
+
 	// вызов
 	out := met.Call(in)
 	if nil == out[0].Interface() {
@@ -274,11 +276,11 @@ func controllersContentUpdate(c *typDb.Controllers) (err error) {
 // responseStatic(*http.Request) bool
 // Отдаем статику (css, images, js, download ...)
 func responseStatic(w http.ResponseWriter, r *http.Request) bool {
-	var pathAbs string
+	var pathAbs = core.Config.View.Path + `/` + r.Host + r.URL.Path
 	l := strings.Split(r.Host, `.`)
 	if len(l) > 2 {
 		pathAbs = core.Config.View.Path + `/` + l[0] + `.` + l[1] + `.` + l[2] + r.URL.Path
-	} else {
+	} else if r.Host != `localhost` {
 		pathAbs = core.Config.View.Path + `/www.` + r.Host + r.URL.Path
 	}
 	pathAbs = strings.TrimRight(pathAbs, `/`)

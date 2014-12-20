@@ -1,13 +1,27 @@
 package controller
 
 import (
-	"core/controller"
+	"core"
 	"types"
+	typDb "types/db"
 )
 
 type Types struct {
-	controller.Controller
+	Session     *core.Session      // Сессия
+	RW          *core.RW           // Управление вводом и выводом
+	Controllers *typDb.Controllers // Соответсвующий контроллер из области данных по строковому ид.
 }
+
+// Создание контроллера
+func NewTypes(rw *core.RW, s *core.Session, c *typDb.Controllers) interface{} {
+	var self = new(Types)
+	self.RW = rw
+	self.Session = s
+	self.Controllers = c
+	return self
+}
+
+////
 
 // ApiScenario Получение сценариев для всех типов
 func (self *Types) ApiScenario() (err error) {

@@ -1,20 +1,30 @@
 package controller
 
 import (
+	"app"
+	"core"
 	"core/base/model"
-	"core/controller"
 	"types"
 	typDb "types/db"
 	typReq "types/request"
 )
 
 type Controllers struct {
-	controller.Controller
+	Session     *core.Session      // Сессия
+	RW          *core.RW           // Управление вводом и выводом
+	Controllers *typDb.Controllers // Соответсвующий контроллер из области данных по строковому ид.
 }
 
-func NewControllers() {
-
+// Создание контроллера
+func NewControllers(rw *core.RW, s *core.Session, c *typDb.Controllers) interface{} {
+	var self = new(Controllers)
+	self.RW = rw
+	self.Session = s
+	self.Controllers = c
+	return self
 }
+
+////
 
 // ApiGrid Управление контроллерами. Список
 func (self *Controllers) ApiGrid() (err error) {
@@ -267,6 +277,6 @@ func (self *Controllers) apiObjGroupsOptions() (err error) {
 
 // ApiProblem Список проблемных контроллеров
 func (self *Controllers) ApiProblem() (err error) {
-	var data = controller.CheckControllers()
+	var data = app.CheckControllers()
 	return self.RW.ResponseJson(data, 200, 0)
 }

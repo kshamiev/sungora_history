@@ -2,8 +2,12 @@
 package app
 
 import (
+	"reflect"
 	"sort"
+	"strings"
 
+	"core"
+	"lib/logs"
 	typDb "types/db"
 )
 
@@ -27,6 +31,8 @@ type data struct {
 	UriDefault  map[string]*typDb.Uri `db:"-"`
 	MaxPostion  map[string]int32      `db:"-"`
 }
+
+////
 
 // Роутинг
 var Routes = RouteList{}
@@ -74,4 +80,38 @@ func ReInitRoute() {
 	}
 	sort.Sort(data)
 	Routes = data
+}
+
+////
+
+var Controller = make(map[string]func(rw *core.RW, s *core.Session, c *typDb.Controllers) interface{})
+
+// Проверка корректности и работспособности контроллеров
+func CheckControllers() (data []*typDb.Controllers) {
+	for _, c := range Data.Controllers {
+		// путь до контроллера и его метода в неправильном формате
+		l := strings.Split(c.Path, `/`)
+		if len(l) != 3 {
+			logs.Critical(172, c.Path)
+			data = append(data, c)
+			continue
+		}
+		// нет такого контроллера
+		ctrF, ok := Controller[l[0]+`/`+l[1]]
+		if false == ok {
+			logs.Critical(173, l[0], l[1])
+			data = append(data, c)
+			continue
+		}
+		// нет такого метода
+		var ctr = ctrF(nil, nil, nil)
+		objValue := reflect.ValueOf(ctr)
+		met := objValue.MethodByName(l[2])
+		if met.IsValid() == false {
+			logs.Critical(174, l[0], l[1], l[2])
+			data = append(data, c)
+			continue
+		}
+	}
+	return data
 }

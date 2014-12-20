@@ -2,13 +2,26 @@ package controller
 
 import (
 	"core"
-	"core/controller"
 	"lib/uploader"
+	typDb "types/db"
 )
 
 type Server struct {
-	controller.Controller
+	Session     *core.Session      // Сессия
+	RW          *core.RW           // Управление вводом и выводом
+	Controllers *typDb.Controllers // Соответсвующий контроллер из области данных по строковому ид.
 }
+
+// Создание контроллера
+func NewServer(rw *core.RW, s *core.Session, c *typDb.Controllers) interface{} {
+	var self = new(Server)
+	self.RW = rw
+	self.Session = s
+	self.Controllers = c
+	return self
+}
+
+////
 
 // ApiPing Проверка доступности сервера
 func (self *Server) ApiPing() (err error) {

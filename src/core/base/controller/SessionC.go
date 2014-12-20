@@ -8,17 +8,30 @@ import (
 
 	"core"
 	"core/base/model"
-	"core/controller"
 	"lib"
 	"lib/cache"
 	"lib/mailer"
+	typDb "types/db"
 	typReq "types/request"
 	typResp "types/response"
 )
 
 type Session struct {
-	controller.Controller
+	Session     *core.Session      // Сессия
+	RW          *core.RW           // Управление вводом и выводом
+	Controllers *typDb.Controllers // Соответсвующий контроллер из области данных по строковому ид.
 }
+
+// Создание контроллера
+func NewSession(rw *core.RW, s *core.Session, c *typDb.Controllers) interface{} {
+	var self = new(Session)
+	self.RW = rw
+	self.Session = s
+	self.Controllers = c
+	return self
+}
+
+////
 
 // ApiMain Авторизация, выход, проверка токена с его пролонгацией
 func (self *Session) ApiMain() (err error) {

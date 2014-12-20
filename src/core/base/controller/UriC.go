@@ -2,16 +2,29 @@ package controller
 
 import (
 	"app"
+	"core"
 	"core/base/model"
-	"core/controller"
 	"types"
 	typDb "types/db"
 	typReq "types/request"
 )
 
 type Uri struct {
-	controller.Controller
+	Session     *core.Session      // Сессия
+	RW          *core.RW           // Управление вводом и выводом
+	Controllers *typDb.Controllers // Соответсвующий контроллер из области данных по строковому ид.
 }
+
+// Создание контроллера
+func NewUri(rw *core.RW, s *core.Session, c *typDb.Controllers) interface{} {
+	var self = new(Uri)
+	self.RW = rw
+	self.Session = s
+	self.Controllers = c
+	return self
+}
+
+////
 
 // ApiGrid Управление разделами. Список
 func (self *Uri) ApiGrid() (err error) {

@@ -44,10 +44,11 @@ func NewRWSimple(w http.ResponseWriter, r *http.Request) *RW {
 	self.Lang = Config.Main.Lang
 	self.Content = newContent(nil)
 	//
+	self.DocumentFolder = r.Host
 	l := strings.Split(r.Host, `.`)
 	if len(l) > 2 {
 		self.DocumentFolder = l[0] + `.` + l[1] + `.` + l[2]
-	} else {
+	} else if r.Host != `localhost` {
 		self.DocumentFolder = `www.` + r.Host
 	}
 	self.DocumentRoot = Config.View.Path + `/` + self.DocumentFolder
@@ -64,10 +65,11 @@ func NewRW(w http.ResponseWriter, r *http.Request, uri *typDb.Uri, uriSegment ma
 	self.Content = newContent(uri)
 	self.Logs = newLog(self)
 	//
+	self.DocumentFolder = r.Host
 	l := strings.Split(r.Host, `.`)
 	if len(l) > 2 {
 		self.DocumentFolder = l[0] + `.` + l[1] + `.` + l[2]
-	} else {
+	} else if r.Host != `localhost` {
 		self.DocumentFolder = `www.` + r.Host
 	}
 	self.DocumentRoot = Config.View.Path + `/` + self.DocumentFolder
@@ -148,7 +150,7 @@ type response struct {
 }
 
 // ResponseJson Выдача браузеру страницы в формате JSON
-func (self *RW) ResponseJson(data interface{}, status int, codeLocal int16, messages ...interface{}) (err error) {
+func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, messages ...interface{}) (err error) {
 	var code int
 	var message string
 	if 0 < codeLocal {
@@ -427,6 +429,7 @@ func newLog(rw *RW) *log {
 	return self
 }
 
+/*
 func (self *log) Info(codeLocal int16, messages ...interface{}) (err error) {
 	code, message := i18n.Message(self.ModuleName, self.rw.Lang, codeLocal, messages...)
 	logs.Info(code, message)
@@ -437,7 +440,7 @@ func (self *log) Error(codeLocal int16, messages ...interface{}) (err error) {
 	code, message := i18n.Message(self.ModuleName, self.rw.Lang, codeLocal, messages...)
 	return logs.Error(code, message).Error
 }
-
+*/
 ///////////////////////////////////////////////////////////////////////////////
 
 // Сессионные данные результирующего контенте

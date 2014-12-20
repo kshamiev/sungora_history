@@ -1,15 +1,28 @@
 package controller
 
 import (
+	"core"
 	"core/base/model"
-	"core/controller"
 	"types"
 	typDb "types/db"
 )
 
 type Groups struct {
-	controller.Controller
+	Session     *core.Session      // Сессия
+	RW          *core.RW           // Управление вводом и выводом
+	Controllers *typDb.Controllers // Соответсвующий контроллер из области данных по строковому ид.
 }
+
+// Создание контроллера
+func NewGroups(rw *core.RW, s *core.Session, c *typDb.Controllers) interface{} {
+	var self = new(Groups)
+	self.RW = rw
+	self.Session = s
+	self.Controllers = c
+	return self
+}
+
+////
 
 // ApiGrid Управление групами. Список
 func (self *Groups) ApiGrid() (err error) {

@@ -4,18 +4,31 @@ import (
 	"lib/logs"
 )
 
+func NewTest() *Content {
+	return new(Content)
+}
+
 func main() {
 
-	var t = new(Content)
-	t.Description = `ghdfjghdfghdf`
+	var ttt = make(map[string]func() *Content)
+	ttt[`qqq`] = NewTest
+	//t = new(Content)
+	//t.Set(`ghdfjghdfghdf`)
 
-	var b = t
+	var t = ttt[`qqq`]()
+	t.Description = `wwwwwwwwwwwwwwwwwwwwwwwww`
+	//b = t
 
-	var t1 = b
-	b = t1
-	b.Description = `!!!!!!!!!!!!!!!!!!!!!!`
+	//var t1 = *b
+	//b = &t1
+	//b.Set(`!!!!!!!!!!!!!!!!!!!!!!`)
 
-	logs.Dumper(t, b)
+	//logs.Dumper(t, b)
+	logs.Dumper(ttt, t)
+}
+
+type ContentFace interface {
+	Set(r string)
 }
 
 // Контент
@@ -27,4 +40,8 @@ type Content struct {
 	Description string // Описание
 	Content     []byte // Контент
 	Block       string // Блок
+}
+
+func (self *Content) Set(t string) {
+	self.Description = t
 }

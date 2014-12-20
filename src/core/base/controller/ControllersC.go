@@ -12,6 +12,10 @@ type Controllers struct {
 	controller.Controller
 }
 
+func NewControllers() {
+
+}
+
 // ApiGrid Управление контроллерами. Список
 func (self *Controllers) ApiGrid() (err error) {
 	// диспетчер методов

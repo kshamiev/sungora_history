@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
@@ -27,13 +28,12 @@ type RW struct {
 	UriSegment     map[string]string   // Сегментированные параметры Uri
 	UriParams      map[string][]string // Параметры текущего Uri запроса после знака вопроса
 	Content        *content            // Результирующий контент
-	Logs           *log
-	Interrupt      bool   // Прерывание выполнения других контрллеров. "Я последний контроллер" (по умолчанию false)
-	InterruptHard  bool   // Прерывание выполнения всего включая управляющий контроллер, управляющий контроллер делает return Status (по умолчанию false)
-	Lang           string // Префикс языка
-	Token          string // Кука (хеш-строка). Для идентификации пользователя
-	DocumentRoot   string // Корневой путь до сайта
-	DocumentFolder string // Папка сайта (host)
+	Interrupt      bool                // Прерывание выполнения других контрллеров. "Я последний контроллер" (по умолчанию false)
+	InterruptHard  bool                // Прерывание выполнения всего включая управляющий контроллер, управляющий контроллер делает return Status (по умолчанию false)
+	Lang           string              // Префикс языка
+	Token          string              // Кука (хеш-строка). Для идентификации пользователя
+	DocumentRoot   string              // Корневой путь до сайта
+	DocumentFolder string              // Папка сайта (host)
 }
 
 // NewRW Инициализация потоков ввода и вывода
@@ -44,12 +44,12 @@ func NewRWSimple(w http.ResponseWriter, r *http.Request) *RW {
 	self.Lang = Config.Main.Lang
 	self.Content = newContent(nil)
 	//
-	self.DocumentFolder = r.Host
-	l := strings.Split(r.Host, `.`)
+	self.DocumentFolder = strings.Split(r.Host, `:`)[0]
+	l := strings.Split(self.DocumentFolder, `.`)
 	if len(l) > 2 {
 		self.DocumentFolder = l[0] + `.` + l[1] + `.` + l[2]
-	} else if r.Host != `localhost` {
-		self.DocumentFolder = `www.` + r.Host
+	} else if self.DocumentFolder != `localhost` {
+		self.DocumentFolder = `www.` + self.DocumentFolder
 	}
 	self.DocumentRoot = Config.View.Path + `/` + self.DocumentFolder
 	return self
@@ -63,14 +63,14 @@ func NewRW(w http.ResponseWriter, r *http.Request, uri *typDb.Uri, uriSegment ma
 	self.UriParams = uriParams
 	self.UriSegment = uriSegment
 	self.Content = newContent(uri)
-	self.Logs = newLog(self)
+	//self.Logs = newLog(self)
 	//
-	self.DocumentFolder = r.Host
-	l := strings.Split(r.Host, `.`)
+	self.DocumentFolder = strings.Split(r.Host, `:`)[0]
+	l := strings.Split(self.DocumentFolder, `.`)
 	if len(l) > 2 {
 		self.DocumentFolder = l[0] + `.` + l[1] + `.` + l[2]
-	} else if r.Host != `localhost` {
-		self.DocumentFolder = `www.` + r.Host
+	} else if self.DocumentFolder != `localhost` {
+		self.DocumentFolder = `www.` + self.DocumentFolder
 	}
 	self.DocumentRoot = Config.View.Path + `/` + self.DocumentFolder
 	//// токен
@@ -135,13 +135,6 @@ func (self *RW) Redirect(url string) (err error) {
 	return
 }
 
-// ResponseJson Выдача браузеру страницы в формате JSON
-//func (self *RW) ResponseHtml(key string, data interface{}) {
-//self.Content.Type = `text/html`
-//self.Content.Encode = `utf-8`
-//	self.Content.Variables[key] = data
-//}
-
 // Структура отдаваемых данных в формате JSON
 type response struct {
 	ErrorCode    int         `json:"errorCode"`         // Внешний код сообщения ( 0 < ошибка )
@@ -151,18 +144,20 @@ type response struct {
 
 // ResponseJson Выдача браузеру страницы в формате JSON
 func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, messages ...interface{}) (err error) {
+	self.Content.Type = `application/json`
+	self.Content.Encode = `utf-8`
+	self.Content.Status = status
 	var code int
 	var message string
-	if 0 < codeLocal {
-		code, message = i18n.Message(self.Logs.ModuleName, self.Lang, codeLocal, messages...)
+	_, path, _, ok := runtime.Caller(1)
+	if 0 < codeLocal && ok == true {
+		moduleName := strings.Split(strings.Split(path, `src/`)[1], `/`)[1]
+		code, message = i18n.Message(moduleName, self.Lang, codeLocal, messages...)
 	}
 	con := new(response)
 	con.ErrorCode = code
 	con.ErrorMessage = message
 	con.Content = data
-	self.Content.Type = `application/json`
-	self.Content.Encode = `utf-8`
-	self.Content.Status = status
 	if self.Content.Content, err = json.Marshal(con); err != nil {
 		lg := logs.Error(105, err)
 		con := new(response)
@@ -173,21 +168,6 @@ func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, messag
 		self.Response(true)
 		return nil
 	}
-	//str = `{"errorCode":` + strconv.Itoa(code) + `,"errorMessage":"` + message + `"`
-	//t := reflect.TypeOf(data)
-	//if t.Kind() == reflect.Slice { // срезы
-	//	str += `,"value":` + string(content) + `}`
-	//} else if t.Kind() == reflect.Map { // хеши
-	//	//str += `,"map":` + string(content) + `}`
-	//	str += `,` + string(content[1:len(content)-1]) + `}`
-	//} else if t.Kind() == reflect.Struct || t.Kind() == reflect.Ptr { // объекты
-	//	str += `,` + string(content[1:len(content)-1]) + `}`
-	//} else if `""` != string(content) { // скалярные значения
-	//	str += `,"value":` + string(content) + `}`
-	//} else { // скалярные значения
-	//	str += `}`
-	//}
-	//self.Content.Content = []byte(str)
 	self.Response(true)
 	return nil
 }
@@ -418,16 +398,16 @@ func (self *RW) GetParamsUri() map[string][]string {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type log struct {
-	rw         *RW
-	ModuleName string // Имя модуля, контроллер которого работает в текущий момент
-}
+//type log struct {
+//	rw         *RW
+//	ModuleName string // Имя модуля, контроллер которого работает в текущий момент
+//}
 
-func newLog(rw *RW) *log {
-	var self = new(log)
-	self.rw = rw
-	return self
-}
+//func newLog(rw *RW) *log {
+//	var self = new(log)
+//	self.rw = rw
+//	return self
+//}
 
 /*
 func (self *log) Info(codeLocal int16, messages ...interface{}) (err error) {

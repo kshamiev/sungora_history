@@ -17,54 +17,6 @@ import (
 	"types"
 )
 
-/*
-@apidoc
-
-## This is test api method /api/v.1.0/test/
-
-Test working server and services.
-
-
-gvdfgdf
-
-gdfsgdf
-
-fdgfdg
-*/
-
-/*
-@apidoc
-
-## This is test api method /api/v.1.0/test/
-
-Test working server and services.
-
-
-gvdfgdf
-
-gdfsgdf
-
-fdgfdg
-*/
-
-/*
-@apidoc
-
-## This is test api method /api/v.1.0/test/
-
-Test working server and services.
-
-
-gvdfgdf
-
-gdfsgdf
-
-fdgfdg
-*/
-func test() {
-
-}
-
 // Базовый и вспоготальный функционал для всех моделей
 type Model struct {
 	model   interface{} // Делегируемая модель

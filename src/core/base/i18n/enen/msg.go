@@ -10,11 +10,11 @@ func init() {
 		i18n.Messages[`en-en`] = make(map[int]string)
 	}
 	for code, message := range Messages {
-		i18n.Messages[`en-en`][int(config.MODULE_CODE)*1000+int(code)] = message
+		i18n.Messages[`en-en`][config.MODULE_CODE*1000+code] = message
 	}
 }
 
-var Messages = map[int16]string{
+var Messages = map[int]string{
 	122: `Ошибка проверки по сценарию [%s]`,
 	139: `Токен [%s] не верный`,
 	140: `Ошибка получения капчи %v`,

@@ -10,11 +10,11 @@ func init() {
 		i18n.Messages[`ru-ru`] = make(map[int]string)
 	}
 	for code, message := range Messages {
-		i18n.Messages[`ru-ru`][int(config.MODULE_CODE)*1000+int(code)] = message
+		i18n.Messages[`ru-ru`][config.MODULE_CODE*1000+code] = message
 	}
 }
 
-var Messages = map[int16]string{
+var Messages = map[int]string{
 	120: `Тип не указан`,
 	121: `Сценарий не найден`,
 	122: `Нет ни одного сценария [%s]`,

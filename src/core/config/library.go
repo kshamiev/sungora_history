@@ -12,7 +12,7 @@ import (
 )
 
 // initLib Инициализация используемых в приложении библиотек
-func initLib() (err error) {
+func library() (err error) {
 	// Библиотека lib
 	lib.Time.Location = core.Config.Main.TimeLocation
 
@@ -33,7 +33,7 @@ func initLib() (err error) {
 }
 
 // initFolders Инициализация (создание если их нет) папок приложения
-func initFolders(perm os.FileMode) (err error) {
+func folders(perm os.FileMode) (err error) {
 	if err = os.MkdirAll(core.Config.Main.WorkDir, perm); err != nil {
 		return
 	}

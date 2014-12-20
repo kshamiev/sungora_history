@@ -175,7 +175,7 @@ func executeController(rw *core.RW, s *core.Session, c *typDb.Controllers) (err 
 	if false == ok {
 		return logs.Error(173, l[0], l[1]).Error
 	}
-	rw.Logs.ModuleName = l[0]
+	//rw.Logs.ModuleName = l[0]
 
 	// нет такого метода
 	var ctr = ctrF(rw, s, c)
@@ -276,12 +276,13 @@ func controllersContentUpdate(c *typDb.Controllers) (err error) {
 // responseStatic(*http.Request) bool
 // Отдаем статику (css, images, js, download ...)
 func responseStatic(w http.ResponseWriter, r *http.Request) bool {
-	var pathAbs = core.Config.View.Path + `/` + r.Host + r.URL.Path
-	l := strings.Split(r.Host, `.`)
+	var host = strings.Split(r.Host, `:`)[0]
+	var pathAbs = core.Config.View.Path + `/` + host + r.URL.Path
+	l := strings.Split(host, `.`)
 	if len(l) > 2 {
 		pathAbs = core.Config.View.Path + `/` + l[0] + `.` + l[1] + `.` + l[2] + r.URL.Path
-	} else if r.Host != `localhost` {
-		pathAbs = core.Config.View.Path + `/www.` + r.Host + r.URL.Path
+	} else if host != `localhost` {
+		pathAbs = core.Config.View.Path + `/www.` + host + r.URL.Path
 	}
 	pathAbs = strings.TrimRight(pathAbs, `/`)
 	if fi, e := os.Stat(pathAbs); e == nil {

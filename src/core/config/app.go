@@ -18,7 +18,7 @@ var ConfigControllers = make(map[string]typDb.Controllers)
 var ConfigUri = make(map[string]typDb.Uri)
 
 // Инициализация данных и проверки
-func InitApp() (err error) {
+func App() (err error) {
 	// Инициализация системных данных
 	if core.Config.Main.UseDb > 0 {
 		err = loadDataFromDb()

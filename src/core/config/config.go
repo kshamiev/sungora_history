@@ -29,12 +29,12 @@ func Init(args *typConfig.CmdArgs) (err error) {
 	}
 
 	// Инициализация папок приложения
-	if err = initFolders(0777); err != nil {
+	if err = folders(0777); err != nil {
 		return
 	}
 
 	// Инициализация библиотек
-	if err = initLib(); err != nil {
+	if err = library(); err != nil {
 		return
 	}
 

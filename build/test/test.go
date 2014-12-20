@@ -1,6 +1,7 @@
 package main
 
 import (
+	"funtik"
 	"lib/logs"
 )
 
@@ -10,21 +11,9 @@ func NewTest() *Content {
 
 func main() {
 
-	var ttt = make(map[string]func() *Content)
-	ttt[`qqq`] = NewTest
-	//t = new(Content)
-	//t.Set(`ghdfjghdfghdf`)
+	funtik.FuntikOne()
 
-	var t = ttt[`qqq`]()
-	t.Description = `wwwwwwwwwwwwwwwwwwwwwwwww`
-	//b = t
-
-	//var t1 = *b
-	//b = &t1
-	//b.Set(`!!!!!!!!!!!!!!!!!!!!!!`)
-
-	//logs.Dumper(t, b)
-	logs.Dumper(ttt, t)
+	logs.Dumper()
 }
 
 type ContentFace interface {

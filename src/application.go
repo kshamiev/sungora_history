@@ -142,7 +142,7 @@ func goAppStart(args *typConfig.CmdArgs) (err error) {
 	}
 
 	// Инициализация системных данных
-	if err = coreConfig.InitApp(); err != nil {
+	if err = coreConfig.App(); err != nil {
 		//logs.Fatal(930, err.Error())
 		return
 	}

@@ -5,14 +5,6 @@ var Query = make(map[string][]string)
 
 func init() {
 	Query = map[string][]string{
-		`base/uri`: []string{
-			"UPDATE `Uri` SET `Position` = `Position` - 1 WHERE `Position` > ?;",
-			"UPDATE `Uri` SET `Position` = `Position` + 1 WHERE `Position` > ?;",
-			"UPDATE `Uri` SET `Position` = ? WHERE `Id` = ?;",
-			"DELETE FROM GroupsUri WHERE Uri_Id = ? AND Controllers_Id = ?;",
-			"DELETE FROM GroupsUri WHERE Uri_Id = ? AND Groups_Id = ?;",
-			"SELECT MAX(Position) as Max FROM `Uri`;",
-		},
 		`base/users`: []string{
 			"INSERT UsersGroups SET `Users_Id` = ?, `Groups_Id` = ?;",
 			"DELETE FROM UsersGroups WHERE Users_Id = ? AND Groups_Id = ?;",
@@ -24,6 +16,14 @@ func init() {
 			"UPDATE `Controllers` SET `Position` = ? WHERE `Id` = ?;",
 			"DELETE FROM GroupsUri WHERE Controllers_Id = ? AND Groups_Id = ?;",
 			"SELECT MAX(Position) as Max FROM `Controllers`;",
+		},
+		`base/uri`: []string{
+			"UPDATE `Uri` SET `Position` = `Position` - 1 WHERE `Position` > ?;",
+			"UPDATE `Uri` SET `Position` = `Position` + 1 WHERE `Position` > ?;",
+			"UPDATE `Uri` SET `Position` = ? WHERE `Id` = ?;",
+			"DELETE FROM GroupsUri WHERE Uri_Id = ? AND Controllers_Id = ?;",
+			"DELETE FROM GroupsUri WHERE Uri_Id = ? AND Groups_Id = ?;",
+			"SELECT MAX(Position) as Max FROM `Uri`;",
 		},
 	}
 }

@@ -41,14 +41,13 @@ func CheckMemory(minMem int) (err error) {
 			err = errors.New(fmt.Sprintf("%v", errPanic))
 		}
 	}()
-	var oneMb []byte = make([]byte, 1024*1024, 1024*1024)
-	var mymem []string = make([]string, minMem)
 
-	oneMb = []byte(strings.Repeat("A", 1024*1024))
+	var oneMb = strings.Repeat("A", 1024*1024)
+	var mymem []string = make([]string, minMem)
 	for i := 0; i < minMem; i++ {
-		mymem = append(mymem, string(oneMb))
+		mymem = append(mymem, oneMb)
 	}
 	mymem = nil
-	oneMb = nil
+	oneMb = ``
 	return
 }

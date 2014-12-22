@@ -14,14 +14,48 @@ import (
 	"github.com/robfig/config"
 
 	"core"
+	"lib"
 	"lib/database/mysql"
+	"lib/logs"
+	"lib/mailer"
+	"lib/uploader"
 	typConfig "types/config"
 )
+
+// Получение и инициализация параметров коммандной строки
+func GetCmdArgs() (args *typConfig.CmdArgs, err error) {
+	args = new(typConfig.CmdArgs)
+	if len(os.Args) > 1 {
+		args.Mode = os.Args[1]
+	}
+	if len(os.Args) > 2 {
+		args.ConfigFile = os.Args[2]
+	}
+	// - проверки
+	if args.Mode == `-h` || args.Mode == `-help` || args.Mode == `--help` {
+		var str string
+		str += "Usage of %s: %s [-mode] [-cfgFile]\n"
+		str += "  -mode=\"\": Режим запуска приложения:\n"
+		str += "\tinstall - Установка сервиса в операционной системе, используется в windows, mac os x\n"
+		str += "\tremove - Удаление сервиса из операционной системы\n"
+		str += "\tstart - Запуск ранее установленного сервиса\n"
+		str += "\tstop - Остановка ранее установленного сервиса\n"
+		str += "\tupdate - Обновление приложенияv\n"
+		str += "\trun - Запуск в режиме разработки выход по 'Ctrl+C'\n"
+		str += "\ttest - Тестирование работоспособности и выход\n"
+		str += "  -cfgFile=\"\": Полный путь до конфигурационного файла:\n"
+		fmt.Fprintf(os.Stderr, str, filepath.Base(os.Args[0]), filepath.Base(os.Args[0]))
+		return nil, errors.New("Help startup request")
+	}
+	return
+}
+
+////
 
 // Конфигурация приложения
 var conf *config.Config
 
-// Init Инициализация приложения
+// Init Инициализация конфигурации приложения
 func Init(args *typConfig.CmdArgs) (err error) {
 	// Инициализация конфигурации
 	if err = initConfig(args); err != nil {
@@ -178,6 +212,28 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 	}
 
 	core.Config = self
+	conf = nil
+	return
+}
+
+// searchConfigFile Писк конфигурационного файла
+func searchConfigFile(args *typConfig.CmdArgs) (configFile string) {
+	if args.ConfigFile != "" {
+		if _, err := os.Stat(args.ConfigFile); err != nil {
+			return
+		} else {
+			configFile = args.ConfigFile
+		}
+	}
+	if configFile == "" {
+		folders := searchConfigPaths()
+		for i := range folders {
+			if _, err := os.Stat(folders[i]); err == nil {
+				configFile = folders[i]
+				break
+			}
+		}
+	}
 	return
 }
 
@@ -236,52 +292,45 @@ func parseConfig(obj interface{}, property, section string) {
 	reflect.ValueOf(obj).Elem().Set(objValue)
 }
 
-// searchConfigFile Писк конфигурационного файла
-func searchConfigFile(args *typConfig.CmdArgs) (configFile string) {
-	if args.ConfigFile != "" {
-		if _, err := os.Stat(args.ConfigFile); err != nil {
-			return
-		} else {
-			configFile = args.ConfigFile
-		}
-	}
-	if configFile == "" {
-		folders := searchConfigPaths()
-		for i := range folders {
-			if _, err := os.Stat(folders[i]); err == nil {
-				configFile = folders[i]
-				break
-			}
-		}
+////
+
+// initLib Инициализация используемых в приложении библиотек
+func library() (err error) {
+	// Библиотека lib
+	lib.Time.Location = core.Config.Main.TimeLocation
+
+	// Библиотека lib/database/mysql
+	mysql.InitMysql(core.Config.Mysql)
+
+	// Служба ведения логов logs
+	logs.Init(&core.Config.Logs)
+
+	// Библиотека отправки почты
+	mailer.Init(&core.Config.Mail)
+
+	// Модуль загрузки файлов и получение их по идентификатору
+	if err = uploader.Init(core.Config.Main.Upload, 30); err != nil {
+		return
 	}
 	return
 }
 
-// GetCmdArgs Получение и разбор параметров коммандной строки
-// Инициализация параметров командной строки
-func GetCmdArgs() (args *typConfig.CmdArgs, err error) {
-	args = new(typConfig.CmdArgs)
-	if len(os.Args) > 1 {
-		args.Mode = os.Args[1]
+// initFolders Инициализация (создание если их нет) папок приложения
+func folders(perm os.FileMode) (err error) {
+	if err = os.MkdirAll(core.Config.Main.WorkDir, perm); err != nil {
+		return
 	}
-	if len(os.Args) > 2 {
-		args.ConfigFile = os.Args[2]
+	if err = os.MkdirAll(filepath.Dir(core.Config.Logs.File), perm); err != nil {
+		return
 	}
-	// - проверки
-	if args.Mode == `-h` || args.Mode == `-help` || args.Mode == `--help` {
-		var str string
-		str += "Usage of %s: %s [-mode] [-cfgFile]\n"
-		str += "  -mode=\"\": Режим запуска приложения:\n"
-		str += "\tinstall - Установка сервиса в операционной системе, используется в windows, mac os x\n"
-		str += "\tremove - Удаление сервиса из операционной системы\n"
-		str += "\tstart - Запуск ранее установленного сервиса\n"
-		str += "\tstop - Остановка ранее установленного сервиса\n"
-		str += "\tupdate - Обновление приложенияv\n"
-		str += "\trun - Запуск в режиме разработки выход по 'Ctrl+C'\n"
-		str += "\ttest - Тестирование работоспособности и выход\n"
-		str += "  -cfgFile=\"\": Полный путь до конфигурационного файла:\n"
-		fmt.Fprintf(os.Stderr, str, filepath.Base(os.Args[0]), filepath.Base(os.Args[0]))
-		return nil, errors.New("Help startup request")
+	if err = os.MkdirAll(core.Config.Main.Keys, perm); err != nil {
+		return
+	}
+	if err = os.MkdirAll(core.Config.View.Path, perm); err != nil {
+		return
+	}
+	if err = os.MkdirAll(filepath.Dir(core.Config.Main.Pid), perm); err != nil {
+		return
 	}
 	return
 }

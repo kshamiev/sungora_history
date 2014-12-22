@@ -15,7 +15,7 @@ import (
 )
 
 // Версия ядра
-const VERSION string = `0.9.0`
+const VERSION string = `0.9.1`
 
 // Время жизни сессиии (в минутах)
 //var SessionTimeout time.Duration

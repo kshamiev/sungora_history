@@ -58,6 +58,7 @@ func compileQuery() (err error) {
 	// CASANDRA
 	// ...
 
+	queryData = nil
 	return
 }
 

@@ -1,4 +1,12 @@
 // Точка входа в программу, запуск на выполнение
+// TODO
+// добавить в конфиг:
+// Main
+// Проверять все типы БД или только ту которая используется
+// Какой объем оперативной памяти проверять
+// индексный файл `index.html`
+//
+// Посмотреть использования стороннего решшеня сервиса для записей логов в системный журнал
 package main
 
 import (
@@ -119,10 +127,10 @@ func goAppStart(args *typConfig.CmdArgs) (err error) {
 	// Setting to use the maximum number of sockets and cores
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Checking the available memory
-	//if err = ensuring.CheckMemory(1024 * 0.5); err != nil {
-	//	logs.Fatal(900, err.Error())
-	//	return
-	//}
+	if err = ensuring.CheckMemory(100); err != nil {
+		logs.Fatal(900, err.Error())
+		return
+	}
 	runtime.GC()
 
 	// Create a PID file and lock on record, control run one copy of the application
@@ -182,7 +190,5 @@ func goAppStart(args *typConfig.CmdArgs) (err error) {
 	//		time.Sleep(time.Second * 1)
 	//	}
 	//}
-
-	// logs.Warning(143)
 	return
 }

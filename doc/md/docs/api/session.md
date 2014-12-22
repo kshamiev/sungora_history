@@ -357,7 +357,6 @@
 
 			Content-Type: text/html; charset=utf-8
 		Body
-
 	* **Response** 404
 
 		Headers

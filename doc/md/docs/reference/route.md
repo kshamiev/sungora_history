@@ -8,17 +8,18 @@
 
 # Компонент: Роутинг
 Этот компонент одновременно является и понятием.
+
 #### Реализация:
-При старте программы происходит инициализация модулей: `src/modules.go`  
-В модулях вызываются функции иницализации разделов, контроллеров и другие: `src/core/base/setup/setup.go`
-Информация обо всех контроллерах и разделах описанных в модулях заносится во временную конфигурацию в базовом контроллере `core/controller/config.go`
-Также создаются реальные контроллеры в `core/controller.Controllers`
+При старте программы происходит инициализация модулей: `src/modules.go`.
+В модулях вызываются функции иницализации разделов, контроллеров: `src/core/base/setup/setup.go`.
+Информация обо всех контроллерах и разделах описанных в модулях заносится во временную конфигурацию `src/core/config/app.go`.
+Также инициализируется массив функций конструторов контроллеров `src/app.Controller`
 
 Далее в момент загрузки данных приложения с учетом БД, происходит сверка с конфигруацией и занесение ее также как и остальных данных в область приложения `src/app.Data`
 
-После этого происходит инициализация собственно самого роутинга в прямом его смысле `src/app.Routes`.
-
-В процессе работы сервера при получении запроса происходит поиск роутинга именно по нему. И только после этого найденый роутинг (uri) ищеться в области данных по Id.
+После этого происходит инициализация собственно самого роутинга в прямом его смысле `src/app.Routes`.<br>
+В процессе работы сервера при получении запроса происходит поиск роутинга именно по нему.<br>
+После этого по найденому роутингу (uri) производиться поиск соответсвующего ему раздела в области данных по Id.
 
 ***
 ### Контроллеры
@@ -44,20 +45,21 @@
 Пример:
 
 	// Контроллер Сессия
-	controller.Controllers[`base/Session`] = new(moduleController.Session)
-	controller.ConfigControllers[`base/Session/ApiRecovery`] = typDb.Controllers{
+	app.Controller[`base/Session`] = moduleController.NewSession
+	// методы
+	coreConfig.ConfigControllers[`base/Session/ApiRecovery`] = typDb.Controllers{
 		Name: `Восстановление пароля пользователя`,
 	}
-	controller.ConfigControllers[`base/Session/ApiMain`] = typDb.Controllers{
+	coreConfig.ConfigControllers[`base/Session/ApiMain`] = typDb.Controllers{
 		Name: `Авторизация, выход, проверка токена с его пролонгацией`,
 	}
-	controller.ConfigControllers[`base/Session/ApiRegistration`] = typDb.Controllers{
+	coreConfig.ConfigControllers[`base/Session/ApiRegistration`] = typDb.Controllers{
 		Name: `Регистрация нового пользователя`,
 	}
-	controller.ConfigControllers[`base/Session/ApiUserCurrent`] = typDb.Controllers{
+	coreConfig.ConfigControllers[`base/Session/ApiUserCurrent`] = typDb.Controllers{
 		Name: `Получение текущего пользователя`,
 	}
-	controller.ConfigControllers[`base/Session/ApiCaptcha`] = typDb.Controllers{
+	coreConfig.ConfigControllers[`base/Session/ApiCaptcha`] = typDb.Controllers{
 		Name: `Получение капчи`,
 	}
 	...
@@ -85,16 +87,34 @@
 Пример:
 
 	// Сессия
-	controller.ConfigUri[`/api/v1.0/session/recovery`] = typDb.Uri{
+	coreConfig.ConfigUri[`/api/v1.0/session/recovery`] = typDb.Uri{
 		Method:      []string{`PUT`},
 		Name:        `Восстановление пароля пользователя`,
 		ContentType: `application/json`,
 		Controllers: []string{`base/Session/ApiRecovery`},
 	}
-	controller.ConfigUri[`/api/v1.0/session/[token]`] = typDb.Uri{
+	coreConfig.ConfigUri[`/api/v1.0/session/[token]`] = typDb.Uri{
 		Method:      []string{`GET`},
 		Name:        `Получение текущего пользователя`,
 		ContentType: `application/json`,
 		Controllers: []string{`base/Session/ApiUserCurrent`},
+	}
+	coreConfig.ConfigUri[`/api/v1.0/session/authorization/[token]`] = typDb.Uri{
+		Method:      []string{`GET`, `PUT`, `DELETE`},
+		Name:        `Авторизация, выход, проверка токена с его пролонгацией`,
+		ContentType: `application/json`,
+		Controllers: []string{`base/Session/ApiMain`},
+	}
+	coreConfig.ConfigUri[`/api/v1.0/session/registration/[token]`] = typDb.Uri{
+		Method:      []string{`POST`},
+		Name:        `Регистрация нового пользователя`,
+		ContentType: `application/json`,
+		Controllers: []string{`base/Session/ApiRegistration`},
+	}
+	coreConfig.ConfigUri[`/api/v1.0/session/captcha/native`] = typDb.Uri{
+		Method:      []string{`GET`},
+		Name:        `Получение капчи`,
+		ContentType: `application/json`,
+		Controllers: []string{`base/Session/ApiCaptcha`},
 	}
 	...

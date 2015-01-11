@@ -24,14 +24,14 @@ func CopyFilter(typInput, typTarget interface{}, f func(src, dst interface{}) bo
 	// инициализация рефлексии исходного объекта
 	objType := reflect.TypeOf(typInput)
 	if objType.Kind() != reflect.Ptr {
-		return logs.Error(152, objType.String()).Error
+		return logs.Base.Error(100, objType.String()).Err
 	}
 	refModel := reflect.ValueOf(typInput)
 
 	// инициализация рефлексии целевого объекта
 	objTypeTarget := reflect.TypeOf(typTarget)
 	if objTypeTarget.Kind() != reflect.Ptr {
-		return logs.Error(153, objTypeTarget.String()).Error
+		return logs.Base.Error(101, objTypeTarget.String()).Err
 	}
 	refModelTarget := reflect.ValueOf(typTarget)
 
@@ -81,11 +81,11 @@ func copyStructure(typInput, typTarget reflect.Value) (err error) {
 
 	//typInput = typInput.Elem()
 	if typInput.CanAddr() == false {
-		return logs.Error(154, typInput.Type().String()).Error
+		return logs.Base.Error(102, typInput.Type().String()).Err
 	}
 	//typTarget = typTarget.Elem()
 	if typTarget.CanAddr() == false {
-		return logs.Error(155, typTarget.Type().String()).Error
+		return logs.Base.Error(103, typTarget.Type().String()).Err
 	}
 
 	// наполнение

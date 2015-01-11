@@ -1,10 +1,9 @@
-[main](/) ::
-[quick start](/docs/start.html) ::
-[reference](/docs/reference.html) ::
-[tutorial](/docs/tutorial.html) ::
-[api](/docs/api.html) ::
-[sample](/sample) ::
-[download](https://github.com/kshamiev/sungora)
+[Главная](/) ::
+[Начало](/docs/start.html) ::
+[Справочник](/docs/reference.html) ::
+[Учебник](/docs/tutorial.html) ::
+[Системное api](/docs/api.html) ::
+[Скачать](https://github.com/kshamiev/sungora)
 
 ## Пользователи (Users)
 

@@ -211,7 +211,7 @@ func GetScenario(source, scenarioName string) (scenario *Scenario, err error) {
 	source = strings.ToLower(source)
 	scenarioName = strings.ToLower(scenarioName)
 	if scenario, ok = scenarioMap[source][scenarioName]; ok == false {
-		return nil, logs.Error(160, source, scenarioName).Error
+		return nil, logs.Base.Error(104, source, scenarioName).Err
 	}
 	return
 }

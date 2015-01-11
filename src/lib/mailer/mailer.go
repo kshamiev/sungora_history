@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"lib/logs"
 	"lib/view"
 )
 
@@ -89,12 +88,6 @@ func (self *Message) To(toMail, toName string) {
 
 // Send Direct Send mail message
 func (self *Message) Send() (num int, err error) {
-	defer func() {
-		if err != nil {
-			logs.Error(1, err.Error())
-		}
-	}()
-
 	var server = cfgMailer.Server + `:` + strconv.Itoa(int(cfgMailer.Port))
 
 	// поточвый шаблон

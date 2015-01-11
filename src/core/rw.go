@@ -15,14 +15,16 @@ import (
 	"text/template"
 	"time"
 
-	"core/i18n"
 	"lib"
+	"lib/i18n"
 	"lib/logs"
+	typConfig "types/config"
 	typDb "types/db"
 )
 
 // Потоковые данные и управление вводом и выводом. Прерывания. (Веб сокет сюда войдет так понимаю?)
 type RW struct {
+	Server         *typConfig.Server   // Конфигурация сервера обрабатывающего запрос
 	Writer         http.ResponseWriter // Writer контента
 	Request        *http.Request       // Reader контента
 	UriSegment     map[string]string   // Сегментированные параметры Uri
@@ -31,59 +33,61 @@ type RW struct {
 	Interrupt      bool                // Прерывание выполнения других контрллеров. "Я последний контроллер" (по умолчанию false)
 	InterruptHard  bool                // Прерывание выполнения всего включая управляющий контроллер, управляющий контроллер делает return Status (по умолчанию false)
 	Lang           string              // Префикс языка
+	Log            *logs.Log           // Лог
 	Token          string              // Кука (хеш-строка). Для идентификации пользователя
 	DocumentRoot   string              // Корневой путь до сайта
 	DocumentFolder string              // Папка сайта (host)
 }
 
 // NewRW Инициализация потоков ввода и вывода
-func NewRWSimple(w http.ResponseWriter, r *http.Request) *RW {
+func NewRW(w http.ResponseWriter, r *http.Request, sc *typConfig.Server) (*RW, bool) {
 	var self = new(RW)
+	self.Server = sc
 	self.Writer = w
 	self.Request = r
 	self.Lang = Config.Main.Lang
 	self.Content = newContent(nil)
-	//
+	// папка и путь до статичных документов
+	dl := strings.Split(sc.Domain, `,`)
 	self.DocumentFolder = strings.Split(r.Host, `:`)[0]
 	l := strings.Split(self.DocumentFolder, `.`)
-	if len(l) > 2 {
+	if len(l) > 3 {
+		self.DocumentFolder = dl[0]
+	} else if len(l) > 2 {
 		self.DocumentFolder = l[0] + `.` + l[1] + `.` + l[2]
 	} else if self.DocumentFolder != `localhost` {
 		self.DocumentFolder = `www.` + self.DocumentFolder
 	}
 	self.DocumentRoot = Config.View.Path + `/` + self.DocumentFolder
-	return self
+	// проверка допустимости домена
+	var ok = false
+	for i := range dl {
+		if strings.LastIndex(dl[i], self.DocumentFolder) != -1 {
+			ok = true
+			break
+		}
+	}
+	return self, ok
 }
 
 // NewRW Инициализация потоков ввода и вывода
-func NewRW(w http.ResponseWriter, r *http.Request, uri *typDb.Uri, uriSegment map[string]string, uriParams map[string][]string) *RW {
-	var self = new(RW)
-	self.Writer = w
-	self.Request = r
+func (self *RW) InitParams(uri *typDb.Uri, uriSegment map[string]string, uriParams map[string][]string) {
 	self.UriParams = uriParams
 	self.UriSegment = uriSegment
 	self.Content = newContent(uri)
-	//self.Logs = newLog(self)
-	//
-	self.DocumentFolder = strings.Split(r.Host, `:`)[0]
-	l := strings.Split(self.DocumentFolder, `.`)
-	if len(l) > 2 {
-		self.DocumentFolder = l[0] + `.` + l[1] + `.` + l[2]
-	} else if self.DocumentFolder != `localhost` {
-		self.DocumentFolder = `www.` + self.DocumentFolder
-	}
-	self.DocumentRoot = Config.View.Path + `/` + self.DocumentFolder
-	//// токен
+	// токен
 	if _, ok := uriSegment[`token`]; ok == true {
 		self.Token = uriSegment[`token`]
 	}
 	// язык запроса
 	if _, ok := uriSegment[`lang`]; ok == true {
 		self.Lang = uriSegment[`lang`]
-	} else {
-		self.Lang = Config.Main.Lang
 	}
-	return self
+}
+
+// NewRW Инициализация потоков ввода и вывода
+func (self *RW) InitLog(moduleName string) {
+	self.Log = logs.NewLog(self.Lang, moduleName)
 }
 
 // Lation Перевод по ключевому слову
@@ -121,7 +125,7 @@ func (self *RW) RequestJsonParse(object interface{}) (err error) {
 	return
 }
 
-func (self *RW) Redirect(url string) (err error) {
+func (self *RW) Redirect(url string) {
 	logs.Info(301, url)
 	// запрет кеширования
 	self.Writer.Header().Set("Cache-Control", "no-cache, must-revalidate")
@@ -165,15 +169,15 @@ func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, messag
 		con.ErrorMessage = lg.Message
 		self.Content.Content, _ = json.Marshal(con)
 		self.Content.Status = 500
-		self.Response(true)
-		return nil
+		self.Response()
+		return
 	}
-	self.Response(true)
-	return nil
+	self.Response()
+	return
 }
 
 // Redirect Переадресация на указанную страницу (301, только для html)
-func (self *RW) ResponseFile(filePath string, flagLogs bool) (err error) {
+func (self *RW) ResponseFile(filePath string) {
 	self.Content.Content = nil
 	self.Content.Encode = ``
 	self.Content.Type = `application/octet-stream`
@@ -185,30 +189,46 @@ func (self *RW) ResponseFile(filePath string, flagLogs bool) (err error) {
 	}
 	self.Content.File = filePath
 	self.Content.Status = 200
-	return self.Response(flagLogs)
+	self.Response()
 }
 
 // Redirect Переадресация на указанную страницу (301, только для html)
-func (self *RW) ResponseError(status int) (err error) {
+func (self *RW) ResponseError(status int) {
 	self.Content.Type = `text/html`
 	self.Content.Encode = `utf-8`
 	self.Content.Content = nil
 	var path = self.DocumentRoot + `/` + strconv.Itoa(status) + `.html`
-	if _, err = os.Stat(path); err != nil {
+	if _, err := os.Stat(path); err != nil {
 		path = Config.View.Tpl + `/` + strconv.Itoa(status) + `.html`
 	}
 	self.Content.Variables[`Message`] = `Доработать передачу ошибок`
 	self.Content.ExecuteFile(path)
 	self.Content.Status = status
-	return self.Response(true)
+	self.Response()
 }
 
-// Lation Перевод по ключевому слову
+// Отдаем статику (css, images, js, download ...)
+func (self *RW) ResponseStatic() bool {
+	var pathAbs = self.DocumentRoot + strings.TrimRight(self.Request.URL.Path, `/`)
+	if fi, e := os.Stat(pathAbs); e == nil {
+		if fi.IsDir() == false {
+			self.ResponseFile(pathAbs)
+			return true
+		} else {
+			pathAbs += `/index.html`
+			if _, e := os.Stat(pathAbs); e == nil {
+				self.ResponseFile(pathAbs)
+				return true
+			}
+		}
+	}
+	return false
+}
 
 // ResponseCustom Выдача браузеру правильных данных в абстрактном формате
 // Возможные типы документов
 // application/json, text/html, image/*
-func (self *RW) Response(flagLogs bool) (err error) {
+func (self *RW) Response() {
 	// Тип и Кодировка документа
 	t := self.Content.Type
 	if self.Content.Encode != "" {
@@ -224,6 +244,7 @@ func (self *RW) Response(flagLogs bool) (err error) {
 
 	// Если контент пустой и указан файл
 	if len(self.Content.Content) == 0 && self.Content.File != `` {
+		var err error
 		if self.Content.Content, err = ioutil.ReadFile(self.Content.File); err != nil {
 			self.Content.Content = []byte(err.Error())
 			self.Content.Status = 500
@@ -246,9 +267,7 @@ func (self *RW) Response(flagLogs bool) (err error) {
 	self.Writer.Write(self.Content.Content)
 	//
 	self.InterruptHard = true
-	if flagLogs == true {
-		logs.Info(106, self.Content.Status, self.Request.URL.Path)
-	}
+	logs.Info(106, self.Content.Status, self.Request.URL.Path)
 	return
 }
 

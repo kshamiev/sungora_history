@@ -1,174 +1,161 @@
-// logs daemon
-
+// Логирование и журналирвоание работы приложения.
 package logs
 
 import (
 	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
-
 	"lib"
+	"lib/i18n"
 )
 
-// cammand channel
-var commandlogsControl = make(chan command, 1000)
+// Конфигурация лога
+var cfg *Cfglogs
 
-// Command structure
-type command struct {
-	action  int
-	code    int
-	message string
-	level   string
-	result  chan<- interface{}
+// Структура конфигурации лога
+type Cfglogs struct {
+	// Режим отладки приложения. Вывод всех логов в консоль
+	Debug bool
+	// Детализация дебага
+	// 0 - детализация отключена (по умолчанию)
+	// 1 - трейс вызвавшей функции, файла, номера строки в файле
+	// 2 - трейс всего стека
+	DebugDetail int64
+	// Режим логирования сообщений системы (6 по умолчанию)
+	// Info     = 6 - Сообщения о всех шагах работы системы, от Info до Fatal (по умолчанию)
+	// Notice   = 5 - Сообщения о наиболее важных шагах работы системы, от Notice до Fatal
+	// Warning  = 4 - Сообщения о не важных ошибках системы, от Warning до Fatal
+	// Error    = 3 - Сообщения об ошибках системы последствия которых важны, но не приводят к деградации функционала системы, от Error до Fatal
+	// Critical = 2 - Сообщения о критичных ошибках системы без которых возможно продолжения работы но с урезанным функционалом, от Critical до Fatal
+	// Fatal    = 1 - Сообщения о фатальных ошибках системы, после фатальной ошибки работа приложения не возможна и немедленно завершается
+	Level int64
+	// Файл системного журнала приложения, если указан, то используется он,
+	// если не указан, логи отправляются в журнал операционной системы
+	File string
+	// Режим записи логов
+	// file - запись логов только в файл лога (по умолчанию), если файл лога не указан то режим переключается на system
+	// system - запись логов только в системный журнал операционной системы
+	// mixed - запись логов как в файл так и в системный журнал операционной системы
+	Mode string
+	// максимальный размер файла лога для его дефрагметации.
+	Size int8
+	// Префикс языка для системных логов
+	Lang string
 }
 
-// Допустимые команды (action)
-const (
-	logsMessage int = iota // Сообщение (лог сообщение)
-	logsClose              // Закрытие службы логирования
-)
-
-// gologs Служба логирования
-func gologs() {
-
-	go func() {
-		msg := fmt.Sprintf("%s\t[start]\r", lib.Time.Label())
-		logsSave(msg)
-		for command := range commandlogsControl {
-			switch command.action {
-			case logsMessage:
-				msg := logsMessageCalculate(command.code, command.message, command.level)
-				logsSave(msg)
-			case logsClose:
-				msg := fmt.Sprintf("%s\t[stop]\r", lib.Time.Label())
-				logsSave(msg)
-				if fp != nil {
-					fp.Close()
-				}
-				close(commandlogsControl)
-				command.result <- true
-			}
-		}
-	}()
-
+// Инициализация библиотеки, системного или базового лога.
+//    + cfgLogs *Cfglogs конфигурация лога
+func Init(cfgLogs *Cfglogs) {
+	cfg = cfgLogs
+	Base = NewLog(`base`)
 }
 
-// logsMessageCalculate формирование сообщения для логирования
-func logsMessageCalculate(code int, message string, level string) string {
-	// временная отметка
-	var prefix = lib.Time.Label()
+// Системный или базовый лог
+var Base *Log
 
-	// формируем
-	var logLine = fmt.Sprintf("%s\t%s[%d]", prefix, level, code)
-	if cfglogs.Debug == true {
-		logLine += `[debug]`
-	}
-	logLine += "\t" + message
+////
 
-	// информация режима debug
-	if cfglogs.Debug == true && cfglogs.DebugDetail >= 1 {
-		// информация о вызвавшей программе
-		var info, _ = getCallerInfo(3)
-		var debugLine = fmt.Sprintf("%s\t[%s]\t%s func:%s line:%d file:%s run:%d",
-			lib.Time.Label(),
-			prefix,
-			info.Version,
-			info.FuncName,
-			info.LineNumber,
-			info.FileName,
-			info.Gorutines)
-		if cfglogs.DebugDetail >= 2 {
-			debugLine += " gorutines:\r\n"
-			for i := range info.GorutinesInfo {
-				debugLine += info.GorutinesInfo[i] + "\r\n"
-			}
-		}
-		logLine += "\t" + debugLine
-	}
-
-	return logLine
+// Структура лога
+type Log struct {
+	Code       int    // Error code
+	Message    string // Error message
+	Err        error  // Error as error
+	lang       string // Префикс языка
+	moduleName string // Имя модуля
+	label      string // метка лога в рамках обработки запроса (сессии)
 }
 
-type callerInfo struct {
-	FileName      string   // Имя исходного файла
-	LineNumber    int      // Номер строки
-	FuncName      string   // Название функции
-	Version       string   // Текущая версия golang
-	Gorutines     int      // Количество горутин работающих в настоящий момент
-	GorutinesInfo []string // Информация по каждой горутине
+// Создание лога
+//    + moduleName string имя модуля
+//    - *Log объект лога
+func NewLog(moduleName string) *Log {
+	var self = new(Log)
+	self.lang = cfg.Lang
+	self.moduleName = moduleName
+	self.label = lib.String.CreatePassword()
+	return self
 }
 
-// Получение информаци о вызвавшем лог
-func getCallerInfo(level int) (*callerInfo, error) {
-	var err error
-	var ret *callerInfo = new(callerInfo)
-	var pc uintptr
-	var file string
-	var line int
-	var ok bool
-
-	ret.Gorutines = runtime.NumGoroutine()
-	ret.Version = runtime.Version()
-
-	pc, file, line, ok = runtime.Caller(level)
-	if ok == true {
-		var fn *runtime.Func
-
-		ret.LineNumber = line
-		ret.FileName = file
-		fn = runtime.FuncForPC(pc)
-		if fn != nil {
-			ret.FuncName = fn.Name()
-		}
-
-		// Информация о состоянии горутин
-		var buf []byte = make([]byte, 1<<16)
-		var i int = runtime.Stack(buf, true)
-		var info string = string(buf[:i])
-		var tmp []string
-
-		tmp = strings.Split(info, "\n")
-		i = -1
-		for _, str := range tmp {
-			if strings.Index(str, "goroutine") == 0 {
-				i++
-				ret.GorutinesInfo = append(ret.GorutinesInfo, "")
-			}
-			if i >= 0 && str != "" {
-				if ret.GorutinesInfo[i] != "" {
-					ret.GorutinesInfo[i] += "\n"
-				}
-				ret.GorutinesInfo[i] += str
-			}
-		}
-	} else {
-		err = errors.New("Не удалось получить информацию о вызвавшей лог функции")
-	}
-	return ret, err
+// Инициализация лога
+//    + lang string язык
+//    + moduleName string имя модуля
+func (self *Log) Init(lang, moduleName string) {
+	self.lang = lang
+	self.moduleName = moduleName
 }
 
-var fp *os.File
+// Инофрмационное сообщение
+//    + codeLocal int локальный (в рамках модуля) код сообщения
+//    + params ...interface{} параметры вставляемые в сообщение
+//    - *Log объект лога
+func (self *Log) Info(codeLocal int, params ...interface{}) *Log {
+	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	if cfg.Level >= 6 {
+		commandlogsControl <- command{action: logsMessage, log: self, level: 6}
+	}
+	self.Err = errors.New(self.Message)
+	return self
+}
 
-// logsSave непосредственное сохранение лога
-func logsSave(msg string) {
-	if cfglogs.Mode == `mixed` || cfglogs.Mode == `file` {
-		if fp == nil {
-			os.MkdirAll(filepath.Dir(cfglogs.File), 0777)
-			fp, _ = os.OpenFile(cfglogs.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0777)
-		}
-		if fp != nil {
-			fp.WriteString(msg + "\n")
-		}
+// Уведомление
+//    + codeLocal int локальный (в рамках модуля) код сообщения
+//    + params ...interface{} параметры вставляемые в сообщение
+//    - *Log объект лога
+func (self *Log) Notice(codeLocal int, params ...interface{}) *Log {
+	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	if cfg.Level >= 5 {
+		commandlogsControl <- command{action: logsMessage, log: self, level: 5}
 	}
-	if cfglogs.Mode == `mixed` || cfglogs.Mode == `system` {
-		// TODO Реализовать
-	}
-	// В режиме дебаг пишем в stdout все
-	if cfglogs.Debug == true {
-		fmt.Println(msg)
-	}
+	self.Err = errors.New(self.Message)
+	return self
+}
 
+// Предупреждение
+//    + codeLocal int локальный (в рамках модуля) код сообщения
+//    + params ...interface{} параметры вставляемые в сообщение
+//    - *Log объект лога
+func (self *Log) Warning(codeLocal int, params ...interface{}) *Log {
+	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	if cfg.Level >= 4 {
+		commandlogsControl <- command{action: logsMessage, log: self, level: 4}
+	}
+	self.Err = errors.New(self.Message)
+	return self
+}
+
+// Ошибка
+//    + codeLocal int локальный (в рамках модуля) код сообщения
+//    + params ...interface{} параметры вставляемые в сообщение
+//    - *Log объект лога
+func (self *Log) Error(codeLocal int, params ...interface{}) *Log {
+	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	if cfg.Level >= 3 {
+		commandlogsControl <- command{action: logsMessage, log: self, level: 3}
+	}
+	self.Err = errors.New(self.Message)
+	return self
+}
+
+// Критическая ошибка
+//    + codeLocal int локальный (в рамках модуля) код сообщения
+//    + params ...interface{} параметры вставляемые в сообщение
+//    - *Log объект лога
+func (self *Log) Critical(codeLocal int, params ...interface{}) *Log {
+	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	if cfg.Level >= 2 {
+		commandlogsControl <- command{action: logsMessage, log: self, level: 2}
+	}
+	self.Err = errors.New(self.Message)
+	return self
+}
+
+// Фатальная ошибка
+//    + codeLocal int локальный (в рамках модуля) код сообщения
+//    + params ...interface{} параметры вставляемые в сообщение
+//    - *Log объект лога
+func (self *Log) Fatal(codeLocal int, params ...interface{}) *Log {
+	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	if cfg.Level >= 1 {
+		commandlogsControl <- command{action: logsMessage, log: self, level: 1}
+	}
+	self.Err = errors.New(self.Message)
+	return self
 }

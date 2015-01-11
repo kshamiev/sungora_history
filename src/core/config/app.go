@@ -25,6 +25,9 @@ func App() (err error) {
 	} else {
 		err = loadDataFromMemory()
 	}
+	if err != nil {
+		return
+	}
 	// инициализация роутинга
 	app.ReInitRoute()
 	// проверка контроллеров
@@ -32,39 +35,6 @@ func App() (err error) {
 	return
 }
 
-/*
-// CheckControllers() ([]*typDb.Controllers)
-// Проверка корректности и работспособности контроллеров
-func CheckControllers() (data []*typDb.Controllers) {
-	for _, c := range app.Data.Controllers {
-		// путь до контроллера и его метода в неправильном формате
-		l := strings.Split(c.Path, `/`)
-		if len(l) != 3 {
-			logs.Critical(172, c.Path)
-			data = append(data, c)
-			continue
-		}
-		// нет такого контроллера
-		ctr, ok := Controllers[l[0]+`/`+l[1]]
-		if false == ok {
-			logs.Critical(173, l[0], l[1])
-			data = append(data, c)
-			continue
-		}
-		// нет такого метода
-		objValue := reflect.ValueOf(ctr)
-		met := objValue.MethodByName(l[2])
-		if met.IsValid() == false {
-			logs.Critical(174, l[0], l[1], l[2])
-			data = append(data, c)
-			continue
-		}
-	}
-	return data
-}
-*/
-
-// LoadDataFromDb() (error)
 // Инициализация данных (с использованием БД)
 func loadDataFromDb() (err error) {
 	var controllersId = make(map[string]uint64)

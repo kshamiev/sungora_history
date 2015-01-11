@@ -1,5 +1,6 @@
-// Debug beautiful output
 package logs
+
+// Инструменты для вывода отладочной информации
 
 import (
 	"bytes"
@@ -9,7 +10,7 @@ import (
 	"io"
 )
 
-// dump Dump all variables to bytes.Buffer
+// Dump all variables to bytes.Buffer
 func dump(idl ...interface{}) bytes.Buffer {
 	var buf bytes.Buffer
 	var wr io.Writer
@@ -22,19 +23,19 @@ func dump(idl ...interface{}) bytes.Buffer {
 	return buf
 }
 
-// Dumper Dump all variables to STDOUT
+// Dump all variables to STDOUT
 func Dumper(idl ...interface{}) {
 	ret := dump(idl...)
 	fmt.Print(ret.String())
 }
 
-// DumperString Dump all variables to string
+// Dump all variables to string
 func DumperString(idl ...interface{}) string {
 	ret := dump(idl...)
 	return ret.String()
 }
 
-// DumperByte Dump all variables to []byte
+// Dump all variables to []byte
 func DumperByte(idl ...interface{}) []byte {
 	ret := dump(idl...)
 	return ret.Bytes()

@@ -26,7 +26,7 @@ var (
 	// Инициализация сессии
 	FactorNewSession func(rw *core.RW, uri *typDb.Uri, user *typDb.Users) *core.Session
 	// Проверка авторизации и прав доступа
-	FactorAccess func(session *core.Session, method string) (interruptHard bool)
+	FactorAccess func(rw *core.RW, session *core.Session) (flag bool)
 )
 
 type Server struct {
@@ -44,33 +44,39 @@ func newServer(cfg *typConfig.Server) *Server {
 func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	logs.Info(0, `--- [`+r.Method+`] `+r.URL.Path)
+	logs.Info(0, `--- [`+r.RemoteAddr+`] [`+r.Method+`] `+r.URL.Path)
+
+	// 0 Инициализация управления потоком I/O
+	var rw, ok = core.NewRW(w, r, self.Server)
+	if ok == false {
+		rw.ResponseError(404)
+		return
+	}
 
 	// 1 Статика
-	if core.Config.Main.ResponseStatic == true && responseStatic(w, r) == true {
+	if core.Config.Main.ResponseStatic == true && rw.ResponseStatic() == true {
 		return
 	}
 
 	// 2 Uri. Поиск и инициализация URI (ОПРЕДЕЛЯЕТСЯ МОДУЛЕМ)
 	if FactorNewUri == nil {
-		core.NewRWSimple(w, r).ResponseError(500)
+		rw.ResponseError(500)
 		return
 	}
 	var uri, uriSegment = FactorNewUri(r)
 	// 404 и статика после ури
 	if uri == nil {
-		if responseStatic(w, r) == false {
-			core.NewRWSimple(w, r).ResponseError(404)
+		if rw.ResponseStatic() == false {
+			rw.ResponseError(404)
 		}
 		return
-	}
-	if uri.IsDisable == true {
-		core.NewRWSimple(w, r).ResponseError(404)
+	} else if uri.IsDisable == true {
+		rw.ResponseError(404)
 		return
 	}
 	// 301
 	if uri.Redirect != `` {
-		core.NewRWSimple(w, r).Redirect(uri.Redirect)
+		rw.Redirect(uri.Redirect)
 		return
 	}
 	var uriParams, _ = url.ParseQuery(r.URL.Query().Encode())
@@ -93,7 +99,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// пользователь
 	var user *typDb.Users
 	if FactorNewUsers == nil {
-		core.NewRWSimple(w, r).ResponseError(500)
+		rw.ResponseError(500)
 		return
 	} else {
 		user = FactorNewUsers(uriSegment[`token`])
@@ -104,8 +110,8 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		uriSegment[`lang`] = user.Language
 	}
 
-	// 4 Инициализация управления потоком I/O
-	var rw = core.NewRW(w, r, uri, uriSegment, uriParams)
+	// 4 Инициализация параметров I/O
+	rw.InitParams(uri, uriSegment, uriParams)
 
 	// 5 Инициализация сессии (ОПРЕДЕЛЯЕТСЯ МОДУЛЕМ)
 	var session *core.Session
@@ -120,7 +126,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if FactorAccess == nil {
 		rw.ResponseError(500)
 		return
-	} else if FactorAccess(session, rw.Token) == false {
+	} else if FactorAccess(rw, session) == false {
 		rw.ResponseError(403)
 		return
 	}
@@ -131,8 +137,8 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		logs.Info(126, c.Id, c.Path)
-		controllersContentUpdate(c)
-		if err := executeController(rw, session, c); err != nil {
+		self.controllersContentUpdate(c)
+		if err := self.executeController(rw, session, c); err != nil {
 			logs.Error(127, c.Id, c.Path)
 		}
 	}
@@ -144,7 +150,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if rw.Content.Type == `text/html` {
 		// дефолтовый шаблон
 		if uri.Layout != `` {
-			if err = layoutUpdate(rw, uri); err != nil {
+			if err = self.layoutUpdate(rw, uri); err != nil {
 				rw.ResponseError(500)
 				return
 			}
@@ -156,12 +162,12 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	rw.Response(true)
+	rw.Response()
 	return
 }
 
 // executeController Выполнение контроллеров
-func executeController(rw *core.RW, s *core.Session, c *typDb.Controllers) (err error) {
+func (self *Server) executeController(rw *core.RW, s *core.Session, c *typDb.Controllers) (err error) {
 	defer core.RecoverErr(&err)
 
 	// путь до контроллера и его метода в неправильном формате
@@ -175,7 +181,7 @@ func executeController(rw *core.RW, s *core.Session, c *typDb.Controllers) (err 
 	if false == ok {
 		return logs.Error(173, l[0], l[1]).Error
 	}
-	//rw.Logs.ModuleName = l[0]
+	rw.InitLog(l[0])
 
 	// нет такого метода
 	var ctr = ctrF(rw, s, c)
@@ -202,16 +208,10 @@ func executeController(rw *core.RW, s *core.Session, c *typDb.Controllers) (err 
 }
 
 // дефолтовый шаблон
-func layoutUpdate(rw *core.RW, uri *typDb.Uri) (err error) {
+func (self *Server) layoutUpdate(rw *core.RW, uri *typDb.Uri) (err error) {
 	var fi os.FileInfo
 	// поиск шаблона в вверх по ФС
 	var pathOrigin = rw.DocumentRoot + uri.Layout
-	//if uri.Domain == `` {
-	//	l := strings.Split(rw.Request.Host, `.`)
-	//	path = core.Config.View.Path + `/` + l[len(l)-2] + `.` + l[len(l)-1] + uri.Layout
-	//} else {
-	//	path = rw.DocumentRoot + uri.Layout
-	//}
 	path := pathOrigin
 	chunks := strings.Split(path, `/`)
 	for fi, err = os.Stat(path); err != nil && 3 < len(chunks); fi, err = os.Stat(path) {
@@ -241,7 +241,7 @@ func layoutUpdate(rw *core.RW, uri *typDb.Uri) (err error) {
 }
 
 // controllersContentUpdate обновление контента контроллеров по отношению к файловой системе
-func controllersContentUpdate(c *typDb.Controllers) (err error) {
+func (self *Server) controllersContentUpdate(c *typDb.Controllers) (err error) {
 	if c.Id == 0 {
 		return
 	}
@@ -271,31 +271,4 @@ func controllersContentUpdate(c *typDb.Controllers) (err error) {
 		}
 	}
 	return
-}
-
-// responseStatic(*http.Request) bool
-// Отдаем статику (css, images, js, download ...)
-func responseStatic(w http.ResponseWriter, r *http.Request) bool {
-	var host = strings.Split(r.Host, `:`)[0]
-	var pathAbs = core.Config.View.Path + `/` + host + r.URL.Path
-	l := strings.Split(host, `.`)
-	if len(l) > 2 {
-		pathAbs = core.Config.View.Path + `/` + l[0] + `.` + l[1] + `.` + l[2] + r.URL.Path
-	} else if host != `localhost` {
-		pathAbs = core.Config.View.Path + `/www.` + host + r.URL.Path
-	}
-	pathAbs = strings.TrimRight(pathAbs, `/`)
-	if fi, e := os.Stat(pathAbs); e == nil {
-		if fi.IsDir() == false {
-			core.NewRWSimple(w, r).ResponseFile(pathAbs, true)
-			return true
-		} else {
-			pathAbs += `/index.html`
-			if _, e := os.Stat(pathAbs); e == nil {
-				core.NewRWSimple(w, r).ResponseFile(pathAbs, true)
-				return true
-			}
-		}
-	}
-	return false
 }

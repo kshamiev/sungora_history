@@ -1,7 +1,7 @@
 package enen
 
 import (
-	"core/i18n"
+	"lib/i18n"
 )
 
 func init() {

@@ -58,7 +58,7 @@ func NewDb(id int8) (obj *Db, err error) {
 	defer mutexNew.Unlock()
 	// проверка конфигурации
 	if d, ok = cfgMysql[id]; false == ok {
-		return nil, logs.Fatal(112, id).Error
+		return nil, logs.Base.Error(800, id).Err
 	}
 	if _, ok = conn[id]; false == ok {
 		conn[id] = make(map[string]*Db)
@@ -83,7 +83,7 @@ func NewDb(id int8) (obj *Db, err error) {
 		obj.Connect = mysql.New("unix", "", d.Socket, d.Login, d.Password, d.Name)
 	}
 	if err := obj.Connect.Connect(); err != nil {
-		return nil, logs.Fatal(111, id, err).Error
+		return nil, logs.Base.Error(806, id, err).Err
 	}
 	obj.time = lib.Time.Now()
 	obj.free = false
@@ -119,7 +119,7 @@ func (self *Db) SelectData(object interface{}) (err error) {
 			continue
 		}
 		if false == field.CanSet() {
-			return logs.Error(181, source).Error
+			return logs.Base.Error(803, source).Err
 		}
 		var sql string
 		if db == `cross` {
@@ -163,10 +163,10 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 	// рефлеския объекта
 	objType := reflect.TypeOf(ObjectList)
 	if objType.Kind() != reflect.Ptr {
-		return logs.Fatal(157, objType.String(), sql).Error
+		return logs.Base.Error(101, objType.String(), sql).Err
 	}
 	if objType.Elem().Kind() != reflect.Slice {
-		return logs.Fatal(169, objType.String(), sql).Error
+		return logs.Base.Error(807, objType.String(), sql).Err
 	}
 	var objValue = reflect.MakeSlice(objType.Elem(), 0, 0)
 	var fieldMap = make(map[string]string)
@@ -181,7 +181,7 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 			continue
 		}
 		if false == field.IsValid() || false == field.CanSet() {
-			return logs.Error(170, fieldName, sql).Error
+			return logs.Base.Error(804, fieldName, sql).Err
 		}
 		if fieldTag == `` {
 			fieldMap[fieldName] = fieldName
@@ -207,14 +207,14 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 	}()
 	stm, err = self.Connect.Prepare(sql)
 	if err != nil {
-		return logs.Error(110, sql, err).Error
+		return logs.Base.Error(801, sql, err).Err
 	}
 	if len(params) > 0 {
 		stm.Bind(params...)
 	}
 	rows, res, err = stm.Exec()
 	if err != nil {
-		return logs.Error(109, sql, err).Error
+		return logs.Base.Error(802, sql, err).Err
 	}
 	// пустой результат
 	if 0 == len(rows) {
@@ -224,7 +224,7 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 	var fieldRes = make(map[string]string)
 	for _, field := range res.Fields() {
 		if _, ok := fieldMap[field.Name]; ok == false {
-			return logs.Error(171, field.Name, sql).Error
+			return logs.Base.Error(803, field.Name, sql).Err
 		}
 		fieldRes[field.Name] = fieldMap[field.Name]
 	}
@@ -279,10 +279,10 @@ func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (e
 	// рефлеския объекта
 	var objValue = reflect.ValueOf(Object)
 	if objValue.Kind() != reflect.Ptr {
-		return logs.Fatal(176, objValue.Type().String(), sql).Error
+		return logs.Base.Error(101, objValue.Type().String()+`:`+sql).Err
 	}
 	if objValue.IsNil() == true {
-		return logs.Fatal(180, objValue.Type().String(), sql).Error
+		return logs.Base.Error(103, objValue.Type().String()+`:`+sql).Err
 	}
 	objValue = objValue.Elem()
 	var fieldMap = make(map[string]string)
@@ -295,7 +295,7 @@ func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (e
 			continue
 		}
 		if false == field.IsValid() || false == field.CanSet() {
-			return logs.Error(177, fieldName, sql).Error
+			return logs.Base.Error(804, fieldName, sql).Err
 		}
 		if fieldTag == `` {
 			fieldMap[fieldName] = fieldName
@@ -321,24 +321,24 @@ func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (e
 	}()
 	stm, err = self.Connect.Prepare(sql)
 	if err != nil {
-		return logs.Error(110, sql, err).Error
+		return logs.Base.Error(801, sql, err).Err
 	}
 	if len(params) > 0 {
 		stm.Bind(params...)
 	}
 	rows, res, err = stm.Exec()
 	if err != nil {
-		return logs.Error(109, sql, err).Error
+		return logs.Base.Error(802, sql, err).Err
 	}
 	// пустой результат
 	if 0 == len(rows) {
-		return logs.Info(156, sql).Error
+		return logs.Base.Info(805, sql).Err
 	}
 	// соответствие структуры типа и структуры запроса
 	var fieldRes = make(map[string]string)
 	for _, field := range res.Fields() {
 		if _, ok := fieldMap[field.Name]; ok == false {
-			return logs.Error(178, field.Name, sql).Error
+			return logs.Base.Error(804, field.Name, sql).Err
 		}
 		fieldRes[field.Name] = fieldMap[field.Name]
 	}
@@ -550,12 +550,12 @@ func (self *Db) Insert(Object interface{}, source string, properties ...map[stri
 	sql = "INSERT " + source + " SET " + sql[:len(sql)-2]
 	// запрос и параметры
 	if stm, err = self.Connect.Prepare(sql); err != nil {
-		return insertId, logs.Error(110, sql, err).Error
+		return insertId, logs.Base.Error(801, sql, err).Err
 	}
 	stm.Bind(paramList...)
 	// выполнение запроса
 	if _, res, err = stm.Exec(); err != nil {
-		return insertId, logs.Error(109, sql, err).Error
+		return insertId, logs.Base.Error(802, sql, err).Err
 	}
 	insertId = res.InsertId()
 	return
@@ -580,7 +580,7 @@ func (self *Db) Update(Object interface{}, source, key string, properties ...map
 	}
 	field := objValue.FieldByName(key)
 	if field.IsValid() == false {
-		return affectedRow, logs.Error(113, key, source).Error
+		return affectedRow, logs.Base.Error(808, key, source).Err
 	}
 	num := objValue.NumField()
 	for i := 0; i < num; i++ {
@@ -736,12 +736,12 @@ func (self *Db) Update(Object interface{}, source, key string, properties ...map
 	paramList = append(paramList, field.Interface())
 	// запрос и параметры
 	if stm, err = self.Connect.Prepare(sql); err != nil {
-		return affectedRow, logs.Error(110, sql, err).Error
+		return affectedRow, logs.Base.Error(801, sql, err).Err
 	}
 	stm.Bind(paramList...)
 	// выполнение запроса
 	if _, res, err = stm.Exec(); err != nil {
-		return affectedRow, logs.Error(109, sql, err).Error
+		return affectedRow, logs.Base.Error(802, sql, err).Err
 	}
 	affectedRow = res.AffectedRows()
 	return
@@ -752,7 +752,7 @@ func (self *Db) QueryByte(data []byte) (messages []string, err error) {
 	var result mysql.Result
 	_, result, err = self.Connect.Query(string(data))
 	if err != nil {
-		return nil, logs.Error(114).Error
+		return nil, logs.Base.Error(809).Err
 	} else {
 		if result != nil {
 			for result.MoreResults() == true {
@@ -788,11 +788,11 @@ func (self *Db) Query(sql string, params ...interface{}) (err error) {
 	sql, params = sqlParse(sql, params)
 	stm, err = self.Connect.Prepare(sql)
 	if err != nil {
-		return logs.Error(110, sql, err).Error
+		return logs.Base.Error(801, sql, err).Err
 	}
 	stm.Bind(params...)
 	if _, _, err = stm.Exec(); err != nil {
-		return logs.Error(109, sql, err).Error
+		return logs.Base.Error(802, sql, err).Err
 	}
 	return
 }
@@ -918,16 +918,16 @@ func GetQuery(index string) (q string, err error) {
 	//
 	var section uint64
 	if section, err = strconv.ParseUint(l[len(l)-1], 0, 64); err != nil {
-		return q, logs.Error(144, index).Error
+		return q, logs.Base.Error(810, index).Err
 	}
 	index = strings.ToLower(strings.Join(l[:len(l)-1], `/`))
 	if _, ok := Query[index]; ok == false {
-		return q, logs.Error(144, index).Error
+		return q, logs.Base.Error(810, index).Err
 	}
 	if int(section) < len(Query[index]) {
 		return Query[index][int(section)], err
 	}
-	return q, logs.Error(144, index).Error
+	return q, logs.Base.Error(810, index).Err
 }
 
 /*

@@ -318,14 +318,15 @@ func FactorNewSession(rw *core.RW, uri *typDb.Uri, user *typDb.Users) *core.Sess
 }
 
 // FactorAccess Проверка авторизации и прав доступа
-func FactorAccess(session *core.Session, method string) bool {
+func FactorAccess(rw *core.RW, session *core.Session) bool {
 	// если не разработчик и uri авторизованный
 	_, ok := session.UserGroupsMap[core.Config.Auth.DevUID]
 	if ok == false && session.Uri.IsAuthorized == true {
 		// если пользователь гость или нет права на метод запроса
-		if _, ok := session.AccessMap[method]; ok == false || session.User.Id == core.Config.Auth.GuestUID {
+		if _, ok := session.AccessMap[rw.Request.Method]; ok == false || session.User.Id == core.Config.Auth.GuestUID {
 			return false
 		}
+		// Здесь можно реализовывать проверку прав бизнес логики
 	}
 	return true
 }

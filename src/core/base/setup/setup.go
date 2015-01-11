@@ -5,8 +5,8 @@ import (
 	_ "core/base/i18n/enen"
 	_ "core/base/i18n/ruru"
 	moduleServer "core/base/server"
-	"core/i18n"
 	"core/server"
+	"lib/i18n"
 )
 
 func init() {

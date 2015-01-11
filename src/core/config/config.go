@@ -140,6 +140,9 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 		if conf.HasSection(section) {
 			obj := new(typConfig.Server)
 			parseConfig(obj, ``, section)
+			if obj.Domain == `` {
+				obj.Domain = `localhost`
+			}
 			self.Server[i] = obj
 		}
 	}
@@ -168,7 +171,6 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 	if self.Main.Upload == "" {
 		self.Main.Upload = self.Main.WorkDir + "/upload"
 	}
-
 	// Сертификаты SSL
 	if self.Main.Keys == "" {
 		self.Main.Keys = self.Main.WorkDir + "/keys"
@@ -177,6 +179,15 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 	if self.Main.Pid == "" {
 		self.Main.Pid = self.Main.WorkDir + `/run/` + filepath.Base(configFile) + `.pid`
 	}
+	// Интернационализация
+	if self.Main.Lang == `` {
+		self.Main.Lang = `ru-ru`
+	}
+	// Интернационализация
+	if self.Main.Memory == 0 {
+		self.Main.Memory = 100
+	}
+
 	// Шаблоны данных не привязанных к URI
 	if self.View.Path == "" {
 		self.View.Path = self.Main.WorkDir + "/templates"
@@ -195,6 +206,9 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 	if self.Logs.File == `` {
 		self.Logs.Mode = `system`
 	}
+	if self.Logs.Size == 0 {
+		self.Logs.Size = 5
+	}
 
 	// Гость и разработчик
 	self.Auth.DevUID = 1
@@ -204,11 +218,6 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 	}
 	if self.Auth.SessionTimeout == 0 { // Время жизни сессиии (в минутах)
 		self.Auth.SessionTimeout = 3600
-	}
-
-	// Интернационализация
-	if self.Main.Lang == `` {
-		self.Main.Lang = `ru-ru`
 	}
 
 	core.Config = self
@@ -294,7 +303,7 @@ func parseConfig(obj interface{}, property, section string) {
 
 ////
 
-// initLib Инициализация используемых в приложении библиотек
+// Инициализация используемых в приложении библиотек
 func library() (err error) {
 	// Библиотека lib
 	lib.Time.Location = core.Config.Main.TimeLocation

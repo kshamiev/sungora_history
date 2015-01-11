@@ -1,10 +1,4 @@
-// Точка входа в программу, запуск на выполнение
-// TODO
-// добавить в конфиг:
-// Main
-// Проверять все типы БД или только ту которая используется
-// Какой объем оперативной памяти проверять
-// индексный файл `index.html`
+// Точка входа в программу, запуск на выполнение.
 //
 // Посмотреть использования стороннего решшеня сервиса для записей логов в системный журнал
 package main
@@ -32,6 +26,8 @@ const (
 	APP_DESCRIPTION  string = "Description Sungora CMF"
 )
 
+var log service.Logger
+
 func main() {
 
 	// Входные данные командной строки
@@ -53,6 +49,7 @@ func main() {
 		fmt.Printf("%s unable to start: %s", APP_DISPLAY_NAME, err)
 		return
 	}
+	log = s
 
 	// Запуск приложения в выбранном режиме
 	switch args.Mode {
@@ -115,44 +112,46 @@ func goAppStop() {
 }
 
 // goAppStart Launch an application
-func goAppStart(args *typConfig.CmdArgs) (err error) {
+func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 	defer func() {
+		if code != 910 {
+			ensuring.PidFileUnlock()
+		}
 		chanelAppStop <- os.Interrupt
 	}()
 
 	// Запуск и остановка службы логирования
-	logs.GoStart()
+	logs.GoStart(log)
 	defer logs.GoClose()
-
-	// Setting to use the maximum number of sockets and cores
-	runtime.GOMAXPROCS(runtime.NumCPU())
-	// Checking the available memory
-	if err = ensuring.CheckMemory(100); err != nil {
-		logs.Fatal(900, err.Error())
-		return
-	}
-	runtime.GC()
 
 	// Create a PID file and lock on record, control run one copy of the application
 	if err = ensuring.PidFileCreate(core.Config.Main.Pid); err != nil {
 		logs.Fatal(910, err.Error())
-		return
+		return err, 910
 	}
-	defer ensuring.PidFileUnlock()
+
+	// Setting to use the maximum number of sockets and cores
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	// Checking the available memory (in mb)
+	if err = ensuring.CheckMemory(core.Config.Main.Memory); err != nil {
+		logs.Fatal(900, err.Error())
+		return err, 900
+	}
+	runtime.GC()
 
 	// В режиме использования БД: проверяем, обновляем БД
 	if core.Config.Main.UseDb > 0 {
 		// Checking availability of databases
 		if err = database.CheckConnect(); err != nil {
 			logs.Fatal(920, err.Error())
-			return
+			return err, 920
 		}
 	}
 
 	// Инициализация системных данных
 	if err = coreConfig.App(); err != nil {
-		//logs.Fatal(930, err.Error())
-		return
+		logs.Fatal(930, err.Error())
+		return err, 930
 	}
 
 	// Запуск и остановка служб модулей приложения
@@ -175,7 +174,6 @@ func goAppStart(args *typConfig.CmdArgs) (err error) {
 		server.GoStop(fmt.Sprintf(`server%d`, i))
 	}
 
-	// Этот вариант оставлен для возможной реализации обновления без перезагрузки приложения
 	// The correctness of the application is closed by a signal
 	//var appExit bool
 	//signal.Notify(chanelServerExit, os.Interrupt)

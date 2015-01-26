@@ -45,7 +45,7 @@ type Cfglogs struct {
 //    + cfgLogs *Cfglogs конфигурация лога
 func Init(cfgLogs *Cfglogs) {
 	cfg = cfgLogs
-	Base = NewLog(`base`)
+	Base = NewLog(`base`, cfg.Lang)
 }
 
 // Системный или базовый лог
@@ -66,18 +66,18 @@ type Log struct {
 // Создание лога
 //    + moduleName string имя модуля
 //    - *Log объект лога
-func NewLog(moduleName string) *Log {
+func NewLog(moduleName, lang string) *Log {
 	var self = new(Log)
-	self.lang = cfg.Lang
+	self.lang = lang
 	self.moduleName = moduleName
 	self.label = lib.String.CreatePassword()
 	return self
 }
 
 // Инициализация лога
-//    + lang string язык
 //    + moduleName string имя модуля
-func (self *Log) Init(lang, moduleName string) {
+//    + lang string язык
+func (self *Log) Init(moduleName, lang string) {
 	self.lang = lang
 	self.moduleName = moduleName
 }

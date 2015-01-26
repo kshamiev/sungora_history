@@ -16,8 +16,9 @@ import (
 )
 
 // Запуск работы службы логирования
+//	+ logSys service.Logger интерфейс логирования в системный лог
 func GoStart(logSys service.Logger) {
-	if fp == nil {
+	if cfg.Mode == `file` && fp == nil {
 		os.MkdirAll(filepath.Dir(cfg.File), 0755)
 		fp, _ = os.OpenFile(cfg.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	}
@@ -115,13 +116,13 @@ func logsSave(msg string, level uint8) {
 
 //// Подготовка сообщения к сохранению
 
-// формирование сообщения для логирования
+// Формирование сообщения для логирования
 func logsMessageCalculate(log *Log, level uint8) string {
 	// временная отметка
 	var prefix = lib.Time.Label()
 
 	// формируем
-	var logLine = fmt.Sprintf("%s [%d] %s\t%s\n", prefix, log.Code, logsLevel[level], log.Message)
+	var logLine = fmt.Sprintf("%s %s [%d] %s\t%s\n", prefix, log.label, log.Code, logsLevel[level], log.Message)
 
 	// информация режима debug
 	if cfg.DebugDetail >= 1 {

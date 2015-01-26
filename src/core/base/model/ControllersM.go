@@ -5,10 +5,7 @@ import (
 	"app"
 	"core"
 	"core/model"
-	"io/ioutil"
 	"lib/database"
-	"lib/logs"
-	"os"
 	typDb "types/db"
 )
 
@@ -67,42 +64,6 @@ func (self *Controllers) Remove(key string) (err error) {
 	}
 	if err = self.RemoveGroups(); err != nil {
 		return
-	}
-	return
-}
-
-////
-
-// ControllersContentUpdate обновление контента контроллеров по отношению к файловой системе
-func ControllersContentUpdate(c *typDb.Controllers) (err error) {
-	if c.Id == 0 {
-		return
-	}
-	var fi os.FileInfo
-	var path = core.Config.View.Tpl + `/` + c.Path + `.html`
-	if fi, err = os.Stat(path); err != nil {
-		// return logs.Error(145, path, err).Error
-		return
-	}
-	var con []byte
-	if fi.ModTime().Sub(c.ContentTime) > 0 {
-		if con, err = ioutil.ReadFile(path); nil != err {
-			return logs.Error(145, path, err).Error
-		} else {
-			c.Content = string(con)
-			c.ContentTime = fi.ModTime()
-			// сохраняем в БД
-			if core.Config.Main.UseDb > 0 {
-				var db database.DbFace
-				if db, err = database.NewDb(core.Config.Main.UseDb, 0); err != nil {
-					return
-				}
-				// сохранение
-				_, err = db.Update(c, `Controllers`, `Id`)
-				db.Free()
-				//self.Db.Save(`All`, `Id`)
-			}
-		}
 	}
 	return
 }

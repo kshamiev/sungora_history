@@ -85,9 +85,9 @@ func (self *RW) InitParams(uri *typDb.Uri, uriSegment map[string]string, uriPara
 	}
 }
 
-// NewRW Инициализация потоков ввода и вывода
+// Инициализация лога в рамках текущего запроса.
 func (self *RW) InitLog(moduleName string) {
-	self.Log = logs.NewLog(self.Lang, moduleName)
+	self.Log = logs.NewLog(moduleName, self.Lang)
 }
 
 // Lation Перевод по ключевому слову
@@ -100,10 +100,10 @@ func (self *RW) RequestJsonParse(object interface{}) (err error) {
 	var buf []byte
 	//var count int
 	if buf, err = ioutil.ReadAll(self.Request.Body); err != nil {
-		return logs.Error(103, self.Request.Method, self.Request.URL.Path).Error
+		return logs.Base.Error(450, self.Request.Method, self.Request.URL.Path).Err
 	}
 	if err = json.Unmarshal(buf, object); err != nil {
-		return logs.Error(104, self.Request.URL.Path, err).Error
+		return logs.Base.Error(451, self.Request.URL.Path, err).Err
 	}
 	//model := reflect.TypeOf(object)
 	//if model.Kind() == reflect.Ptr {
@@ -126,7 +126,7 @@ func (self *RW) RequestJsonParse(object interface{}) (err error) {
 }
 
 func (self *RW) Redirect(url string) {
-	logs.Info(301, url)
+	logs.Base.Info(301, url)
 	// запрет кеширования
 	self.Writer.Header().Set("Cache-Control", "no-cache, must-revalidate")
 	self.Writer.Header().Set("Pragma", "no-cache")
@@ -163,7 +163,7 @@ func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, messag
 	con.ErrorMessage = message
 	con.Content = data
 	if self.Content.Content, err = json.Marshal(con); err != nil {
-		lg := logs.Error(105, err)
+		lg := logs.Base.Error(452, err)
 		con := new(response)
 		con.ErrorCode = lg.Code
 		con.ErrorMessage = lg.Message
@@ -267,7 +267,7 @@ func (self *RW) Response() {
 	self.Writer.Write(self.Content.Content)
 	//
 	self.InterruptHard = true
-	logs.Info(106, self.Content.Status, self.Request.URL.Path)
+	logs.Base.Info(200, self.Content.Status, self.Request.URL.Path)
 	return
 }
 
@@ -280,9 +280,9 @@ func (self *RW) SetCookie(name, value string, t ...time.Time) {
 	cookie.Path = `/`
 	if 0 < len(t) {
 		cookie.Expires = t[0]
-		logs.Info(101, name, value)
+		logs.Base.Info(250, name, value)
 	} else {
-		logs.Info(100, name, value)
+		logs.Base.Info(251, name, value)
 	}
 	http.SetCookie(self.Writer, cookie)
 }
@@ -295,7 +295,7 @@ func (self *RW) RemCookie(name string) {
 	cookie.Path = `/`
 	cookie.Expires = lib.Time.Now()
 	http.SetCookie(self.Writer, cookie)
-	logs.Info(175, name)
+	logs.Base.Info(252, name)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -329,36 +329,36 @@ func (self *RW) GetSegmentUriInt(paramName string) (value int64, ok bool) {
 	var err error
 	if p, ok := self.UriSegment[paramName]; ok == true {
 		if value, err = strconv.ParseInt(p, 0, 64); err != nil {
-			logs.Error(135, paramName, self.Request.URL.Path, err)
+			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Warning(139, paramName, self.Request.URL.Path)
+	logs.Base.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetSegmentUriUint(paramName string) (value uint64, ok bool) {
 	var err error
 	if p, ok := self.UriSegment[paramName]; ok == true {
 		if value, err = strconv.ParseUint(p, 0, 64); err != nil {
-			logs.Error(135, paramName, self.Request.URL.Path, err)
+			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Warning(139, paramName, self.Request.URL.Path)
+	logs.Base.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetSegmentUriFloat(paramName string) (value float64, ok bool) {
 	var err error
 	if p, ok := self.UriSegment[paramName]; ok == true {
 		if value, err = strconv.ParseFloat(p, 64); err != nil {
-			logs.Error(135, paramName, self.Request.URL.Path, err)
+			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Warning(139, paramName, self.Request.URL.Path)
+	logs.Base.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetSegmentUriString(paramName string) (value string, ok bool) {
@@ -373,36 +373,36 @@ func (self *RW) GetParamUriInt(paramName string) (value int64, ok bool) {
 	var err error
 	if p, ok := self.UriParams[paramName]; ok == true {
 		if value, err = strconv.ParseInt(p[0], 0, 64); err != nil {
-			logs.Error(135, paramName, self.Request.URL.Path, err)
+			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Warning(139, paramName, self.Request.URL.Path)
+	logs.Base.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetParamUriUint(paramName string) (value uint64, ok bool) {
 	var err error
 	if p, ok := self.UriParams[paramName]; ok == true {
 		if value, err = strconv.ParseUint(p[0], 0, 64); err != nil {
-			logs.Error(135, paramName, self.Request.URL.Path, err)
+			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Warning(139, paramName, self.Request.URL.Path)
+	logs.Base.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetParamUriFloat(paramName string) (value float64, ok bool) {
 	var err error
 	if p, ok := self.UriParams[paramName]; ok == true {
 		if value, err = strconv.ParseFloat(p[0], 64); err != nil {
-			logs.Error(135, paramName, self.Request.URL.Path, err)
+			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Warning(139, paramName, self.Request.URL.Path)
+	logs.Base.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetParamUriString(paramName string) (value string, ok bool) {

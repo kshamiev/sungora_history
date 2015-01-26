@@ -42,7 +42,7 @@ func (self *Model) VPropertiesFile(propertyName string, value string) (err error
 		//var propertyFile = strings.Replace(propertyName, "File", "", 1)
 		resp, err := uploader.Get(value)
 		if err == nil {
-			logs.Info(123, resp.Data.PathSys)
+			logs.Base.Info(110, resp.Data.PathSys)
 			data, _ := ioutil.ReadFile(resp.Data.PathSys)
 			setProperty(self.typ, propertyName, data, false)
 			//setProperty(self.typ, propertyFile, data, false)
@@ -50,7 +50,7 @@ func (self *Model) VPropertiesFile(propertyName string, value string) (err error
 			// удаление временного файла
 			err = uploader.Delete(value)
 			if err != nil {
-				logs.Warning(118, value, err)
+				logs.Base.Warning(111, value, err)
 			}
 		}
 	}
@@ -102,7 +102,10 @@ func (self *Model) Set(modelType interface{}, scenarioName string) (propertyMess
 	// Прямое копирование
 	if scenarioName == "" {
 		err = types.Copy(modelType, self.typ)
-		return propertyMessage, logs.Error(120, err).Error
+		if err != nil {
+			return propertyMessage, logs.Base.Error(112, err).Err
+		}
+		return propertyMessage, nil
 	}
 	objValue := reflect.ValueOf(self.model)
 	objValueSet := reflect.ValueOf(modelType)
@@ -113,7 +116,7 @@ func (self *Model) Set(modelType interface{}, scenarioName string) (propertyMess
 	// Проверка и копирование по сценарию
 	var options *types.Scenario
 	if options, err = types.GetScenario(self.typName, scenarioName); err != nil {
-		return propertyMessage, logs.Error(121, scenarioName, self.typName).Error
+		return propertyMessage, logs.Base.Error(113, scenarioName, self.typName).Err
 	}
 	// Общая проверка для сценария
 	var method = objValue.MethodByName("VScenario" + scenarioName)
@@ -123,7 +126,7 @@ func (self *Model) Set(modelType interface{}, scenarioName string) (propertyMess
 		out := method.Call(in)
 		if nil != out[0].Interface() {
 			err = out[0].Interface().(error)
-			return propertyMessage, logs.Error(119, "VScenario"+scenarioName, err).Error
+			return propertyMessage, logs.Base.Error(114, "VScenario"+scenarioName, err).Err
 		}
 	}
 	// Проверка по свойствам
@@ -188,8 +191,8 @@ func (self *Model) Save(key string) (err error) {
 		typValue = typValue.Elem()
 	}
 	typField := typValue.FieldByName(key)
-	if typField.IsValid() == false {
-		return logs.Error(113, key, typValue.Type().Name()).Error
+	if typField.CanSet() == false {
+		return logs.Base.Error(115, typValue.Type().Name(), key).Err
 	}
 	// Данные
 	dataValue := reflect.ValueOf(app.Data)
@@ -197,11 +200,11 @@ func (self *Model) Save(key string) (err error) {
 		dataValue = dataValue.Elem()
 	}
 	dataField := dataValue.FieldByName(self.typName)
-	if dataField.IsValid() == false {
-		return logs.Error(124, typValue.Type().Name()).Error
+	if dataField.CanSet() == false {
+		return logs.Base.Error(116, typValue.Type().Name()).Err
 	}
 	if dataField.Type().Kind() != reflect.Slice {
-		return logs.Error(125, typValue.Type().Name()).Error
+		return logs.Base.Error(117, typValue.Type().Name()).Err
 	}
 	// Сохранение
 	if key == `Id` {
@@ -294,11 +297,11 @@ func (self *Model) Remove(key string) (err error) {
 	}
 	dataField := dataValue.FieldByName(self.typName)
 	if dataField.IsValid() == false {
-		return logs.Error(124, typValue.Type().Name()).Error
+		return logs.Base.Error(116, typValue.Type().Name()).Err
 	}
 	// Срез
 	if dataField.Type().Kind() != reflect.Slice {
-		return logs.Error(125, typValue.Type().Name()).Error
+		return logs.Base.Error(117, typValue.Type().Name()).Err
 	}
 	if key == `Id` {
 		index := sort.Search(dataField.Len(), func(i int) bool {
@@ -349,12 +352,12 @@ func (self *Model) Load(key string) (err error) {
 		dataValue = dataValue.Elem()
 	}
 	dataField := dataValue.FieldByName(self.typName)
-	if dataField.IsValid() == false {
-		return logs.Error(124, typValue.Type().Name()).Error
+	if dataField.CanSet() == false {
+		return logs.Base.Error(116, typValue.Type().Name()).Err
 	}
 	// Срез
 	if dataField.Type().Kind() != reflect.Slice {
-		return logs.Error(125, typValue.Type().Name()).Error
+		return logs.Base.Error(117, typValue.Type().Name()).Err
 	}
 	var flag bool
 	if key == `Id` {
@@ -389,7 +392,7 @@ func (self *Model) Load(key string) (err error) {
 		}
 	}
 	if flag == false {
-		return logs.Error(159, typValue.Type().Name(), typField.Interface()).Error
+		return logs.Base.Error(118, typValue.Type().Name(), typField.Interface()).Err
 	}
 	return
 }

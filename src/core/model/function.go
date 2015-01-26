@@ -15,7 +15,7 @@ func getProperty(typ interface{}, property string) (value interface{}, err error
 	}
 	prop := objValue.FieldByName(property)
 	if prop.IsValid() == false {
-		return value, logs.Error(1, "у объекта "+objValue.Type().String()+" остутсвует свойство "+property).Error
+		return value, logs.Base.Error(108, objValue.Type().String(), property).Err
 	}
 	return prop.Interface(), err
 }
@@ -28,7 +28,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	}
 	prop := objValue.FieldByName(property)
 	if prop.IsValid() == false {
-		return logs.Error(1, "у объекта "+objValue.Type().String()+" остутсвует свойство "+property).Error
+		return logs.Base.Error(108, objValue.Type().String(), property).Err
 	}
 	t := prop.Type().String()
 	switch t {
@@ -37,7 +37,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	case "int8":
 		if value.(int8) == 0 {
 			if required == true {
-				return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+				return logs.Base.Error(109, objValue.Type().String(), property).Err
 			}
 			prop.SetInt(0)
 		} else {
@@ -46,7 +46,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	case "int16":
 		if value.(int16) == 0 {
 			if required == true {
-				return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+				return logs.Base.Error(109, objValue.Type().String(), property).Err
 			}
 			prop.SetInt(0)
 		} else {
@@ -55,7 +55,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	case "int32":
 		if value.(int32) == 0 {
 			if required == true {
-				return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+				return logs.Base.Error(109, objValue.Type().String(), property).Err
 			}
 			prop.SetInt(0)
 		} else {
@@ -64,7 +64,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	case "int64":
 		if value.(int64) == 0 {
 			if required == true {
-				return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+				return logs.Base.Error(109, objValue.Type().String(), property).Err
 			}
 			prop.SetInt(0)
 		} else {
@@ -73,7 +73,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	case "uint8":
 		if value.(uint8) == 0 {
 			if required == true {
-				return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+				return logs.Base.Error(109, objValue.Type().String(), property).Err
 			}
 			prop.SetUint(0)
 		} else {
@@ -82,7 +82,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	case "uint16":
 		if value.(uint16) == 0 {
 			if required == true {
-				return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+				return logs.Base.Error(109, objValue.Type().String(), property).Err
 			}
 			prop.SetUint(0)
 		} else {
@@ -91,7 +91,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	case "uint32":
 		if value.(uint32) == 0 {
 			if required == true {
-				return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+				return logs.Base.Error(109, objValue.Type().String(), property).Err
 			}
 			prop.SetUint(0)
 		} else {
@@ -100,7 +100,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 	case "uint64":
 		if value.(uint64) == 0 {
 			if required == true {
-				return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+				return logs.Base.Error(109, objValue.Type().String(), property).Err
 			}
 			prop.SetUint(0)
 		} else {
@@ -108,7 +108,7 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 		}
 	case "float64":
 		if required == true && 0 == value.(float64) {
-			return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+			return logs.Base.Error(109, objValue.Type().String(), property).Err
 		}
 		if value == 0 {
 			prop.SetFloat(0)
@@ -117,27 +117,27 @@ func setProperty(typ interface{}, property string, value interface{}, required b
 		}
 	case "string":
 		if required == true && "" == value.(string) {
-			return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+			return logs.Base.Error(109, objValue.Type().String(), property).Err
 		}
 		prop.SetString(value.(string))
 	case "[]string":
 		if required == true && 0 == len(value.([]string)) {
-			return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+			return logs.Base.Error(109, objValue.Type().String(), property).Err
 		}
 		prop.Set(reflect.ValueOf(value))
 	case "time.Time":
 		if required == true && "0001-01-01 00:00:00 +0000 UTC" == value.(time.Time).String() {
-			return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+			return logs.Base.Error(109, objValue.Type().String(), property).Err
 		}
 		prop.Set(reflect.ValueOf(value))
 	case "time.Duration":
 		if required == true && "0" == value.(time.Duration).String() {
-			return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+			return logs.Base.Error(109, objValue.Type().String(), property).Err
 		}
 		prop.Set(reflect.ValueOf(value))
 	case "[]uint8":
 		if required == true && 0 == len(value.([]byte)) {
-			return logs.Error(1, "своство '"+property+"' обязательно для заполнения").Error
+			return logs.Base.Error(109, objValue.Type().String(), property).Err
 		}
 		prop.SetBytes(value.([]byte))
 	default:

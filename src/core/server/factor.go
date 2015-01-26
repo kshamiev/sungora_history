@@ -44,7 +44,7 @@ func newServer(cfg *typConfig.Server) *Server {
 func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	logs.Info(0, `--- [`+r.RemoteAddr+`] [`+r.Method+`] `+r.URL.Path)
+	logs.Base.Info(0, `--- [`+r.RemoteAddr+`] [`+r.Method+`] `+r.URL.Path)
 
 	// 0 Инициализация управления потоком I/O
 	var rw, ok = core.NewRW(w, r, self.Server)
@@ -80,7 +80,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var uriParams, _ = url.ParseQuery(r.URL.Query().Encode())
-	logs.Info(131, uri.Id, uri.Uri)
+	logs.Base.Info(119, uri.Id, uri.Uri)
 
 	// 3 Users. Поиск и инициализация пользователя (ОПРЕДЕЛЯЕТСЯ МОДУЛЕМ)
 	// токен
@@ -95,7 +95,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	logs.Info(132, uriSegment[`token`])
+	logs.Base.Info(120, uriSegment[`token`])
 	// пользователь
 	var user *typDb.Users
 	if FactorNewUsers == nil {
@@ -104,7 +104,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		user = FactorNewUsers(uriSegment[`token`])
 	}
-	logs.Info(134, user.Login, user.Id)
+	logs.Base.Info(121, user.Login, user.Id)
 	// приоритетно переопределяем язык указанный в uri
 	if user.Language != `` {
 		uriSegment[`lang`] = user.Language
@@ -136,10 +136,10 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if rw.Interrupt == true || rw.InterruptHard == true {
 			break
 		}
-		logs.Info(126, c.Id, c.Path)
+		logs.Base.Info(122, c.Id, c.Path)
 		self.controllersContentUpdate(c)
 		if err := self.executeController(rw, session, c); err != nil {
-			logs.Error(127, c.Id, c.Path)
+			logs.Base.Error(123, c.Id, c.Path)
 		}
 	}
 	if rw.InterruptHard == true {
@@ -156,7 +156,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			index := rw.DocumentFolder + `_` + uri.Layout
 			if err := rw.Content.ExecuteBytes(app.Data.UriDefault[index].Content); err != nil {
-				logs.Error(128, app.Data.UriDefault[index].Layout, err)
+				logs.Base.Error(124, app.Data.UriDefault[index].Layout, err)
 				rw.ResponseError(500)
 				return
 			}
@@ -173,13 +173,13 @@ func (self *Server) executeController(rw *core.RW, s *core.Session, c *typDb.Con
 	// путь до контроллера и его метода в неправильном формате
 	l := strings.Split(c.Path, `/`)
 	if len(l) != 3 {
-		return logs.Error(172, c.Path).Error
+		return logs.Base.Critical(105, c.Path).Err
 	}
 
 	// нет такого контроллера
 	ctrF, ok := app.Controller[l[0]+`/`+l[1]]
 	if false == ok {
-		return logs.Error(173, l[0], l[1]).Error
+		return logs.Base.Critical(106, l[0], l[1]).Err
 	}
 	rw.InitLog(l[0])
 
@@ -188,7 +188,7 @@ func (self *Server) executeController(rw *core.RW, s *core.Session, c *typDb.Con
 	objValue := reflect.ValueOf(ctr)
 	met := objValue.MethodByName(l[2])
 	if met.IsValid() == false {
-		return logs.Error(174, l[0], l[1], l[2]).Error
+		return logs.Base.Error(107, l[0], l[1], l[2]).Err
 	}
 
 	// оставлено для примера передачи параметров в метод
@@ -221,7 +221,7 @@ func (self *Server) layoutUpdate(rw *core.RW, uri *typDb.Uri) (err error) {
 		path = strings.Join(chunks, `/`)
 	}
 	if err != nil {
-		return logs.Error(147, uri.Layout, pathOrigin).Error
+		return logs.Base.Error(125, uri.Layout, pathOrigin).Err
 	}
 	var index = rw.DocumentFolder + `_` + uri.Layout
 	if _, ok := app.Data.UriDefault[index]; ok == false {
@@ -230,7 +230,7 @@ func (self *Server) layoutUpdate(rw *core.RW, uri *typDb.Uri) (err error) {
 	var con []byte
 	if fi.ModTime().Sub(app.Data.UriDefault[index].ContentTime) > 0 { // нашли, проверяем и обновляем
 		if con, err = ioutil.ReadFile(path); nil != err {
-			return logs.Error(147, uri.Layout, err).Error
+			return logs.Base.Error(125, uri.Layout, err.Error()).Err
 		} else {
 			app.Data.UriDefault[index].Layout = uri.Layout
 			app.Data.UriDefault[index].Content = con
@@ -254,7 +254,7 @@ func (self *Server) controllersContentUpdate(c *typDb.Controllers) (err error) {
 	var con []byte
 	if fi.ModTime().Sub(c.ContentTime) > 0 {
 		if con, err = ioutil.ReadFile(path); nil != err {
-			return logs.Error(145, path, err).Error
+			return logs.Base.Error(126, path, err).Err
 		} else {
 			c.Content = string(con)
 			c.ContentTime = fi.ModTime()

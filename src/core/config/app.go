@@ -310,7 +310,7 @@ func loadDataFromMemory() (err error) {
 	u.Login = `developer`
 	u.Email = `developer@developer.developer`
 	if u.Id != core.Config.Auth.DevUID {
-		return logs.Fatal(161).Error
+		return logs.Base.Fatal(131).Err
 	}
 	app.Data.Users = append(app.Data.Users, u)
 	//
@@ -319,7 +319,7 @@ func loadDataFromMemory() (err error) {
 	u.Login = `guest`
 	u.Email = `guest@guest.guest`
 	if u.Id != core.Config.Auth.GuestUID {
-		return logs.Fatal(165).Error
+		return logs.Base.Fatal(132).Err
 	}
 	app.Data.Users = append(app.Data.Users, u)
 	core.Config.Auth.GuestUID = u.Id
@@ -330,7 +330,7 @@ func loadDataFromMemory() (err error) {
 	g.Id = model.GenerateId(`Groups`)
 	g.Name = `developer`
 	if g.Id != core.Config.Auth.DevUID {
-		return logs.Fatal(166).Error
+		return logs.Base.Fatal(133).Err
 	}
 	app.Data.Groups = append(app.Data.Groups, g)
 	core.Config.Auth.DevUID = g.Id
@@ -339,7 +339,7 @@ func loadDataFromMemory() (err error) {
 	g.Id = model.GenerateId(`Groups`)
 	g.Name = `guest`
 	if g.Id != core.Config.Auth.GuestUID {
-		return logs.Fatal(167).Error
+		return logs.Base.Fatal(134).Err
 	}
 	app.Data.Groups = append(app.Data.Groups, g)
 	core.Config.Auth.GuestUID = g.Id

@@ -55,16 +55,16 @@ func goServerFactory() {
 						if err == nil {
 							break
 						}
-						logs.Error(148, webserverAddress)
+						logs.Base.Error(127, webserverAddress)
 					}
 					if err == nil && store[command.name] != nil {
-						logs.Notice(149, webserverAddress)
+						logs.Base.Notice(130, webserverAddress)
 						command.result <- true
 						Server.Serve(store[command.name])
-						logs.Notice(150, webserverAddress)
+						logs.Base.Notice(128, webserverAddress)
 						delete(store, command.name)
 					} else {
-						logs.Error(151, webserverAddress)
+						logs.Base.Error(129, webserverAddress)
 						command.result <- false
 						delete(store, command.name)
 					}

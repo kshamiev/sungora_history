@@ -20,7 +20,7 @@ func NewDb(useDb int64, idConfig int8) (db DbFace, err error) {
 	case UseMysql:
 		return mysql.NewDb(idConfig)
 	}
-	return nil, logs.Fatal(168, useDb).Error
+	return nil, logs.Base.Fatal(811, useDb).Err
 }
 
 func NewAr(useDb int64) ArFace {

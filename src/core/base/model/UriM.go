@@ -5,10 +5,7 @@ import (
 	"app"
 	"core"
 	"core/model"
-	"io/ioutil"
 	"lib/database"
-	"lib/logs"
-	"os"
 	typDb "types/db"
 )
 
@@ -48,17 +45,17 @@ func (self *Uri) VPropertySample(scenario string, value uint64) (err error) {
 	return
 }
 
-func (self *Uri) VPropertyUri(scenario string, value string) (err error) {
+func (self *Uri) VPropertyUri(scenario string, value string) bool {
 	if value == `` {
-		return logs.Error(201).Error
+		return false
 	}
 	for i := range app.Data.Uri {
 		if app.Data.Uri[i].Uri == value && (self.Type.Id == 0 || self.Type.Id != app.Data.Uri[i].Id) {
-			return logs.Error(1, value).Error
+			return false
 		}
 	}
 	self.Type.Uri = value
-	return
+	return true
 }
 
 func (self *Uri) VPropertyContentType(scenario string, value string) (err error) {
@@ -120,38 +117,38 @@ func (self *Uri) Remove(key string) (err error) {
 ////
 
 // UriContentUpdate обновление контента uri по отношению к файловой системе
-func UriContentUpdate(rw *core.RW, u *typDb.Uri) (err error) {
-	if u.Id == 0 {
-		return
-	}
-	var fi os.FileInfo
-	var path = rw.DocumentRoot + u.Uri
-	if fi, err = os.Stat(path); err != nil {
-		// return logs.Error(146, path, err).Error
-		return
-	}
-	var con []byte
-	if fi.ModTime().Sub(u.ContentTime) > 0 {
-		if con, err = ioutil.ReadFile(path); nil != err {
-			return logs.Error(146, path, err).Error
-		} else {
-			u.Content = con
-			u.ContentTime = fi.ModTime()
-			// сохраняем в БД
-			if core.Config.Main.UseDb > 0 {
-				var db database.DbFace
-				if db, err = database.NewDb(core.Config.Main.UseDb, 0); err != nil {
-					return
-				}
-				// сохранение
-				_, err = db.Update(u, `Uri`, `Id`)
-				db.Free()
-				//self.Db.Save(`All`, `Id`)
-			}
-		}
-	}
-	return
-}
+//func UriContentUpdate(rw *core.RW, u *typDb.Uri) (err error) {
+//	if u.Id == 0 {
+//		return
+//	}
+//	var fi os.FileInfo
+//	var path = rw.DocumentRoot + u.Uri
+//	if fi, err = os.Stat(path); err != nil {
+//		// return logs.Error(146, path, err).Error
+//		return
+//	}
+//	var con []byte
+//	if fi.ModTime().Sub(u.ContentTime) > 0 {
+//		if con, err = ioutil.ReadFile(path); nil != err {
+//			return logs.Error(146, path, err).Error
+//		} else {
+//			u.Content = con
+//			u.ContentTime = fi.ModTime()
+//			// сохраняем в БД
+//			if core.Config.Main.UseDb > 0 {
+//				var db database.DbFace
+//				if db, err = database.NewDb(core.Config.Main.UseDb, 0); err != nil {
+//					return
+//				}
+//				// сохранение
+//				_, err = db.Update(u, `Uri`, `Id`)
+//				db.Free()
+//				//self.Db.Save(`All`, `Id`)
+//			}
+//		}
+//	}
+//	return
+//}
 
 ////
 

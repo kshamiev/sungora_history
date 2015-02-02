@@ -46,6 +46,7 @@ type Cfglogs struct {
 func Init(cfgLogs *Cfglogs) {
 	cfg = cfgLogs
 	Base = NewLog(`base`, cfg.Lang)
+	Base.label = `base`
 }
 
 // Системный или базовый лог

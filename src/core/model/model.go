@@ -124,17 +124,21 @@ func (self *Model) Set(modelType interface{}, scenarioName string) (propertyMess
 		var in = []reflect.Value{}
 		in = append(in, objValueSet)
 		out := method.Call(in)
-		if nil != out[0].Interface() {
-			err = out[0].Interface().(error)
-			return propertyMessage, logs.Base.Error(114, "VScenario"+scenarioName, err).Err
+		if false == out[0].Interface().(bool) {
+			return propertyMessage, logs.Base.Warning(114, "VScenario"+scenarioName, err).Err
 		}
+		//if nil != out[0].Interface() {
+		//	err = out[0].Interface().(error)
+		//	return propertyMessage, logs.Base.Error(114, "VScenario"+scenarioName, err).Err
+		//}
 	}
 	// Проверка по свойствам
 	for i := range options.Property {
 		var propertyName = options.Property[i].Name
 		var fieldSet = objValueSet.FieldByName(propertyName)
 		if fieldSet.IsValid() == false {
-			propertyMessage[propertyName] = "property '" + propertyName + "' not exists in type"
+			logs.Base.Warning(135, self.typName, propertyName)
+			propertyMessage[propertyName] = propertyName
 			continue
 		}
 		var validMethod = "VProperty" + propertyName
@@ -145,10 +149,13 @@ func (self *Model) Set(modelType interface{}, scenarioName string) (propertyMess
 			in = append(in, reflect.ValueOf(scenarioName))
 			in = append(in, fieldSet)
 			out := method.Call(in)
-			if nil != out[0].Interface() {
-				err = out[0].Interface().(error)
-				propertyMessage[propertyName] = err.Error()
+			if false == out[0].Interface().(bool) {
+				propertyMessage[propertyName] = propertyName
 			}
+			//if nil != out[0].Interface() {
+			//	err = out[0].Interface().(error)
+			//	propertyMessage[propertyName] = err.Error()
+			//}
 			continue
 		}
 		// Присвоение по умолчанию
@@ -160,11 +167,11 @@ func (self *Model) Set(modelType interface{}, scenarioName string) (propertyMess
 			// пропускаем работу по кросс связям и отношениям
 		case "file":
 			if err = self.VPropertiesFile(propertyName, string(fieldSet.Interface().([]byte))); err != nil {
-				propertyMessage[propertyName] = err.Error()
+				propertyMessage[propertyName] = propertyName
 			}
 		case "img":
 			if err = self.VPropertiesFile(propertyName, string(fieldSet.Interface().([]byte))); err != nil {
-				propertyMessage[propertyName] = err.Error()
+				propertyMessage[propertyName] = propertyName
 			}
 		default:
 			if options.Property[i].Required == `yes` {
@@ -173,7 +180,7 @@ func (self *Model) Set(modelType interface{}, scenarioName string) (propertyMess
 				err = setProperty(self.typ, propertyName, fieldSet.Interface(), false)
 			}
 			if err != nil {
-				propertyMessage[propertyName] = err.Error()
+				propertyMessage[propertyName] = propertyName
 			}
 		}
 	}

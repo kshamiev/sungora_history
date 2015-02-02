@@ -140,7 +140,7 @@ func uriContentUpdate(r *http.Request, u *typDb.Uri) (err error) {
 	var con []byte
 	if fi.ModTime().Sub(u.ContentTime) > 0 {
 		if con, err = ioutil.ReadFile(path); nil != err {
-			return logs.Error(146, path, err).Error
+			return logs.Base.Error(136, path, err).Err
 		} else {
 			u.Content = con
 			u.ContentTime = fi.ModTime()

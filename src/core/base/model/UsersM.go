@@ -7,7 +7,6 @@ import (
 	"core/model"
 	"lib"
 	"lib/database"
-	"lib/logs"
 	typDb "types/db"
 )
 
@@ -52,7 +51,7 @@ func (self *Users) VScenarioAll(typ typDb.Users) (err error) {
 }
 
 // VPropertyLogin Проверка логина
-func (self *Users) VPropertyLogin(scenario string, value string) (err error) {
+func (self *Users) VPropertyLogin(scenario string, value string) bool {
 	switch scenario {
 	case `Registration`:
 		var flag = false
@@ -65,16 +64,16 @@ func (self *Users) VPropertyLogin(scenario string, value string) (err error) {
 		if flag == false {
 			self.Type.Login = value
 		} else {
-			return logs.Error(163, value).Error
+			return false
 		}
 	default:
 		self.Type.Login = value
 	}
-	return
+	return true
 }
 
 // VPropertyEmail Проверка Email
-func (self *Users) VPropertyEmail(scenario string, value string) (err error) {
+func (self *Users) VPropertyEmail(scenario string, value string) bool {
 	switch scenario {
 	case `Registration`:
 		var flag = false
@@ -87,20 +86,20 @@ func (self *Users) VPropertyEmail(scenario string, value string) (err error) {
 		if flag == false {
 			self.Type.Email = value
 		} else {
-			return logs.Error(162, value).Error
+			return false
 		}
 	default:
 		self.Type.Email = value
 	}
-	return
+	return true
 }
 
 // VScenarioProfile Пример общей валидации для сценария
-func (self *Users) VScenarioProfile(typ typDb.Users) (err error) {
+func (self *Users) VScenarioProfile(typ typDb.Users) bool {
 	if typ.Password != typ.PasswordR {
-		return logs.Error(164, typ.Password, typ.PasswordR).Error
+		return false
 	}
-	return
+	return true
 }
 
 // VPropertyPassword Формирование пароля

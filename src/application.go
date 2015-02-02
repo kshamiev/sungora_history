@@ -1,6 +1,7 @@
 // Точка входа в программу, запуск на выполнение.
 //
 // Посмотреть использования стороннего решшеня сервиса для записей логов в системный журнал
+// todo проверить загрузку бинарных файлов
 package main
 
 import (
@@ -126,7 +127,7 @@ func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 
 	// Create a PID file and lock on record, control run one copy of the application
 	if err = ensuring.PidFileCreate(core.Config.Main.Pid); err != nil {
-		logs.Fatal(910, err.Error())
+		logs.Base.Fatal(910, err.Error())
 		return err, 910
 	}
 
@@ -134,7 +135,7 @@ func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Checking the available memory (in mb)
 	if err = ensuring.CheckMemory(core.Config.Main.Memory); err != nil {
-		logs.Fatal(900, err.Error())
+		logs.Base.Fatal(900, err.Error())
 		return err, 900
 	}
 	runtime.GC()
@@ -143,14 +144,14 @@ func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 	if core.Config.Main.UseDb > 0 {
 		// Checking availability of databases
 		if err = database.CheckConnect(); err != nil {
-			logs.Fatal(920, err.Error())
+			logs.Base.Fatal(920, err.Error())
 			return err, 920
 		}
 	}
 
 	// Инициализация системных данных
 	if err = coreConfig.App(); err != nil {
-		logs.Fatal(930, err.Error())
+		logs.Base.Fatal(930, err.Error())
 		return err, 930
 	}
 

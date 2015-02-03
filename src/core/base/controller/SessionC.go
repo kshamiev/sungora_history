@@ -52,7 +52,7 @@ func (self *Session) ApiMain() (err error) {
 // apiMainDelete Выход
 func (self *Session) apiMainDelete() (err error) {
 	if self.RW.Token == `` {
-		self.RW.ResponseJson(nil, 409, 171)
+		self.RW.ResponseJson(nil, 409, 137)
 	} else if self.Session.User.Id != core.Config.Auth.GuestUID {
 		user := model.NewUsersType(*self.Session.User)
 		user.Type.Token = ``
@@ -66,9 +66,9 @@ func (self *Session) apiMainDelete() (err error) {
 // apiMainGet Проверка токена с его пролонгацией
 func (self *Session) apiMainGet() (err error) {
 	if self.RW.Token == `` {
-		self.RW.ResponseJson(nil, 409, 171)
+		self.RW.ResponseJson(nil, 409, 137)
 	} else if self.Session.User.Id == core.Config.Auth.GuestUID {
-		self.RW.ResponseJson(nil, 404, 166)
+		self.RW.ResponseJson(nil, 404, 139)
 	} else {
 		user := model.NewUsersType(*self.Session.User)
 		user.Type.DateOnline = lib.Time.Now()
@@ -104,7 +104,7 @@ func (self *Session) apiMainPut() (err error) {
 	}
 	var u = model.SearchUsersLogin(reqUser.Login)
 	if u == nil {
-		self.RW.ResponseJson(nil, 404, 166)
+		self.RW.ResponseJson(nil, 404, 139)
 		return
 	}
 	if lib.String.CreatePasswordHash(reqUser.Password) != u.Password {
@@ -169,7 +169,7 @@ func (self *Session) ApiRecovery() (err error) {
 	}
 	var u = model.SearchUsersEmail(reqUser.Email)
 	if u == nil {
-		return self.RW.ResponseJson(nil, 404, 166)
+		return self.RW.ResponseJson(nil, 404, 139)
 	}
 
 	// восстановление

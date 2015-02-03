@@ -33,9 +33,9 @@ func (self *Server) ApiPing() (err error) {
 // ApiUpload Загрузка бинарных данных
 func (self *Server) ApiUpload() (err error) {
 	if self.RW.Token == `` { // токен не передан
-		return self.RW.ResponseJson(nil, 409, 171)
+		return self.RW.ResponseJson(nil, 409, 137)
 	} else if self.Session.User.Id == core.Config.Auth.GuestUID { // токен не верный
-		return self.RW.ResponseJson(nil, 404, 139, self.RW.Token)
+		return self.RW.ResponseJson(nil, 404, 138, self.RW.Token)
 	}
 	var key string
 	key, err = uploader.Upload(self.RW.Request, `myFile`)

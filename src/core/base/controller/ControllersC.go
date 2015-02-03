@@ -104,17 +104,17 @@ func (self *Controllers) apiGridPut() (err error) {
 func (self *Controllers) apiGridOptions() (err error) {
 	var typ, ok = self.RW.GetSegmentUriString(`param`)
 	if ok == false {
-		return self.RW.ResponseJson(nil, 409, 202)
+		return self.RW.ResponseJson(nil, 409, 575)
 	}
 	switch typ {
 	case `scenario`:
 		var options *types.Scenario
 		if options, err = types.GetScenario(`Controllers`, `GridAdmin`); err != nil {
-			return self.RW.ResponseJson(nil, 404, 570, `GridAdmin`, `Controllers`)
+			return self.RW.ResponseJson(nil, 404, 104, `Controllers`, `GridAdmin`)
 		}
 		return self.RW.ResponseJson(options, 200, 0)
 	}
-	return self.RW.ResponseJson(nil, 409, 203, typ)
+	return self.RW.ResponseJson(nil, 409, 570, typ)
 }
 
 ////

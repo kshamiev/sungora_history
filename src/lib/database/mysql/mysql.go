@@ -21,20 +21,6 @@ import (
 	"lib/logs"
 )
 
-// Для получения общих и часто используемых результатов запросов
-//type Result struct {
-//	Count    int64
-//	Position int64
-//	Max      int64
-//	Min      int64
-//	Avg      int64
-//	Id       uint64
-//	IdTarget uint64
-//	IdGrid   uint64
-//	IdParent uint64
-//	IdChild  uint64
-//}
-
 // Стек соединений с БД
 var conn = make(map[int8]map[string]*Db)
 
@@ -46,6 +32,7 @@ type Db struct {
 	Connect mysql.Conn // Конннект к БД
 	free    bool       // Статус блокировки (использования)
 	time    time.Time  // Дата и время последнего использования коннекта
+	logs    bool       // Логирование запросов
 }
 
 // New Конструктор соединений с БД
@@ -87,6 +74,7 @@ func NewDb(id int8) (obj *Db, err error) {
 	}
 	obj.time = lib.Time.Now()
 	obj.free = false
+	obj.logs = d.Logs
 	//conn[confId] = append(conn[confId], obj)
 	conn[id][obj.time.String()] = obj
 	// fmt.Println("\nnew coonnect. count connect:", len(conn[id]))
@@ -128,33 +116,145 @@ func (self *Db) SelectData(object interface{}) (err error) {
 			sql = "SELECT * FROM " + source + " ORDER BY Id ASC"
 		}
 		// читаем данные
-		if err = self.SelectSlice(field.Addr().Interface(), sql); err != nil {
-			return
+		switch field.Type().Kind() {
+		case reflect.Slice:
+			if err = self.SelectSlice(field.Addr().Interface(), sql); err != nil {
+				return
+			}
+		case reflect.Map:
+			if err = self.SelectMap(field.Addr().Interface(), sql); err != nil {
+				return
+			}
+		default:
+			return logs.Base.Error(812, source).Err
 		}
-		//switch field.Type().Kind() {
-		//case reflect.Slice:
-		//	slc := reflect.MakeSlice(field.Type(), 0, 0)
-		//	slc, err = self.loadArrayReflect(slc, sql)
-		//	if err != nil {
-		//		return
-		//	}
-		//	field.Set(slc)
-		//case reflect.Map:
-		//	mp := reflect.MakeMap(field.Type())
-		//	mp, err = self.loadArrayReflect(mp, sql)
-		//	if err != nil {
-		//		return err
-		//	}
-		//	field.Set(mp)
-		//default:
-		//	return logs.Error(158, source).Error
-		//}
 	}
 	return err
 }
 
 // LoadArray Загрузка списка объектов из БД. Сопоставление свойств структур полям в БД
 func (self *Db) SelectMap(ObjectList interface{}, sql string, params ...interface{}) (err error) {
+	// рефлеския объекта
+	objType := reflect.TypeOf(ObjectList)
+	if objType.Kind() != reflect.Ptr {
+		return logs.Base.Error(101, objType.String(), sql).Err
+	}
+	if objType.Elem().Kind() != reflect.Map {
+		return logs.Base.Error(813, objType.String(), sql).Err
+	}
+	var objValue = reflect.MakeMap(objType.Elem())
+	var fieldMap = make(map[string]string)
+	var obj = reflect.New(objType.Elem().Elem().Elem())
+	obj = obj.Elem()
+	num := obj.NumField()
+	for i := 0; i < num; i++ {
+		field := obj.Field(i)
+		fieldName := obj.Type().Field(i).Name
+		fieldTag := obj.Type().Field(i).Tag.Get(`db`)
+		if fieldTag == `-` {
+			continue
+		}
+		if false == field.IsValid() || false == field.CanSet() {
+			return logs.Base.Error(804, fieldName, sql).Err
+		}
+		if fieldTag == `` {
+			fieldMap[fieldName] = fieldName
+		} else {
+			fieldMap[fieldTag] = fieldName
+		}
+	}
+	// запрос
+	if strings.LastIndex(sql, " ") == -1 {
+		if sql, err = GetQuery(sql); err != nil {
+			return
+		}
+	}
+	//sql, params = sqlParse(sql, params)
+	var res mysql.Result
+	var rows []mysql.Row
+	var row mysql.Row
+	var stm mysql.Stmt
+	defer func() {
+		if stm != nil {
+			stm.Delete()
+		}
+	}()
+	stm, err = self.Connect.Prepare(sql)
+	if err != nil {
+		return logs.Base.Error(801, sql, err).Err
+	}
+	if len(params) > 0 {
+		stm.Bind(params...)
+	}
+	rows, res, err = stm.Exec()
+	if err != nil {
+		return logs.Base.Error(802, sql, err).Err
+	}
+	if self.logs == true {
+		logs.Base.Info(999, sql)
+	}
+	// пустой результат
+	if 0 == len(rows) {
+		return
+	}
+	// соответствие структуры типа и структуры запроса
+	var fieldRes = make(map[string]string)
+	for _, field := range res.Fields() {
+		if _, ok := fieldMap[field.Name]; ok == false {
+			return logs.Base.Error(803, field.Name, sql).Err
+		}
+		fieldRes[field.Name] = fieldMap[field.Name]
+	}
+	// наполнение результата
+	for _, row = range rows {
+		objectId := uint64(0)
+		var obj = reflect.New(objType.Elem().Elem().Elem())
+		obj = obj.Elem()
+		for fAlias, fName := range fieldRes {
+			// logs.Dumper(fAlias, res.Map(fAlias))
+			prop := obj.FieldByName(fName)
+			// заносим полученные значения согласно типам свойств
+			switch prop.Type().String() {
+			case "bool":
+				prop.SetBool(row.Bool(res.Map(fAlias)))
+			case "int8", "int64", "int32", "int16":
+				prop.SetInt(row.Int64(res.Map(fAlias)))
+			case "uint64":
+				val := row.Uint64(res.Map(fAlias))
+				prop.SetUint(val)
+				if fAlias == `Id` {
+					objectId = val
+				}
+			case "uint8", "uint32", "uint16":
+				prop.SetUint(row.Uint64(res.Map(fAlias)))
+			case "float32", "float64":
+				prop.SetFloat(row.Float(res.Map(fAlias)))
+			case "string":
+				prop.SetString(row.Str(res.Map(fAlias)))
+			case "[]uint8":
+				prop.SetBytes(row.Bin(res.Map(fAlias)))
+			case "[]string":
+				val := row.Str(res.Map(fAlias))
+				slc := reflect.MakeSlice(prop.Type(), 0, 0)
+				if "" != val {
+					list := strings.Split(val, ",")
+					for i := range list {
+						slc = reflect.Append(slc, reflect.ValueOf(list[i]))
+					}
+				}
+				prop.Set(slc)
+			case "time.Time":
+				prop.Set(reflect.ValueOf(row.Time(res.Map(fAlias), lib.Time.Location)))
+			case "time.Duration":
+				prop.Set(reflect.ValueOf(row.Duration(res.Map(fAlias))))
+			}
+		}
+		if objectId == 0 {
+			objectId++
+		}
+		objValue.SetMapIndex(reflect.ValueOf(objectId), obj.Addr())
+	}
+	reflect.ValueOf(ObjectList).Elem().Set(objValue)
 	return
 }
 
@@ -195,7 +295,7 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 			return
 		}
 	}
-	sql, params = sqlParse(sql, params)
+	//sql, params = sqlParse(sql, params)
 	var res mysql.Result
 	var rows []mysql.Row
 	var row mysql.Row
@@ -215,6 +315,9 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 	rows, res, err = stm.Exec()
 	if err != nil {
 		return logs.Base.Error(802, sql, err).Err
+	}
+	if self.logs == true {
+		logs.Base.Info(999, sql)
 	}
 	// пустой результат
 	if 0 == len(rows) {
@@ -270,7 +373,6 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 	}
 	reflect.ValueOf(ObjectList).Elem().Set(objValue)
 	return
-
 }
 
 // Load Загрузка объекта из БД. Сопоставление свойств структур полям в БД
@@ -309,7 +411,7 @@ func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (e
 			return
 		}
 	}
-	sql, params = sqlParse(sql, params)
+	//sql, params = sqlParse(sql, params)
 	var res mysql.Result
 	var rows []mysql.Row
 	var row mysql.Row
@@ -329,6 +431,9 @@ func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (e
 	rows, res, err = stm.Exec()
 	if err != nil {
 		return logs.Base.Error(802, sql, err).Err
+	}
+	if self.logs == true {
+		logs.Base.Info(999, sql)
 	}
 	// пустой результат
 	if 0 == len(rows) {
@@ -557,6 +662,9 @@ func (self *Db) Insert(Object interface{}, source string, properties ...map[stri
 	if _, res, err = stm.Exec(); err != nil {
 		return insertId, logs.Base.Error(802, sql, err).Err
 	}
+	if self.logs == true {
+		logs.Base.Info(999, sql)
+	}
 	insertId = res.InsertId()
 	return
 }
@@ -743,6 +851,9 @@ func (self *Db) Update(Object interface{}, source, key string, properties ...map
 	if _, res, err = stm.Exec(); err != nil {
 		return affectedRow, logs.Base.Error(802, sql, err).Err
 	}
+	if self.logs == true {
+		logs.Base.Info(999, sql)
+	}
 	affectedRow = res.AffectedRows()
 	return
 }
@@ -785,7 +896,7 @@ func (self *Db) Query(sql string, params ...interface{}) (err error) {
 		}
 	}()
 	// запрос
-	sql, params = sqlParse(sql, params)
+	//sql, params = sqlParse(sql, params)
 	stm, err = self.Connect.Prepare(sql)
 	if err != nil {
 		return logs.Base.Error(801, sql, err).Err
@@ -793,6 +904,9 @@ func (self *Db) Query(sql string, params ...interface{}) (err error) {
 	stm.Bind(params...)
 	if _, _, err = stm.Exec(); err != nil {
 		return logs.Base.Error(802, sql, err).Err
+	}
+	if self.logs == true {
+		logs.Base.Info(999, sql)
 	}
 	return
 }

@@ -1,14 +1,14 @@
 package face
 
-type ArFace interface {
-	Select(property string) ArFace
-	SelectScenario(source, scenario string) ArFace
-	From(from string) ArFace
-	Where(where string) ArFace
-	Group(group string) ArFace
-	Having(having string) ArFace
-	Order(order string) ArFace
-	Limit(start, step int) ArFace
+type QubFace interface {
+	Select(property string) QubFace
+	SelectScenario(source, scenario string) QubFace
+	From(from string) QubFace
+	Where(where string) QubFace
+	Group(group string) QubFace
+	Having(having string) QubFace
+	Order(order string) QubFace
+	Limit(start, step int) QubFace
 	Get() (query string)
 }
 

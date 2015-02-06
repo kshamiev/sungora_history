@@ -8,7 +8,7 @@ import (
 )
 
 type DbFace face.DbFace
-type ArFace face.ArFace
+type QubFace face.QubFace
 
 // Доступные БД для использования
 const (
@@ -23,10 +23,10 @@ func NewDb(useDb int64, idConfig int8) (db DbFace, err error) {
 	return nil, logs.Base.Fatal(811, useDb).Err
 }
 
-func NewAr(useDb int64) ArFace {
+func NewQub(useDb int64) QubFace {
 	switch useDb {
 	case UseMysql:
-		return mysql.NewAr()
+		return mysql.NewQub()
 	}
 	return nil
 }

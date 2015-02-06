@@ -143,7 +143,7 @@ func SortingUri(req *typReg.Position) (err error) {
 
 func GetUriGrid(page int) (data []*typDb.Uri, err error) {
 	page = (page - 1) * config.PAGE_ITEM
-	var ar = database.NewAr(core.Config.Main.UseDb).SelectScenario(`Uri`, `GridAdmin`)
+	var ar = database.NewQub(core.Config.Main.UseDb).SelectScenario(`Uri`, `GridAdmin`)
 	var query = ar.From(`Uri`).Order("`Name` ASC").Limit(page, config.PAGE_ITEM).Get()
 	var db database.DbFace
 	if db, err = database.NewDb(core.Config.Main.UseDb, 0); err != nil {
@@ -157,7 +157,7 @@ func GetUriGrid(page int) (data []*typDb.Uri, err error) {
 
 func GetControllersGrid(page int) (data []*typDb.Controllers, err error) {
 	page = (page - 1) * config.PAGE_ITEM
-	var ar = database.NewAr(core.Config.Main.UseDb).SelectScenario(`Controllers`, `GridAdmin`)
+	var ar = database.NewQub(core.Config.Main.UseDb).SelectScenario(`Controllers`, `GridAdmin`)
 	var query = ar.From(`Controllers`).Order("`Name` ASC").Limit(page, config.PAGE_ITEM).Get()
 	var db database.DbFace
 	if db, err = database.NewDb(core.Config.Main.UseDb, 0); err != nil {
@@ -171,7 +171,7 @@ func GetControllersGrid(page int) (data []*typDb.Controllers, err error) {
 
 func GetUsersGrid(page int) (data []*typDb.Users, err error) {
 	page = (page - 1) * config.PAGE_ITEM
-	var ar = database.NewAr(core.Config.Main.UseDb).SelectScenario(`Users`, `GridAdmin`)
+	var ar = database.NewQub(core.Config.Main.UseDb).SelectScenario(`Users`, `GridAdmin`)
 	var query = ar.From(`Users`).Order("`Name` ASC").Limit(page, config.PAGE_ITEM).Get()
 	var db database.DbFace
 	if db, err = database.NewDb(core.Config.Main.UseDb, 0); err != nil {
@@ -185,7 +185,7 @@ func GetUsersGrid(page int) (data []*typDb.Users, err error) {
 
 func GetGroupsGrid(page int) (data []*typDb.Groups, err error) {
 	page = (page - 1) * config.PAGE_ITEM
-	var ar = database.NewAr(core.Config.Main.UseDb).SelectScenario(`Groups`, `GridAdmin`)
+	var ar = database.NewQub(core.Config.Main.UseDb).SelectScenario(`Groups`, `GridAdmin`)
 	var query = ar.From(`Groups`).Order("`Name` ASC").Limit(page, config.PAGE_ITEM).Get()
 	debug(query)
 	var db database.DbFace

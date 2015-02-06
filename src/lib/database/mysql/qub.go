@@ -7,7 +7,7 @@ import (
 	"types"
 )
 
-type Ar struct {
+type Qub struct {
 	property []string
 	from     string
 	where    []string
@@ -17,18 +17,18 @@ type Ar struct {
 	limit    string
 }
 
-func NewAr() face.ArFace {
-	var self = new(Ar)
+func NewQub() face.QubFace {
+	var self = new(Qub)
 	return self
 
 }
 
-func (self *Ar) Select(property string) face.ArFace {
+func (self *Qub) Select(property string) face.QubFace {
 	self.property = append(self.property, property)
 	return self
 }
 
-func (self *Ar) SelectScenario(source, scenario string) face.ArFace {
+func (self *Qub) SelectScenario(source, scenario string) face.QubFace {
 	sc, err := types.GetScenario(source, scenario)
 	if err != nil {
 		return self
@@ -41,37 +41,37 @@ func (self *Ar) SelectScenario(source, scenario string) face.ArFace {
 	return self
 }
 
-func (self *Ar) From(from string) face.ArFace {
+func (self *Qub) From(from string) face.QubFace {
 	self.from = from
 	return self
 }
 
-func (self *Ar) Where(where string) face.ArFace {
+func (self *Qub) Where(where string) face.QubFace {
 	self.where = append(self.where, where)
 	return self
 }
 
-func (self *Ar) Group(group string) face.ArFace {
+func (self *Qub) Group(group string) face.QubFace {
 	self.group = group
 	return self
 }
 
-func (self *Ar) Having(having string) face.ArFace {
+func (self *Qub) Having(having string) face.QubFace {
 	self.having = having
 	return self
 }
 
-func (self *Ar) Order(order string) face.ArFace {
+func (self *Qub) Order(order string) face.QubFace {
 	self.order = order
 	return self
 }
 
-func (self *Ar) Limit(start, step int) face.ArFace {
+func (self *Qub) Limit(start, step int) face.QubFace {
 	self.limit = strconv.Itoa(start) + `, ` + strconv.Itoa(step)
 	return self
 }
 
-func (self *Ar) Get() (query string) {
+func (self *Qub) Get() (query string) {
 	query += "SELECT\n\t" + strings.Join(self.property, `, `) + "\n"
 	query += "FROM " + self.from + "\n"
 	if len(self.where) > 0 {

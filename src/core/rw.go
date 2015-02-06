@@ -147,7 +147,7 @@ type response struct {
 }
 
 // ResponseJson Выдача браузеру страницы в формате JSON
-func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, messages ...interface{}) (err error) {
+func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, params ...interface{}) (err error) {
 	self.Content.Type = `application/json`
 	self.Content.Encode = `utf-8`
 	self.Content.Status = status
@@ -156,7 +156,11 @@ func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, messag
 	_, path, _, ok := runtime.Caller(1)
 	if 0 < codeLocal && ok == true {
 		moduleName := strings.Split(strings.Split(path, `src/`)[1], `/`)[1]
-		code, message = i18n.Message(moduleName, self.Lang, codeLocal, messages...)
+		code, message = i18n.Message(moduleName, self.Lang, codeLocal, params...)
+	} else if 0 < len(params) {
+		if s, ok := params[0].(string); ok == true {
+			message = fmt.Sprintf(s, params[1:]...)
+		}
 	}
 	con := new(response)
 	con.ErrorCode = code

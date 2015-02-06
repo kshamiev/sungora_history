@@ -131,4 +131,6 @@ type Server struct {
 	WriteTimeout int64
 	// Защита от атак. Максимальный размер заголовка получаемого от браузера клиента
 	MaxHeaderBytes int64
+	// Логирование работы сервера
+	Logs bool
 }

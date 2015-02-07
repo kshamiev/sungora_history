@@ -20,7 +20,7 @@ import (
 func GoStart(logSys service.Logger) {
 	if cfg.Mode == `file` && fp == nil {
 		os.MkdirAll(filepath.Dir(cfg.File), 0755)
-		fp, _ = os.OpenFile(cfg.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		fp, _ = os.OpenFile(cfg.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	}
 	sys = logSys
 	gologs()
@@ -39,19 +39,19 @@ var commandlogsControl = make(chan command, 1000)
 // Command structure
 type command struct {
 	action int
-	log    *Log
+	log    Log
 	level  uint8
 	result chan<- interface{}
 }
 
 // Справочник уровня ошибок
 var logsLevel = map[uint8]string{
-	6: `[info]`,
-	5: `[notice]`,
-	4: `[warning]`,
-	3: `[error]`,
+	6: `[info    ]`,
+	5: `[notice  ]`,
+	4: `[warning ]`,
+	3: `[error   ]`,
 	2: `[critical]`,
-	1: `[fatal]`,
+	1: `[fatal   ]`,
 }
 
 // Допустимые команды (action)
@@ -117,12 +117,15 @@ func logsSave(msg string, level uint8) {
 //// Подготовка сообщения к сохранению
 
 // Формирование сообщения для логирования
-func logsMessageCalculate(log *Log, level uint8) string {
+func logsMessageCalculate(log Log, level uint8) string {
 	// временная отметка
 	var prefix = lib.Time.Label()
 
 	// формируем
-	var logLine = fmt.Sprintf("%s %s [%d] %s\t%s\n", prefix, log.label, log.Code, logsLevel[level], log.Message)
+	log.Message = strings.Replace(log.Message, "\r\n", " ", -1)
+	log.Message = strings.Replace(log.Message, "\n", " ", -1)
+	log.Message = strings.Replace(log.Message, "\t", " ", -1)
+	var logLine = fmt.Sprintf("%s %s [%d] %s %s\n", prefix, log.label, log.Code, logsLevel[level], log.Message)
 
 	// информация режима debug
 	if cfg.DebugDetail >= 1 {

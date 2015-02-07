@@ -44,7 +44,6 @@ func newServer(cfg *typConfig.Server) *Server {
 func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	logs.Base.Info(0, `--- [`+r.RemoteAddr+`] [`+r.Method+`] `+r.URL.Path)
 
 	// 0 Инициализация управления потоком I/O
 	var rw, ok = core.NewRW(w, r, self.Server)
@@ -80,6 +79,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var uriParams, _ = url.ParseQuery(r.URL.Query().Encode())
+	logs.Base.Info(0, `--- [`+r.RemoteAddr+`] [`+r.Method+`] `+r.URL.Path)
 	logs.Base.Info(119, uri.Id, uri.Uri)
 
 	// 3 Users. Поиск и инициализация пользователя (ОПРЕДЕЛЯЕТСЯ МОДУЛЕМ)

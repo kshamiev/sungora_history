@@ -95,33 +95,15 @@ func (self *RW) Translation(key string, messages ...interface{}) (translation st
 	return i18n.Translation(self.Lang, key, messages...)
 }
 
-// RequestParse Разбор входящего запроса в формате JSON и сохранение в переданный объект
+// Разбор входящего запроса в формате JSON и сохранение в переданный объект
 func (self *RW) RequestJsonParse(object interface{}) (err error) {
 	var buf []byte
-	//var count int
 	if buf, err = ioutil.ReadAll(self.Request.Body); err != nil {
 		return logs.Base.Error(450, self.Request.Method, self.Request.URL.Path).Err
 	}
 	if err = json.Unmarshal(buf, object); err != nil {
 		return logs.Base.Error(451, self.Request.URL.Path, err).Err
 	}
-	//model := reflect.TypeOf(object)
-	//if model.Kind() == reflect.Ptr {
-	//	model = model.Elem()
-	//}
-	//num := model.NumField()
-	//dataString := strings.ToLower(string(buf))
-	//for i := 0; i < num; i++ {
-	//	field := model.Field(i)
-	//	fieldString := strings.ToLower(field.Name)
-	//	if 1 < len(strings.Split(dataString, fieldString)) {
-	//		count++
-	//	}
-	//}
-	//aa := float64(num)
-	//bb := float64(count)
-	//ab := aa / 100
-	//dd = int(bb / ab)
 	return
 }
 

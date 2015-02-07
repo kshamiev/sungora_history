@@ -1,5 +1,6 @@
 // запуск теста
 // SET GOPATH=C:\Work\projectName
+// SET GOPATH=C:\home\projects\sungora
 // go test -v lib/logs | go test -v -bench . lib/logs
 package logs_test
 
@@ -16,52 +17,38 @@ import (
 	"lib/logs"
 )
 
-func Testlogs(t *testing.T) {
+// Тестирование работы логирования
+func TestLog(t *testing.T) {
+
 	var cfglogs = new(logs.Cfglogs)
 	cfglogs.Debug = true
 	cfglogs.DebugDetail = 0
 	cfglogs.Level = 6
 	cfglogs.Mode = `file`
+
 	cfglogs.File, _ = os.Getwd()
 	cfglogs.File = filepath.Dir(cfglogs.File)
 	cfglogs.File = filepath.Dir(cfglogs.File)
 	cfglogs.File = filepath.Dir(cfglogs.File) + `/log`
 	os.MkdirAll(cfglogs.File, 0777)
 	cfglogs.File += `/logs.log`
+
 	logs.Init(cfglogs)
-	logs.GoStart()
+	logs.GoStart(nil)
 	t.Logf("путь до файл лога %s", cfglogs.File)
 
-	logs.Info(0, `logsInfo`)
-	logs.Notice(0, `logsNotice`)
-	logs.Warning(0, `logsWarning`)
-	logs.Error(0, `logsError`)
-	logs.Critical(0, `logsCritical`)
-	logs.Fatal(0, `logsFatal`)
+	logs.Base.Info(0, `logsInfo`)
+	logs.Base.Notice(0, `logsNotice`)
+	logs.Base.Warning(0, `logsWarning`)
+	logs.Base.Error(0, `logsError`)
+	logs.Base.Critical(0, `logsCritical`)
+	logs.Base.Fatal(0, `logsFatal`)
 
 	var flag = logs.GoClose()
 	if flag == false {
 		t.Fatal(`Ошибка остановки службы логирования`)
 	}
-	fmt.Println()
 }
-
-//func TestTimer(t *testing.T) {
-//	logs.TimerStart(`Millisecond %d`, 543)
-//	time.Sleep(time.Millisecond * 543)
-//	logs.TimerStop(`Millisecond %d`, 543)
-
-//	logs.TimerStart(`Microsecond %d`, 345)
-//	time.Sleep(time.Microsecond * 345)
-//	logs.TimerStop(`Microsecond %d`, 345)
-
-//	logs.TimerStart(`Nanosecond %d`, 785)
-//	time.Sleep(time.Nanosecond * 785)
-//	logs.TimerStop(`Nanosecond %d`, 785)
-
-//	var result = logs.TimerGetAllString()
-//	t.Log(result)
-//}
 
 func BenchmarkBlank(b *testing.B) {
 	b.StopTimer()

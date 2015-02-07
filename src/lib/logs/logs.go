@@ -46,7 +46,7 @@ type Cfglogs struct {
 func Init(cfgLogs *Cfglogs) {
 	cfg = cfgLogs
 	Base = NewLog(`base`, cfg.Lang)
-	Base.label = `base`
+	//Base.label = `base`
 }
 
 // Системный или базовый лог
@@ -90,7 +90,7 @@ func (self *Log) Init(moduleName, lang string) {
 func (self *Log) Info(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
 	if cfg.Level >= 6 {
-		commandlogsControl <- command{action: logsMessage, log: self, level: 6}
+		commandlogsControl <- command{action: logsMessage, log: *self, level: 6}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -103,7 +103,7 @@ func (self *Log) Info(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Notice(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
 	if cfg.Level >= 5 {
-		commandlogsControl <- command{action: logsMessage, log: self, level: 5}
+		commandlogsControl <- command{action: logsMessage, log: *self, level: 5}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -116,7 +116,7 @@ func (self *Log) Notice(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Warning(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
 	if cfg.Level >= 4 {
-		commandlogsControl <- command{action: logsMessage, log: self, level: 4}
+		commandlogsControl <- command{action: logsMessage, log: *self, level: 4}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -129,7 +129,7 @@ func (self *Log) Warning(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Error(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
 	if cfg.Level >= 3 {
-		commandlogsControl <- command{action: logsMessage, log: self, level: 3}
+		commandlogsControl <- command{action: logsMessage, log: *self, level: 3}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -142,7 +142,7 @@ func (self *Log) Error(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Critical(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
 	if cfg.Level >= 2 {
-		commandlogsControl <- command{action: logsMessage, log: self, level: 2}
+		commandlogsControl <- command{action: logsMessage, log: *self, level: 2}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -155,7 +155,7 @@ func (self *Log) Critical(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Fatal(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
 	if cfg.Level >= 1 {
-		commandlogsControl <- command{action: logsMessage, log: self, level: 1}
+		commandlogsControl <- command{action: logsMessage, log: *self, level: 1}
 	}
 	self.Err = errors.New(self.Message)
 	return self

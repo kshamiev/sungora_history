@@ -20,10 +20,18 @@ var Messages = make(map[string]map[int]string)
 // + codeLocal int локальный код сообщения в рамках модуля
 // + params ...interface{} параметры вставляемые в переводимое сообщение
 // - int глобальный неизменяемый код сообщения для вывода в логи или клиенту
-// - string свормированное сообщение на нужном языке
+// - string сформированное сообщение на нужном языке
 func Message(moduleName, lang string, codeLocal int, params ...interface{}) (code int, message string) {
 	var ok bool
-	code = ModuleCode[moduleName]*1000 + codeLocal
+	// определение кода
+	if codeLocal == 0 {
+		code = 100000
+	} else if _, ok = ModuleCode[moduleName]; ok == true {
+		code = ModuleCode[moduleName]*1000 + codeLocal
+	} else {
+		code = codeLocal
+	}
+	// определение сообщения
 	if message, ok = Messages[lang][code]; ok == true {
 		message = fmt.Sprintf(message, params...)
 	} else if 0 < len(params) {
@@ -41,7 +49,7 @@ var Data = make(map[string]map[string]string)
 // + lang string язык
 // + key string текстовой ключ
 // + params ...interface{} параметры вставляемые в перевод
-// - string свормированный перевод на нужном языке
+// - string сформированный перевод на нужном языке
 func Translation(lang, key string, params ...interface{}) (message string) {
 	var ok bool
 	if message, ok = Data[lang][key]; ok == true {

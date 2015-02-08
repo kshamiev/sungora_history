@@ -37,10 +37,22 @@ func (self *Time) Now() time.Time {
 	return time.Now().In(self.Location)
 }
 
-// Формирование даты и времени для записи в лог файл
+// Формирование даты и времени с наносекундами для записи в лог файл
 func (self *Time) Label() string {
 	t := self.Now()
-	return fmt.Sprintf("%02d.%02d.%04d %02d:%02d:%02d:%09d", t.Day(), t.Month(), t.Year(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond())
+	return fmt.Sprintf("%04d.%02d.%02d %02d:%02d:%02d:%09d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond())
+}
+
+// Формирование даты и времени
+func (self *Time) LabelTime() string {
+	t := self.Now()
+	return fmt.Sprintf("%04d.%02d.%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+}
+
+// Формирование даты
+func (self *Time) LabelDate() string {
+	t := self.Now()
+	return fmt.Sprintf("%04d.%02d.%02d", t.Year(), t.Month(), t.Day())
 }
 
 // Перевод time.Duration в человеческий формат

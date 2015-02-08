@@ -22,15 +22,13 @@ type CmdArgs struct {
 //     config:"Название секции"` Имя сопоставляемой свойству секции конфигурационного файла
 //     config:"-"` системная конфигурация по специальному алгоритму
 type Configuration struct {
-	Main      Main                     `config:"MAIN"`      // Главная конфигурация
-	View      View                     `config:"VIEW"`      // Шаблонизатор и представление
-	Logs      logs.Cfglogs             `config:"LOGS"`      // Настройка лог службы
-	Auth      Auth                     `config:"AUTH"`      // Настройки авторизации
-	Mail      mailer.CfgMailer         `config:"MAIL"`      // Настройки почты
-	Memcached Memcached                `config:"MEMCACHED"` // Настройка кеширования
-	Update    Update                   `config:"UPDATE"`    // Обновление приложения
-	Server    map[int8]*Server         `config:"-"`         // Настройки сервера
-	Mysql     map[int8]*mysql.CfgMysql `config:"-"`         // Настройки mysql
+	Main   Main                     `config:"MAIN"` // Главная конфигурация
+	View   View                     `config:"VIEW"` // Шаблонизатор и представление
+	Logs   logs.Cfglogs             `config:"LOGS"` // Настройка лог службы
+	Auth   Auth                     `config:"AUTH"` // Настройки авторизации
+	Mail   mailer.CfgMailer         `config:"MAIL"` // Настройки почты
+	Server map[int8]*Server         `config:"-"`    // Настройки сервера
+	Mysql  map[int8]*mysql.CfgMysql `config:"-"`    // Настройки mysql
 }
 
 // Главная конфигурация
@@ -88,27 +86,6 @@ type Auth struct {
 	// По окончании времени хранения сесии пользователю необходимо будет повторно пройти авторизацию.
 	// (по умолчанию 3600)
 	SessionTimeout int16
-}
-
-// Кеширование
-type Memcached struct {
-	// Список серверов с указанием порта разделённых запятыми.
-	Servers string
-	// Переменная разрешает или запрещает использование memcached, значения true, false
-	Enable bool
-}
-
-// Обновление приложения
-type Update struct {
-	// Адрес к API сервера обновлений,
-	// Если сервер не указан, то режим обновления (Mode='disable') не работает.
-	Server string
-	// Режим обновления. Поддерживаемые режимы:
-	// auto – Автоматическое обновление сразу после обнаружения новой версии
-	// idle – Обновление только в том случае если нет ни одного активного пользователя
-	// download – Не обновлять приложение, только скачивать новую версию, обновление происходит при следующем запуске приложения
-	// disable – Обновление отключено
-	Mode string
 }
 
 // Конфигурация сервера

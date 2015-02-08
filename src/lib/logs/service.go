@@ -3,7 +3,6 @@ package logs
 // Сулжба логирования
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -96,6 +95,15 @@ var sys service.Logger
 func logsSave(msg string, level uint8) {
 	if cfg.Mode == `mixed` || cfg.Mode == `file` {
 		fp.WriteString(msg)
+		if inf, err := fp.Stat(); err == nil && inf.Size() > int64(cfg.Size)*1000000 {
+			if err := fp.Close(); err == nil {
+				t := lib.Time.Now()
+				d := fmt.Sprintf("%04d_%02d_%02d_%02d_%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute())
+				path := strings.Replace(fp.Name(), `.log`, `_`+d+`.log`, -1)
+				os.Rename(fp.Name(), path)
+				fp, _ = os.OpenFile(cfg.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+			}
+		}
 	}
 	if sys != nil && (cfg.Mode == `mixed` || cfg.Mode == `system`) {
 		switch level {
@@ -129,79 +137,34 @@ func logsMessageCalculate(log Log, level uint8) string {
 
 	// информация режима debug
 	if cfg.DebugDetail >= 1 {
-		// информация о вызвавшей программе
-		var info, _ = getCallerInfo(3)
-		var debugLine = fmt.Sprintf("version: %s func: %s line: %d file: %s run: %d\n",
-			info.Version,
-			info.FuncName,
-			info.LineNumber,
-			info.FileName,
-			info.Gorutines)
-		if cfg.DebugDetail >= 2 {
-			debugLine += "gorutines:\n"
-			for i := range info.GorutinesInfo {
-				debugLine += info.GorutinesInfo[i] + "\n"
-			}
-		}
-		logLine += debugLine
+		//var tr *trace
+		//tr = newTrace(3)
+		//logLine += fmt.Sprintf("%s %s (%d)\n", tr.function, tr.file, tr.line)
 	}
 	return logLine
 }
 
-type callerInfo struct {
-	FileName      string   // Имя исходного файла
-	LineNumber    int      // Номер строки
-	FuncName      string   // Название функции
-	Version       string   // Текущая версия golang
-	Gorutines     int      // Количество горутин работающих в настоящий момент
-	GorutinesInfo []string // Информация по каждой горутине
+type trace struct {
+	function string
+	file     string
+	line     int
 }
 
 // Получение информаци о вызвавшем лог
-func getCallerInfo(level int) (*callerInfo, error) {
-	var err error
-	var ret *callerInfo = new(callerInfo)
-	var pc uintptr
-	var file string
-	var line int
+func newTrace(level int) *trace {
 	var ok bool
-
-	ret.Gorutines = runtime.NumGoroutine()
-	ret.Version = runtime.Version()
-
-	pc, file, line, ok = runtime.Caller(level)
+	var pc uintptr
+	var self = new(trace)
+	pc, self.file, self.line, ok = runtime.Caller(level)
 	if ok == true {
-		var fn *runtime.Func
-
-		ret.LineNumber = line
-		ret.FileName = file
-		fn = runtime.FuncForPC(pc)
+		fn := runtime.FuncForPC(pc)
 		if fn != nil {
-			ret.FuncName = fn.Name()
+			self.function = fn.Name()
 		}
-
-		// Информация о состоянии горутин
-		var buf []byte = make([]byte, 1<<16)
-		var i int = runtime.Stack(buf, true)
-		var info string = string(buf[:i])
-		var tmp []string
-
-		tmp = strings.Split(info, "\n")
-		i = -1
-		for _, str := range tmp {
-			if strings.Index(str, "goroutine") == 0 {
-				i++
-				ret.GorutinesInfo = append(ret.GorutinesInfo, "")
-			}
-			if i >= 0 && str != "" {
-				if ret.GorutinesInfo[i] != "" {
-					ret.GorutinesInfo[i] += "\n"
-				}
-				ret.GorutinesInfo[i] += str
-			}
-		}
-	} else {
-		err = errors.New("Не удалось получить информацию о вызвавшей лог функции")
+		//var buf = make([]byte, 1<<16)
+		//i := runtime.Stack(buf, true)
+		//var info string = string(buf[:i])
+		//fmt.Println(info)
 	}
-	return ret, err
+	return self
 }

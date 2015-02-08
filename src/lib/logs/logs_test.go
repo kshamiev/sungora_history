@@ -31,7 +31,7 @@ func TestLog(t *testing.T) {
 	cfglogs.File = filepath.Dir(cfglogs.File)
 	cfglogs.File = filepath.Dir(cfglogs.File) + `/log`
 	os.MkdirAll(cfglogs.File, 0777)
-	cfglogs.File += `/logs.log`
+	cfglogs.File += `/logs_test.log`
 
 	logs.Init(cfglogs)
 	logs.GoStart(nil)

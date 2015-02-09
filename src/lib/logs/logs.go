@@ -46,6 +46,7 @@ type Cfglogs struct {
 func Init(cfgLogs *Cfglogs) {
 	cfg = cfgLogs
 	Base = NewLog(`base`)
+	Base.Init(`base`, `server`)
 	//Base.label = `base`
 }
 
@@ -78,8 +79,8 @@ func NewLog(moduleName string) *Log {
 //    + moduleName string имя модуля
 //    + login string логин пользователя
 func (self *Log) Init(moduleName, login string) {
-	self.login = login
 	self.moduleName = moduleName
+	self.login = login
 }
 
 // Инофрмационное сообщение
@@ -178,7 +179,6 @@ func (self *Log) Journal(codeLocal int, params ...interface{}) *Log {
 //    - *Log объект лога
 func (self *Log) Database(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
-	self.Message = self.login + ` ` + self.Message
 	commandlogsControl <- command{action: logsMessage, log: *self, level: 8}
 	self.Err = errors.New(self.Message)
 	return self

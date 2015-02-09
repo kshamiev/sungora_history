@@ -9,10 +9,18 @@ import (
 
 // Коды модулей. Для формирования ункиального глобального кода сообщения
 // Заполняется в момент инициализации модулей
-var ModuleCode = make(map[string]int)
+//var ModuleCode = make(map[string]int)
+var ModuleCode = map[string]int{
+	`base`: 100,
+}
 
 // Сообщения всех уровней на разных языках
-var Messages = make(map[string]map[int]string)
+//var Messages = make(map[string]map[int]string)
+var Messages = map[string]map[int]string{
+	`ru-ru`: {
+		100100: `Тестовое сообщение с параметром: [%s]`,
+	},
+}
 
 // Перевод сообщений
 // + moduleName string имя модуля

@@ -25,6 +25,7 @@ func TestLog(t *testing.T) {
 	cfglogs.DebugDetail = 0
 	cfglogs.Level = 6
 	cfglogs.Mode = `file`
+	cfglogs.Lang = `ru-ru`
 
 	cfglogs.File, _ = os.Getwd()
 	cfglogs.File = filepath.Dir(cfglogs.File)
@@ -35,14 +36,16 @@ func TestLog(t *testing.T) {
 
 	logs.Init(cfglogs)
 	logs.GoStart(nil)
-	t.Logf("путь до файл лога %s", cfglogs.File)
 
-	logs.Base.Info(0, `logsInfo`)
-	logs.Base.Notice(0, `logsNotice`)
-	logs.Base.Warning(0, `logsWarning`)
-	logs.Base.Error(0, `logsError`)
-	logs.Base.Critical(0, `logsCritical`)
-	logs.Base.Fatal(0, `logsFatal`)
+	logs.Base.Info(0, `путь до файл лога %s`, cfglogs.File)
+	logs.Base.Info(100, `Message Info`)
+	logs.Base.Notice(100, `Message Notice`)
+	logs.Base.Warning(100, `Message Warning`)
+	logs.Base.Error(100, `Message Error`)
+	logs.Base.Critical(100, `Message Critical`)
+	logs.Base.Fatal(100, `Message Fatal`)
+	logs.Base.Database(100, `Message Database`)
+	logs.Base.Journal(100, `Message Journal`)
 
 	var flag = logs.GoClose()
 	if flag == false {

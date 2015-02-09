@@ -296,6 +296,8 @@ func (self *Session) ApiRegistration() (err error) {
 		return self.RW.ResponseJson(nil, 500, 142, user.Type.Email)
 	}
 
+	self.RW.Log.Journal(567, `Регистрация нового пользователя`)
+
 	// Все хорошо
 	return self.RW.ResponseJson(nil, 200, 0)
 }

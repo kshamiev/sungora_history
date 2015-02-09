@@ -45,12 +45,14 @@ type command struct {
 
 // Справочник уровня ошибок
 var logsLevel = map[uint8]string{
-	6: `[info    ]`,
-	5: `[notice  ]`,
-	4: `[warning ]`,
-	3: `[error   ]`,
-	2: `[critical]`,
-	1: `[fatal   ]`,
+	8: `database`,
+	7: `journal `,
+	6: `info    `,
+	5: `notice  `,
+	4: `warning `,
+	3: `error   `,
+	2: `critical`,
+	1: `fatal   `,
 }
 
 // Допустимые команды (action)
@@ -111,7 +113,7 @@ func logsSave(msg string, level uint8) {
 			sys.Error(msg)
 		case 4, 5:
 			sys.Warning(msg)
-		case 6:
+		case 6, 7, 8:
 			sys.Info(msg)
 		}
 	}
@@ -133,7 +135,7 @@ func logsMessageCalculate(log Log, level uint8) string {
 	log.Message = strings.Replace(log.Message, "\r\n", " ", -1)
 	log.Message = strings.Replace(log.Message, "\n", " ", -1)
 	log.Message = strings.Replace(log.Message, "\t", " ", -1)
-	var logLine = fmt.Sprintf("%s %s [%d] %s %s\n", prefix, log.label, log.Code, logsLevel[level], log.Message)
+	var logLine = fmt.Sprintf("%s %s %d %s %s\n", prefix, log.label, log.Code, logsLevel[level], log.Message)
 
 	// информация режима debug
 	if cfg.DebugDetail >= 1 {

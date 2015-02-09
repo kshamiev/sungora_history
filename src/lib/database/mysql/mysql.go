@@ -191,7 +191,7 @@ func (self *Db) SelectMap(ObjectList interface{}, sql string, params ...interfac
 		return logs.Base.Error(802, sql, err).Err
 	}
 	if self.logs == true {
-		logs.Base.Info(999, sql)
+		logs.Base.Database(999, sql)
 	}
 	// пустой результат
 	if 0 == len(rows) {
@@ -317,7 +317,7 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 		return logs.Base.Error(802, sql, err).Err
 	}
 	if self.logs == true {
-		logs.Base.Info(999, sql)
+		logs.Base.Database(999, sql)
 	}
 	// пустой результат
 	if 0 == len(rows) {
@@ -433,7 +433,7 @@ func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (e
 		return logs.Base.Error(802, sql, err).Err
 	}
 	if self.logs == true {
-		logs.Base.Info(999, sql)
+		logs.Base.Database(999, sql)
 	}
 	// пустой результат
 	if 0 == len(rows) {
@@ -663,7 +663,7 @@ func (self *Db) Insert(Object interface{}, source string, properties ...map[stri
 		return insertId, logs.Base.Error(802, sql, err).Err
 	}
 	if self.logs == true {
-		logs.Base.Info(999, sql)
+		logs.Base.Database(999, sql)
 	}
 	insertId = res.InsertId()
 	return
@@ -852,7 +852,7 @@ func (self *Db) Update(Object interface{}, source, key string, properties ...map
 		return affectedRow, logs.Base.Error(802, sql, err).Err
 	}
 	if self.logs == true {
-		logs.Base.Info(999, sql)
+		logs.Base.Database(999, sql)
 	}
 	affectedRow = res.AffectedRows()
 	return
@@ -906,7 +906,7 @@ func (self *Db) Query(sql string, params ...interface{}) (err error) {
 		return logs.Base.Error(802, sql, err).Err
 	}
 	if self.logs == true {
-		logs.Base.Info(999, sql)
+		logs.Base.Database(999, sql)
 	}
 	return
 }

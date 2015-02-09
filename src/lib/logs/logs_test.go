@@ -1,5 +1,5 @@
 // запуск теста
-// SET GOPATH=C:\Work\projectName
+// SET GOPATH=C:\Work\sungora
 // SET GOPATH=C:\home\projects\sungora
 // go test -v lib/logs | go test -v -bench . lib/logs
 package logs_test

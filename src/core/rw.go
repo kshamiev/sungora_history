@@ -46,6 +46,7 @@ func NewRW(w http.ResponseWriter, r *http.Request, sc *typConfig.Server) (*RW, b
 	self.Writer = w
 	self.Request = r
 	self.Lang = Config.Main.Lang
+	self.Log = logs.NewLog(`base`)
 	self.Content = newContent(nil)
 	// папка и путь до статичных документов
 	dl := strings.Split(sc.Domain, `,`)
@@ -86,8 +87,8 @@ func (self *RW) InitParams(uri *typDb.Uri, uriSegment map[string]string, uriPara
 }
 
 // Инициализация лога в рамках текущего запроса.
-func (self *RW) InitLog(moduleName string) {
-	self.Log = logs.NewLog(moduleName, self.Lang)
+func (self *RW) InitLog(moduleName, login string) {
+	self.Log.Init(moduleName, login)
 }
 
 // Lation Перевод по ключевому слову
@@ -99,16 +100,16 @@ func (self *RW) Translation(key string, messages ...interface{}) (translation st
 func (self *RW) RequestJsonParse(object interface{}) (err error) {
 	var buf []byte
 	if buf, err = ioutil.ReadAll(self.Request.Body); err != nil {
-		return logs.Base.Error(450, self.Request.Method, self.Request.URL.Path).Err
+		return self.Log.Error(450, self.Request.Method, self.Request.URL.Path).Err
 	}
 	if err = json.Unmarshal(buf, object); err != nil {
-		return logs.Base.Error(451, self.Request.URL.Path, err).Err
+		return self.Log.Error(451, self.Request.URL.Path, err).Err
 	}
 	return
 }
 
 func (self *RW) Redirect(url string) {
-	logs.Base.Info(301, url)
+	self.Log.Info(301, url)
 	// запрет кеширования
 	self.Writer.Header().Set("Cache-Control", "no-cache, must-revalidate")
 	self.Writer.Header().Set("Pragma", "no-cache")
@@ -149,7 +150,7 @@ func (self *RW) ResponseJson(data interface{}, status int, codeLocal int, params
 	con.ErrorMessage = message
 	con.Content = data
 	if self.Content.Content, err = json.Marshal(con); err != nil {
-		lg := logs.Base.Error(452, err)
+		lg := self.Log.Error(452, err)
 		con := new(response)
 		con.ErrorCode = lg.Code
 		con.ErrorMessage = lg.Message
@@ -253,7 +254,7 @@ func (self *RW) Response() {
 	self.Writer.Write(self.Content.Content)
 	//
 	self.InterruptHard = true
-	logs.Base.Info(200, self.Content.Status, self.Request.URL.Path)
+	self.Log.Info(200, self.Content.Status, self.Request.URL.Path)
 	return
 }
 
@@ -266,9 +267,9 @@ func (self *RW) SetCookie(name, value string, t ...time.Time) {
 	cookie.Path = `/`
 	if 0 < len(t) {
 		cookie.Expires = t[0]
-		logs.Base.Info(250, name, value)
+		self.Log.Info(250, name, value)
 	} else {
-		logs.Base.Info(251, name, value)
+		self.Log.Info(251, name, value)
 	}
 	http.SetCookie(self.Writer, cookie)
 }
@@ -281,7 +282,7 @@ func (self *RW) RemCookie(name string) {
 	cookie.Path = `/`
 	cookie.Expires = lib.Time.Now()
 	http.SetCookie(self.Writer, cookie)
-	logs.Base.Info(252, name)
+	self.Log.Info(252, name)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -315,36 +316,36 @@ func (self *RW) GetSegmentUriInt(paramName string) (value int64, ok bool) {
 	var err error
 	if p, ok := self.UriSegment[paramName]; ok == true {
 		if value, err = strconv.ParseInt(p, 0, 64); err != nil {
-			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
+			self.Log.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Base.Warning(253, paramName, self.Request.URL.Path)
+	self.Log.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetSegmentUriUint(paramName string) (value uint64, ok bool) {
 	var err error
 	if p, ok := self.UriSegment[paramName]; ok == true {
 		if value, err = strconv.ParseUint(p, 0, 64); err != nil {
-			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
+			self.Log.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Base.Warning(253, paramName, self.Request.URL.Path)
+	self.Log.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetSegmentUriFloat(paramName string) (value float64, ok bool) {
 	var err error
 	if p, ok := self.UriSegment[paramName]; ok == true {
 		if value, err = strconv.ParseFloat(p, 64); err != nil {
-			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
+			self.Log.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Base.Warning(253, paramName, self.Request.URL.Path)
+	self.Log.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetSegmentUriString(paramName string) (value string, ok bool) {
@@ -359,36 +360,36 @@ func (self *RW) GetParamUriInt(paramName string) (value int64, ok bool) {
 	var err error
 	if p, ok := self.UriParams[paramName]; ok == true {
 		if value, err = strconv.ParseInt(p[0], 0, 64); err != nil {
-			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
+			self.Log.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Base.Warning(253, paramName, self.Request.URL.Path)
+	self.Log.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetParamUriUint(paramName string) (value uint64, ok bool) {
 	var err error
 	if p, ok := self.UriParams[paramName]; ok == true {
 		if value, err = strconv.ParseUint(p[0], 0, 64); err != nil {
-			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
+			self.Log.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Base.Warning(253, paramName, self.Request.URL.Path)
+	self.Log.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetParamUriFloat(paramName string) (value float64, ok bool) {
 	var err error
 	if p, ok := self.UriParams[paramName]; ok == true {
 		if value, err = strconv.ParseFloat(p[0], 64); err != nil {
-			logs.Base.Error(254, paramName, self.Request.URL.Path, err)
+			self.Log.Error(254, paramName, self.Request.URL.Path, err)
 			return 0, false
 		}
 		return value, true
 	}
-	logs.Base.Warning(253, paramName, self.Request.URL.Path)
+	self.Log.Warning(253, paramName, self.Request.URL.Path)
 	return 0, false
 }
 func (self *RW) GetParamUriString(paramName string) (value string, ok bool) {

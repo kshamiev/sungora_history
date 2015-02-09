@@ -45,7 +45,7 @@ type Cfglogs struct {
 //    + cfgLogs *Cfglogs конфигурация лога
 func Init(cfgLogs *Cfglogs) {
 	cfg = cfgLogs
-	Base = NewLog(`base`, cfg.Lang)
+	Base = NewLog(`base`)
 	//Base.label = `base`
 }
 
@@ -59,7 +59,7 @@ type Log struct {
 	Code       int    // Error code
 	Message    string // Error message
 	Err        error  // Error as error
-	lang       string // Префикс языка
+	login      string // Логин пользователя
 	moduleName string // Имя модуля
 	label      string // метка лога в рамках обработки запроса (сессии)
 }
@@ -67,9 +67,8 @@ type Log struct {
 // Создание лога
 //    + moduleName string имя модуля
 //    - *Log объект лога
-func NewLog(moduleName, lang string) *Log {
+func NewLog(moduleName string) *Log {
 	var self = new(Log)
-	self.lang = lang
 	self.moduleName = moduleName
 	self.label = lib.String.CreatePassword()
 	return self
@@ -77,9 +76,9 @@ func NewLog(moduleName, lang string) *Log {
 
 // Инициализация лога
 //    + moduleName string имя модуля
-//    + lang string язык
-func (self *Log) Init(moduleName, lang string) {
-	self.lang = lang
+//    + login string логин пользователя
+func (self *Log) Init(moduleName, login string) {
+	self.login = login
 	self.moduleName = moduleName
 }
 
@@ -88,7 +87,7 @@ func (self *Log) Init(moduleName, lang string) {
 //    + params ...interface{} параметры вставляемые в сообщение
 //    - *Log объект лога
 func (self *Log) Info(codeLocal int, params ...interface{}) *Log {
-	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 6 {
 		commandlogsControl <- command{action: logsMessage, log: *self, level: 6}
 	}
@@ -101,7 +100,7 @@ func (self *Log) Info(codeLocal int, params ...interface{}) *Log {
 //    + params ...interface{} параметры вставляемые в сообщение
 //    - *Log объект лога
 func (self *Log) Notice(codeLocal int, params ...interface{}) *Log {
-	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 5 {
 		commandlogsControl <- command{action: logsMessage, log: *self, level: 5}
 	}
@@ -114,7 +113,7 @@ func (self *Log) Notice(codeLocal int, params ...interface{}) *Log {
 //    + params ...interface{} параметры вставляемые в сообщение
 //    - *Log объект лога
 func (self *Log) Warning(codeLocal int, params ...interface{}) *Log {
-	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 4 {
 		commandlogsControl <- command{action: logsMessage, log: *self, level: 4}
 	}
@@ -127,7 +126,7 @@ func (self *Log) Warning(codeLocal int, params ...interface{}) *Log {
 //    + params ...interface{} параметры вставляемые в сообщение
 //    - *Log объект лога
 func (self *Log) Error(codeLocal int, params ...interface{}) *Log {
-	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 3 {
 		commandlogsControl <- command{action: logsMessage, log: *self, level: 3}
 	}
@@ -140,7 +139,7 @@ func (self *Log) Error(codeLocal int, params ...interface{}) *Log {
 //    + params ...interface{} параметры вставляемые в сообщение
 //    - *Log объект лога
 func (self *Log) Critical(codeLocal int, params ...interface{}) *Log {
-	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 2 {
 		commandlogsControl <- command{action: logsMessage, log: *self, level: 2}
 	}
@@ -153,10 +152,34 @@ func (self *Log) Critical(codeLocal int, params ...interface{}) *Log {
 //    + params ...interface{} параметры вставляемые в сообщение
 //    - *Log объект лога
 func (self *Log) Fatal(codeLocal int, params ...interface{}) *Log {
-	self.Code, self.Message = i18n.Message(self.moduleName, self.lang, codeLocal, params...)
+	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 1 {
 		commandlogsControl <- command{action: logsMessage, log: *self, level: 1}
 	}
+	self.Err = errors.New(self.Message)
+	return self
+}
+
+// Журналирование действий пользователя
+//    + codeLocal int локальный (в рамках модуля) код сообщения
+//    + params ...interface{} параметры вставляемые в сообщение
+//    - *Log объект лога
+func (self *Log) Journal(codeLocal int, params ...interface{}) *Log {
+	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
+	self.Message = `[` + self.login + `] ` + self.Message
+	commandlogsControl <- command{action: logsMessage, log: *self, level: 7}
+	self.Err = errors.New(self.Message)
+	return self
+}
+
+// Журналирование запросов к БД (источник, хранилище)
+//    + codeLocal int локальный (в рамках модуля) код сообщения
+//    + params ...interface{} параметры вставляемые в сообщение
+//    - *Log объект лога
+func (self *Log) Database(codeLocal int, params ...interface{}) *Log {
+	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
+	self.Message = self.login + ` ` + self.Message
+	commandlogsControl <- command{action: logsMessage, log: *self, level: 8}
 	self.Err = errors.New(self.Message)
 	return self
 }

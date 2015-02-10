@@ -27,18 +27,24 @@ type Cfglogs struct {
 	// Critical = 2 - Сообщения о критичных ошибках системы без которых возможно продолжения работы но с урезанным функционалом, от Critical до Fatal
 	// Fatal    = 1 - Сообщения о фатальных ошибках системы, после фатальной ошибки работа приложения не возможна и немедленно завершается
 	Level int64
+	// Логирование действий пользователя
+	Journal bool
+	// Логирование выполняемых запросов к БД
+	Database bool
 	// Файл системного журнала приложения, если указан, то используется он,
 	// если не указан, логи отправляются в журнал операционной системы
+	Mode string
+	// максимальный размер файла лога для его дефрагметации (в mb).
 	File string
 	// Режим записи логов
 	// file - запись логов только в файл лога (по умолчанию), если файл лога не указан то режим переключается на system
 	// system - запись логов только в системный журнал операционной системы
 	// mixed - запись логов как в файл так и в системный журнал операционной системы
-	Mode string
-	// максимальный размер файла лога для его дефрагметации (в mb).
 	Size int8
 	// Префикс языка для системных логов
 	Lang string
+	// Разделитель параметров лога
+	Separator string
 }
 
 // Инициализация библиотеки, системного или базового лога.
@@ -47,7 +53,6 @@ func Init(cfgLogs *Cfglogs) {
 	cfg = cfgLogs
 	Base = NewLog(`base`)
 	Base.Init(`base`, `server`)
-	//Base.label = `base`
 }
 
 // Системный или базовый лог
@@ -168,7 +173,9 @@ func (self *Log) Fatal(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Journal(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	self.Message = `[` + self.login + `] ` + self.Message
-	commandlogsControl <- command{action: logsMessage, log: *self, level: 7}
+	if cfg.Journal == true {
+		commandlogsControl <- command{action: logsMessage, log: *self, level: 7}
+	}
 	self.Err = errors.New(self.Message)
 	return self
 }
@@ -179,7 +186,9 @@ func (self *Log) Journal(codeLocal int, params ...interface{}) *Log {
 //    - *Log объект лога
 func (self *Log) Database(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
-	commandlogsControl <- command{action: logsMessage, log: *self, level: 8}
+	if cfg.Database == true {
+		commandlogsControl <- command{action: logsMessage, log: *self, level: 8}
+	}
 	self.Err = errors.New(self.Message)
 	return self
 }

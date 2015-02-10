@@ -135,7 +135,13 @@ func logsMessageCalculate(log Log, level uint8) string {
 	log.Message = strings.Replace(log.Message, "\r\n", " ", -1)
 	log.Message = strings.Replace(log.Message, "\n", " ", -1)
 	log.Message = strings.Replace(log.Message, "\t", " ", -1)
-	var logLine = fmt.Sprintf("%s %s %d %s %s\n", prefix, log.label, log.Code, logsLevel[level], log.Message)
+	var logLine = fmt.Sprintf("%s%s%s%s%d%s%s%s%s\n",
+		prefix, cfg.Separator,
+		log.label, cfg.Separator,
+		log.Code, cfg.Separator,
+		logsLevel[level], cfg.Separator,
+		log.Message,
+	)
 
 	// информация режима debug
 	if cfg.DebugDetail >= 1 {

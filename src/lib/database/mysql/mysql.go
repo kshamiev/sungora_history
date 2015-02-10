@@ -32,7 +32,7 @@ type Db struct {
 	Connect mysql.Conn // Конннект к БД
 	free    bool       // Статус блокировки (использования)
 	time    time.Time  // Дата и время последнего использования коннекта
-	logs    bool       // Логирование запросов
+	//logs    bool       // Логирование запросов
 }
 
 // New Конструктор соединений с БД
@@ -74,7 +74,7 @@ func NewDb(id int8) (obj *Db, err error) {
 	}
 	obj.time = lib.Time.Now()
 	obj.free = false
-	obj.logs = d.Logs
+	//	obj.logs = d.Logs
 	//conn[confId] = append(conn[confId], obj)
 	conn[id][obj.time.String()] = obj
 	// fmt.Println("\nnew coonnect. count connect:", len(conn[id]))
@@ -190,9 +190,7 @@ func (self *Db) SelectMap(ObjectList interface{}, sql string, params ...interfac
 	if err != nil {
 		return logs.Base.Error(802, sql, err).Err
 	}
-	if self.logs == true {
-		logs.Base.Database(999, sql)
-	}
+	logs.Base.Database(999, sql)
 	// пустой результат
 	if 0 == len(rows) {
 		return
@@ -316,9 +314,7 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 	if err != nil {
 		return logs.Base.Error(802, sql, err).Err
 	}
-	if self.logs == true {
-		logs.Base.Database(999, sql)
-	}
+	logs.Base.Database(999, sql)
 	// пустой результат
 	if 0 == len(rows) {
 		return
@@ -432,9 +428,7 @@ func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (e
 	if err != nil {
 		return logs.Base.Error(802, sql, err).Err
 	}
-	if self.logs == true {
-		logs.Base.Database(999, sql)
-	}
+	logs.Base.Database(999, sql)
 	// пустой результат
 	if 0 == len(rows) {
 		return logs.Base.Info(805, sql).Err
@@ -662,9 +656,7 @@ func (self *Db) Insert(Object interface{}, source string, properties ...map[stri
 	if _, res, err = stm.Exec(); err != nil {
 		return insertId, logs.Base.Error(802, sql, err).Err
 	}
-	if self.logs == true {
-		logs.Base.Database(999, sql)
-	}
+	logs.Base.Database(999, sql)
 	insertId = res.InsertId()
 	return
 }
@@ -851,9 +843,7 @@ func (self *Db) Update(Object interface{}, source, key string, properties ...map
 	if _, res, err = stm.Exec(); err != nil {
 		return affectedRow, logs.Base.Error(802, sql, err).Err
 	}
-	if self.logs == true {
-		logs.Base.Database(999, sql)
-	}
+	logs.Base.Database(999, sql)
 	affectedRow = res.AffectedRows()
 	return
 }
@@ -905,9 +895,7 @@ func (self *Db) Query(sql string, params ...interface{}) (err error) {
 	if _, _, err = stm.Exec(); err != nil {
 		return logs.Base.Error(802, sql, err).Err
 	}
-	if self.logs == true {
-		logs.Base.Database(999, sql)
-	}
+	logs.Base.Database(999, sql)
 	return
 }
 

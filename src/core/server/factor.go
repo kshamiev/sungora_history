@@ -78,7 +78,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var uriParams, _ = url.ParseQuery(r.URL.Query().Encode())
-	rw.Log.Info(0, `--- [`+r.RemoteAddr+`] [`+r.Method+`] `+r.URL.Path)
+	rw.Log.Info(0, `--- [`+r.Host+`] [`+r.Method+`] `+r.URL.Path)
 	rw.Log.Info(119, uri.Id, uri.Uri)
 
 	// 3 Users. Поиск и инициализация пользователя (ОПРЕДЕЛЯЕТСЯ МОДУЛЕМ)

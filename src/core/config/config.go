@@ -172,11 +172,11 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 		self.Main.Upload = self.Main.WorkDir + "/upload"
 	}
 	// Сертификаты SSL
-	if self.Main.Keys == "" {
+	if self.Main.Keys == `` {
 		self.Main.Keys = self.Main.WorkDir + "/keys"
 	}
 	// Сертификаты SSL
-	if self.Main.Pid == "" {
+	if self.Main.Pid == `` {
 		self.Main.Pid = self.Main.WorkDir + `/run/` + filepath.Base(configFile) + `.pid`
 	}
 	// Интернационализация
@@ -189,10 +189,10 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 	}
 
 	// Шаблоны данных не привязанных к URI
-	if self.View.Path == "" {
+	if self.View.Path == `` {
 		self.View.Path = self.Main.WorkDir + "/templates"
 	}
-	if self.View.Tpl == "" {
+	if self.View.Tpl == `` {
 		self.View.Tpl = self.View.Path + "/view"
 	}
 
@@ -203,8 +203,16 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 	if self.Logs.Level == 0 {
 		self.Logs.Level = 6
 	}
+	if self.Logs.Separator == `` {
+		self.Logs.Separator = ` `
+	} else if self.Logs.Separator == `,` {
+		self.Logs.Separator = `;`
+	}
 	if self.Logs.File == `` {
 		self.Logs.Mode = `system`
+	}
+	if self.Logs.Mode == `` {
+		self.Logs.Mode = `file`
 	}
 	if self.Logs.Size == 0 {
 		self.Logs.Size = 5

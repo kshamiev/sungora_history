@@ -20,6 +20,9 @@ var Messages = map[string]map[int]string{
 	`ru-ru`: {
 		100100: `Тестовое сообщение с параметром: [%s]`,
 	},
+	`en-en`: {
+		100100: `Test message with a parameter: [%s]`,
+	},
 }
 
 // Перевод сообщений

@@ -2,8 +2,6 @@
 //
 // Непосредственная работа с БД. Выполнение запросов.
 // Работа с БД Mysql в парадигме ORM.
-// Отложенное выполнение запросов к БД.
-// Генерация идентификаторов объектов к БД.
 package mysql
 
 import (
@@ -24,9 +22,6 @@ import (
 // Стек соединений с БД
 var conn = make(map[int8]map[string]*Db)
 
-// служебная переменная для реализации блокировок
-var mutexNew sync.Mutex
-
 // Структура по работе с БД
 type Db struct {
 	Connect mysql.Conn // Конннект к БД
@@ -35,8 +30,13 @@ type Db struct {
 	//logs    bool       // Логирование запросов
 }
 
-// New Конструктор соединений с БД
-// id выбранная конфигурация
+// служебная переменная для реализации блокировок
+var mutexNew sync.Mutex
+
+// Конструктор соединений с БД
+//    + id int8 Выбранная конфигурация
+//    - *Db Объект по работе с БД для выполнения запросов
+//    - error Ошибка операции
 func NewDb(id int8) (obj *Db, err error) {
 	var ok bool
 	var d *CfgMysql
@@ -74,24 +74,22 @@ func NewDb(id int8) (obj *Db, err error) {
 	}
 	obj.time = lib.Time.Now()
 	obj.free = false
-	//	obj.logs = d.Logs
-	//conn[confId] = append(conn[confId], obj)
 	conn[id][obj.time.String()] = obj
 	// fmt.Println("\nnew coonnect. count connect:", len(conn[id]))
 	return obj, nil
 }
 
-// Free Освобождение коннекта для других процессов (запросов)
+// Освобождение коннекта для других процессов (запросов)
 func (self *Db) Free() {
 	self.time = lib.Time.Now()
 	self.free = true
 }
 
-// LoadData Загрузка БД в память
-// object объект со свойствами одноименными с таблицами в БД
-// Свойства object могут быть хешами либо срезами структур (рекомендуется ссылочные `[]*Users`)
-// Свойста структур соответсвуют полям или столбцам в таблицах
-// Все свойства должны быть публичны
+// Загрузка БД в память
+//    + object interface{} объект для заполнения табличными данными
+//    Свойства object могут быть хешами либо срезами структур (рекомендуется ссылочные `[]*Users`)
+//    Свойста структур соответсвуют полям или столбцам в таблицах
+//    Все свойства должны быть публичны
 func (self *Db) SelectData(object interface{}) (err error) {
 	objValue := reflect.ValueOf(object)
 	if objValue.Kind() == reflect.Ptr {

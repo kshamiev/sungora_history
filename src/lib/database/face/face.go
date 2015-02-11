@@ -1,5 +1,10 @@
+// Описание интерфейсов.
+//
+// Интерфейс для работы с абстрактной (любого типа) БД
+// Интерфейс для формирования запросов к абстрактного БД
 package face
 
+// Интерфейс для формирования запросов к абстрактного БД
 type QubFace interface {
 	Select(property string) QubFace
 	SelectScenario(source, scenario string) QubFace
@@ -12,7 +17,7 @@ type QubFace interface {
 	Get() (query string)
 }
 
-// Интерфейс к БД
+// Интерфейс для работы с абстрактной (любого типа) БД
 type DbFace interface {
 	Select(typ interface{}, sql string, params ...interface{}) (err error)
 	SelectMap(typMap interface{}, sql string, params ...interface{}) (err error)

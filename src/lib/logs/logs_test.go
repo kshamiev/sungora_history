@@ -1,19 +1,14 @@
-// запуск теста
+// Запуск теста
 // SET GOPATH=C:\Work\sungora
-// SET GOPATH=C:\home\projects\sungora
-// go test -v lib/logs | go test -v -bench . lib/logs
+// go test -v lib/logs
+// go test -v -bench . lib/logs
 package logs_test
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
-	"strconv"
 	"testing"
-	"time"
 
-	"lib"
 	"lib/logs"
 )
 
@@ -53,6 +48,7 @@ func TestLog(t *testing.T) {
 	}
 }
 
+/*
 func BenchmarkBlank(b *testing.B) {
 	b.StopTimer()
 	var dataSlice []*Users
@@ -124,3 +120,4 @@ type Users struct {
 	CaptchaHash  string    `db:"-" json:"captchaHash"`
 	Language     string    `db:"-" json:"language"`
 }
+*/

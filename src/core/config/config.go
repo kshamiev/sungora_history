@@ -205,7 +205,7 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 	}
 	if self.Logs.Separator == `` {
 		self.Logs.Separator = ` `
-	} else if self.Logs.Separator == `,` {
+	} else if self.Logs.Separator == `.,` {
 		self.Logs.Separator = `;`
 	}
 	if self.Logs.File == `` {

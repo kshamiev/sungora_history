@@ -1,5 +1,8 @@
 package mysql
 
+// Инициализация конфигурации и проверка работоспособоности БД
+// Запуск службы обслуживания работы с БД
+
 import (
 	"errors"
 	"fmt"
@@ -25,9 +28,11 @@ type CfgMysql struct {
 	TimeOut  int64  // Таймаут использования соединения (в секундах) (5 - по умолчанию)
 	Updates  string // Путь где лежат обновления БД
 	CntConn  int64  // Максимальное допустимое количество коннектов (50 - по умолчанию)
-	//Logs     bool   // Логирование выполняемых запросов
 }
 
+// Инициализация конфигурации
+// Запуск службы обслуживания работы с БД
+//    + cfg map[int8]*CfgMysql Срез конфигураций
 func InitMysql(cfg map[int8]*CfgMysql) {
 	cfgMysql = cfg
 	for i := range cfgMysql {
@@ -53,7 +58,8 @@ func InitMysql(cfg map[int8]*CfgMysql) {
 	goMysql()
 }
 
-// CheckConnect Проверка настроек, конфигарций и соединений с БД
+// Проверка настроек, конфигарций и соединений с БД
+//    - error Ошибка проверок
 func CheckConnect() (err error) {
 	var db mysql.Conn
 	for k, d := range cfgMysql {

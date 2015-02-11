@@ -8,14 +8,13 @@ import (
 )
 
 // Коды модулей. Для формирования ункиального глобального кода сообщения
-// Заполняется в момент инициализации модулей
-//var ModuleCode = make(map[string]int)
+// Заполняется в момент инициализации модулей при старте приложения
 var ModuleCode = map[string]int{
 	`base`: 100,
 }
 
 // Сообщения всех уровней на разных языках
-//var Messages = make(map[string]map[int]string)
+// Заполняется в момент инициализации модулей при старте приложения
 var Messages = map[string]map[int]string{
 	`ru-ru`: {
 		100100: `Тестовое сообщение с параметром: [%s]`,
@@ -30,7 +29,7 @@ var Messages = map[string]map[int]string{
 // + lang string язык
 // + codeLocal int локальный код сообщения в рамках модуля
 // + params ...interface{} параметры вставляемые в переводимое сообщение
-// - int глобальный неизменяемый код сообщения для вывода в логи или клиенту
+// - int глобальный уникальный код сообщения для вывода в логи или клиенту
 // - string сформированное сообщение на нужном языке
 func Message(moduleName, lang string, codeLocal int, params ...interface{}) (code int, message string) {
 	var ok bool
@@ -40,7 +39,7 @@ func Message(moduleName, lang string, codeLocal int, params ...interface{}) (cod
 	} else if _, ok = ModuleCode[moduleName]; ok == true {
 		code = ModuleCode[moduleName]*1000 + codeLocal
 	} else {
-		code = codeLocal
+		code = -1
 	}
 	// определение сообщения
 	if message, ok = Messages[lang][code]; ok == true {

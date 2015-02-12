@@ -1,14 +1,16 @@
 package mysql
 
+// Службы и сервисы по работе с БД mysql
+
 import (
 	"time"
 
 	"lib"
 )
 
-// goMysql отложенное выполнение запросов
-func goMysql() {
-	// контроль коннектов
+// Контроль коннектов.
+// Закрытие неиспользуемых коннектов по таймауту.
+func goControlConnect() {
 	go func() {
 		for {
 			for i := range conn {

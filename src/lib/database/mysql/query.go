@@ -1,8 +1,9 @@
-// mysql запросы приложения к БД
 package mysql
 
+// Запросы к БД по индексам
 var Query = make(map[string][]string)
 
+// Инициализация базы запросов к БД
 func init() {
 	Query = map[string][]string{
 		`base/controllers`: []string{

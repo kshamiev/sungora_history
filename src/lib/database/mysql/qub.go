@@ -1,12 +1,16 @@
 package mysql
 
+// Конструктор запрсов к БД
+
 import (
-	"lib/database/face"
 	"strconv"
 	"strings"
+
+	"lib/database/face"
 	"types"
 )
 
+// Структура конструктора
 type Qub struct {
 	property []string
 	from     string
@@ -17,12 +21,16 @@ type Qub struct {
 	limit    string
 }
 
+// Создание объекта конструктора запросов
+//    - *Qub конструктор запросов
 func NewQub() face.QubFace {
 	var self = new(Qub)
 	return self
-
 }
 
+// Выборка
+//    + property Строка полей таблицы через запятую получаемых из БД
+//    - *Qub конструктор запросов
 func (self *Qub) Select(property string) face.QubFace {
 	self.property = append(self.property, property)
 	return self

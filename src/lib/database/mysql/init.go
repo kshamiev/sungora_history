@@ -25,14 +25,14 @@ type CfgMysql struct {
 	Login    string // Логин к базе данных
 	Password string // Пароль к базе данных
 	Charset  string // Кодировка данных (utf-8 - по умолчанию)
-	TimeOut  int64  // Таймаут использования соединения (в секундах) (5 - по умолчанию)
+	TimeOut  int64  // Таймаут использования соединения (в секундах) (60 - по умолчанию)
 	Updates  string // Путь где лежат обновления БД
 	CntConn  int64  // Максимальное допустимое количество коннектов (50 - по умолчанию)
 }
 
 // Инициализация конфигурации
-// Запуск службы обслуживания работы с БД
-//    + cfg map[int8]*CfgMysql Срез конфигураций
+// Запуск службы обслуживания или фоновоф работы работы с БД
+//    + cfg map[int8]*CfgMysql Хеш конфигураций
 func InitMysql(cfg map[int8]*CfgMysql) {
 	cfgMysql = cfg
 	for i := range cfgMysql {
@@ -49,13 +49,13 @@ func InitMysql(cfg map[int8]*CfgMysql) {
 			cfgMysql[i].Host = `localhost`
 		}
 		if cfgMysql[i].TimeOut == 0 {
-			cfgMysql[i].TimeOut = 5
+			cfgMysql[i].TimeOut = 60
 		}
 		if cfgMysql[i].CntConn == 0 {
 			cfgMysql[i].CntConn = 50
 		}
 	}
-	goMysql()
+	goControlConnect()
 }
 
 // Проверка настроек, конфигарций и соединений с БД

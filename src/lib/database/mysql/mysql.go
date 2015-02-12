@@ -2,6 +2,11 @@
 //
 // Непосредственная работа с БД. Выполнение запросов.
 // Работа с БД Mysql в парадигме ORM.
+// Работа с БД Mysql в фоновом режиме. Отдельная параллельная программа.
+// Термины:
+// Сохранение (INSERT)
+// Изменение (UPDATE)
+// Обновление (INSERT, UPDATE)
 package mysql
 
 import (
@@ -27,7 +32,6 @@ type Db struct {
 	Connect mysql.Conn // Конннект к БД
 	free    bool       // Статус блокировки (использования)
 	time    time.Time  // Дата и время последнего использования коннекта
-	//logs    bool       // Логирование запросов
 }
 
 // служебная переменная для реализации блокировок
@@ -87,9 +91,14 @@ func (self *Db) Free() {
 
 // Загрузка БД в память
 //    + object interface{} объект для заполнения табличными данными
-//    Свойства object могут быть хешами либо срезами структур (рекомендуется ссылочные `[]*Users`)
-//    Свойста структур соответсвуют полям или столбцам в таблицах
-//    Все свойства должны быть публичны
+//    Свойства object могут быть хешами либо срезами структур, одноименные загружаемым в них таблицам (пример Users []*Users)
+//    Свойства структур соответсвуют полям или столбцам в таблицах.
+//    Все загружаемые свойства должны быть публичны
+//    Возможно использование тегов - алиасов в объявлении структур:
+//    `db:"-"` - игнорировать и не загружать
+//    `db:"cross"` - загружать как кросс таблицу без Id
+//    `db:"Login" - загружать под указанным имененм в запросе к БД
+//    - error Ошибка загрузки
 func (self *Db) SelectData(object interface{}) (err error) {
 	objValue := reflect.ValueOf(object)
 	if objValue.Kind() == reflect.Ptr {
@@ -130,10 +139,20 @@ func (self *Db) SelectData(object interface{}) (err error) {
 	return err
 }
 
-// LoadArray Загрузка списка объектов из БД. Сопоставление свойств структур полям в БД
-func (self *Db) SelectMap(ObjectList interface{}, sql string, params ...interface{}) (err error) {
+// Загрузка объектов (записей) из БД в хеш.
+//    + ObjectMap interface{} Хеш для заполнения табличными данными (пример map[uint64]*Users)
+//    Передается по ссылке.
+//    Свойства структуры соответсвуют полям или столбцам в таблицах.
+//    Все загружаемые свойства должны быть публичны
+//    Возможно использование тегов - алиасов в объявлении структуры:
+//    `db:"-"` - игнорировать и не загружать свойство
+//    `db:"Login" - загружать под указанным имененм в запросе к БД
+//    + sql string Запрос к БД ("Select * FROM TableName WHERE Comment LIKE ? OR Id = ?")
+//    + params ...interface{} Обциональное количество параметров запроса любого скалярного типа ('%кошка%', 25)
+//    - error Ошибка загрузки
+func (self *Db) SelectMap(ObjectMap interface{}, sql string, params ...interface{}) (err error) {
 	// рефлеския объекта
-	objType := reflect.TypeOf(ObjectList)
+	objType := reflect.TypeOf(ObjectMap)
 	if objType.Kind() != reflect.Ptr {
 		return logs.Base.Error(101, objType.String(), sql).Err
 	}
@@ -250,14 +269,24 @@ func (self *Db) SelectMap(ObjectList interface{}, sql string, params ...interfac
 		}
 		objValue.SetMapIndex(reflect.ValueOf(objectId), obj.Addr())
 	}
-	reflect.ValueOf(ObjectList).Elem().Set(objValue)
+	reflect.ValueOf(ObjectMap).Elem().Set(objValue)
 	return
 }
 
-// LoadArray Загрузка списка объектов из БД. Сопоставление свойств структур полям в БД
-func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interface{}) (err error) {
+// Загрузка объектов (записей) из БД в срез.
+//    + ObjectSlice interface{} Срез для заполнения табличными данными (пример []*Users)
+//    Передается по ссылке.
+//    Свойства структуры соответсвуют полям или столбцам в таблицах.
+//    Все загружаемые свойства должны быть публичны
+//    Возможно использование тегов - алиасов в объявлении структуры:
+//    `db:"-"` - игнорировать и не загружать свойство
+//    `db:"Login" - загружать под указанным имененм в запросе к БД
+//    + sql string Запрос к БД ("Select * FROM TableName WHERE Comment LIKE ? OR Id = ?")
+//    + params ...interface{} Обциональное количество параметров запроса любого скалярного типа ('%кошка%', 25)
+//    - error Ошибка загрузки
+func (self *Db) SelectSlice(ObjectSlice interface{}, sql string, params ...interface{}) (err error) {
 	// рефлеския объекта
-	objType := reflect.TypeOf(ObjectList)
+	objType := reflect.TypeOf(ObjectSlice)
 	if objType.Kind() != reflect.Ptr {
 		return logs.Base.Error(101, objType.String(), sql).Err
 	}
@@ -365,12 +394,20 @@ func (self *Db) SelectSlice(ObjectList interface{}, sql string, params ...interf
 		}
 		objValue = reflect.Append(objValue, obj.Addr())
 	}
-	reflect.ValueOf(ObjectList).Elem().Set(objValue)
+	reflect.ValueOf(ObjectSlice).Elem().Set(objValue)
 	return
 }
 
-// Load Загрузка объекта из БД. Сопоставление свойств структур полям в БД
-// Object = *TypeName
+// Загрузка объекта (записи) из БД.
+//    + Object interface{} Объект структуры переданный по ссылке (пример var Object = new(Users)).
+//    Свойства структуры соответсвуют полям или столбцам в таблице.
+//    Все загружаемые свойства должны быть публичны
+//    Возможно использование тегов - алиасов в объявлении структуры:
+//    `db:"-"` - игнорировать и не загружать свойство
+//    `db:"Login" - загружать под указанным имененм в запросе к БД
+//    + sql string Запрос к БД ("Select * FROM TableName WHERE Comment LIKE ? OR Id = ?")
+//    + params ...interface{} Обциональное количество параметров запроса любого скалярного типа ('%кошка%', 25)
+//    - error Ошибка загрузки
 func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (err error) {
 	// рефлеския объекта
 	var objValue = reflect.ValueOf(Object)
@@ -477,7 +514,18 @@ func (self *Db) Select(Object interface{}, sql string, params ...interface{}) (e
 	return
 }
 
-// SaveInsert Сохранение объекта в БД. Сопоставление свойств структур полям в БД
+// Сохранение объекта (записи) в БД.
+//    + Object interface{} Объект структуры переданный по ссылке (пример var Object = new(Users)).
+//    Свойства структуры соответсвуют полям или столбцам в таблице.
+//    Все сохраняемые свойства должны быть публичны
+//    Возможно использование тегов - алиасов в объявлении структуры:
+//    `db:"-"` - игнорировать и не сохранять свойство
+//    `db:"Login" - сохранять под указанным именем
+//    + source string Имя таблицы в которую сохраняется объект (запись)
+//    + properties ...map[string]string Хеш с обциональным количеством свойств которые нужно сохранить
+//    Если хеш пустой сохраняются все доступные для сохранения свойства
+//    - uint64 Идентификатор (сохраненной новой записи в БД) объекта
+//    - error Ошибка сохранения
 func (self *Db) Insert(Object interface{}, source string, properties ...map[string]string) (insertId uint64, err error) {
 	// инициализация
 	var stm mysql.Stmt
@@ -659,7 +707,19 @@ func (self *Db) Insert(Object interface{}, source string, properties ...map[stri
 	return
 }
 
-// SaveUpdate Изменение объекта в БД. Сопоставление свойств структур полям в БД
+// Изменение объекта (записи) в БД.
+//    + Object interface{} Объект структуры переданный по ссылке (пример var Object = new(Users)).
+//    Свойства структуры соответсвуют полям или столбцам в таблице.
+//    Все изменяемые свойства должны быть публичны
+//    Возможно использование тегов - алиасов в объявлении структуры:
+//    `db:"-"` - игнорировать и не изменять свойство
+//    `db:"Login" - сохранять под указанным именем
+//    + source string Имя таблицы в которой изменяется объект (запись)
+//    + key string Ключевое поле по которому изменяется объект (запись)
+//    + properties ...map[string]string Хеш с обциональным количеством свойств которые нужно изменить
+//    Если хеш пустой изменяются все доступные для изменения свойства
+//    - uint64 Количество измененых записей (всегдя либо 0 либо 1)
+//    - error Ошибка изменения
 func (self *Db) Update(Object interface{}, source, key string, properties ...map[string]string) (affectedRow uint64, err error) {
 	// инициализация
 	var stm mysql.Stmt
@@ -846,7 +906,10 @@ func (self *Db) Update(Object interface{}, source, key string, properties ...map
 	return
 }
 
-// QueryByte Пользовательский запрос на обновление в БД (из дамп файлов).
+// Пользовательский запрос на обновление в БД (как правило из файлов).
+//    + data []byte Дамп запросов на изменения в БД (К примеру бекап БД)
+//    + []string Сообщения о результате обновления
+//    + error Ошибка обновления
 func (self *Db) QueryByte(data []byte) (messages []string, err error) {
 	var result mysql.Result
 	_, result, err = self.Connect.Query(string(data))
@@ -869,7 +932,10 @@ func (self *Db) QueryByte(data []byte) (messages []string, err error) {
 	return
 }
 
-// Query Пользовательский запрос на обновление в БД.
+// Пользовательский запрос на обновление в БД.
+//    + sql string Запрос на обновление БД (UPDATE Users SET Email = ?, Status = ?, Age = ? WHERE Id = ?)
+//    + params ...interface{} Обциональное количество параметров запроса любого скалярного типа ("funtik@yandex.ru", true, 25, 4536)
+//    - error Ошибка обновления
 func (self *Db) Query(sql string, params ...interface{}) (err error) {
 	if strings.LastIndex(sql, " ") == -1 {
 		if sql, err = GetQuery(sql); err != nil {
@@ -897,8 +963,51 @@ func (self *Db) Query(sql string, params ...interface{}) (err error) {
 	return
 }
 
-// sqlParse Разбор входных параметров
-// корректировка параметров для запросов с параметрами IN
+// Выполнение функций
+//    + Object interface{} Срез структур принимающий данные результата выполнения функции.
+//    + nameCall string Имя функции
+//    + params ...interface{} Обциональное количество параметров функции любого скалярного типа ("funtik@yandex.ru", true, 25)
+func (self *Db) CallFunc(Object interface{}, nameCall string, params ...interface{}) (err error) {
+	return
+}
+
+// Выполнение хранимых процедур
+//    + Object interface{} Срез структур принимающий данные результата выполнения хранимой процедуры.
+//    + nameCall string Имя хранимой процедуры
+//    + params ...interface{} Обциональное количество параметров процедуры любого скалярного типа ("funtik@yandex.ru", true, 25)
+func (self *Db) CallExec(Object interface{}, nameCall string, params ...interface{}) (err error) {
+	return
+}
+
+// Поиск и получение запроса по его индексу
+//    + index string Индекс запроса (`ModuleName/FileName/NumberQuery` -> `base/users/0`)
+//    - string Найденный запрос или пустая строка в случае ошибки
+//    - error Ошибка поиска и получение запроса
+func GetQuery(index string) (q string, err error) {
+	l := strings.Split(index, `/`)
+	//
+	var section uint64
+	if section, err = strconv.ParseUint(l[len(l)-1], 0, 64); err != nil {
+		return q, logs.Base.Error(810, index).Err
+	}
+	index = strings.ToLower(strings.Join(l[:len(l)-1], `/`))
+	if _, ok := Query[index]; ok == false {
+		return q, logs.Base.Error(810, index).Err
+	}
+	if int(section) < len(Query[index]) {
+		return Query[index][int(section)], err
+	}
+	return q, logs.Base.Error(810, index).Err
+}
+
+// Разбор входных параметров
+// Корректировка параметров для запросов с параметрами IN
+// Использовать не рекомендуется.
+// Рекомендуется подготавливать параметры запросов до их вызова.
+//    + sql string Запрос к БД
+//    + param []interface{} Срез параметров запроса
+//    - string Запрос к БД со вставленными параметрами из срезов
+//    - []interface{} Срез параметров запроса, за вычетом параметрами из срезов
 func sqlParse(sql string, param []interface{}) (string, []interface{}) {
 	// инициализируем данные для встапвки и находим их местоположения в запросе
 	var str []string
@@ -1007,27 +1116,6 @@ func sqlParse(sql string, param []interface{}) (string, []interface{}) {
 	}
 	dataNew = append(dataNew, strings.Join(data[pos:], "?"))
 	return strings.Join(dataNew, ""), params
-}
-
-func (self *Db) Call(typ interface{}, nameCall string, params ...interface{}) (err error) {
-	return
-}
-
-func GetQuery(index string) (q string, err error) {
-	l := strings.Split(index, `/`)
-	//
-	var section uint64
-	if section, err = strconv.ParseUint(l[len(l)-1], 0, 64); err != nil {
-		return q, logs.Base.Error(810, index).Err
-	}
-	index = strings.ToLower(strings.Join(l[:len(l)-1], `/`))
-	if _, ok := Query[index]; ok == false {
-		return q, logs.Base.Error(810, index).Err
-	}
-	if int(section) < len(Query[index]) {
-		return Query[index][int(section)], err
-	}
-	return q, logs.Base.Error(810, index).Err
 }
 
 /*

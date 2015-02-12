@@ -36,8 +36,10 @@ func compileQuery() (err error) {
 	}
 
 	// формируем результат
-	var sql = "// mysql запросы приложения к БД\npackage mysql\n\n"
+	var sql = "package mysql\n\n"
+	sql += "// Запросы к БД по индексам\n"
 	sql += "var Query = make(map[string][]string)\n\n"
+	sql += "// Инициализация базы запросов к БД\n"
 	sql += "func init() {\n\tQuery = map[string][]string{\n"
 	for i := range queryData {
 		sql += "\t\t`" + i + "`: []string{\n"

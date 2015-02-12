@@ -19,14 +19,15 @@ type QubFace interface {
 
 // Интерфейс для работы с абстрактной (любого типа) БД
 type DbFace interface {
-	Select(typ interface{}, sql string, params ...interface{}) (err error)
-	SelectMap(typMap interface{}, sql string, params ...interface{}) (err error)
-	SelectSlice(typSlice interface{}, sql string, params ...interface{}) (err error)
-	SelectData(typType interface{}) (err error)
-	Insert(typ interface{}, source string, properties ...map[string]string) (insertId uint64, err error)
-	Update(typ interface{}, source, key string, properties ...map[string]string) (affectedRow uint64, err error)
+	Select(Object interface{}, sql string, params ...interface{}) (err error)
+	SelectMap(ObjectMap interface{}, sql string, params ...interface{}) (err error)
+	SelectSlice(ObjectSlice interface{}, sql string, params ...interface{}) (err error)
+	SelectData(object interface{}) (err error)
+	Insert(Object interface{}, source string, properties ...map[string]string) (insertId uint64, err error)
+	Update(Object interface{}, source, key string, properties ...map[string]string) (affectedRow uint64, err error)
 	Query(sql string, params ...interface{}) (err error)
 	QueryByte(data []byte) (messages []string, err error)
-	Call(typ interface{}, nameCall string, params ...interface{}) (err error)
+	CallFunc(Object interface{}, nameCall string, params ...interface{}) (err error)
+	CallExec(Object interface{}, nameCall string, params ...interface{}) (err error)
 	Free()
 }

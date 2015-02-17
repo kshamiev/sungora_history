@@ -3,7 +3,7 @@
 
 [www.sungora.ru](http://sungora.ru)
 
-Version: 0.9.1
+Version: 0.9.9
 
 
 ### Install

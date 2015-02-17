@@ -299,13 +299,12 @@ pre {
 <title>session.md</title>
 </head>
 <body>
-<p><a href="/">main</a> ::
-<a href="/docs/start.html">quick start</a> ::
-<a href="/docs/reference.html">reference</a> ::
-<a href="/docs/tutorial.html">tutorial</a> ::
-<a href="/docs/api.html">api</a> ::
-<a href="/sample">sample</a> ::
-<a href="https://github.com/kshamiev/sungora">download</a></p>
+<p><a href="/">Главная</a> ::
+<a href="/docs/start.html">Начало</a> ::
+<a href="/docs/reference.html">Справочник</a> ::
+<a href="/docs/tutorial.html">Учебник</a> ::
+<a href="/docs/api.html">Системное api</a> ::
+<a href="https://github.com/kshamiev/sungora">Скачать</a></p>
 
 <p><a name="anchor_home"></a></p>
 
@@ -789,32 +788,36 @@ Controller: <code>base.Session.ApiMain(apiMainGet)</code></p>
 </code></pre>
 
 <p>Body</p></li>
+<li><p><strong>Response</strong> 404</p>
+
+<p>Headers</p>
+
+<pre><code>Content-Type: application/json; charset=utf-8
+</code></pre>
+
+<p>Body</p>
+
+<pre><code>{
+    &quot;errorCode&quot;: 100166,
+    &quot;errorMessage&quot;: &quot;Пользователь не найден&quot;
+}
+</code></pre></li>
+<li><p><strong>Response</strong> 409</p>
+
+<p>Headers</p>
+
+<pre><code>Content-Type: application/json; charset=utf-8
+</code></pre>
+
+<p>Body</p>
+
+<pre><code>{
+    &quot;errorCode&quot;: 100171,
+    &quot;errorMessage&quot;: &quot;Токен не указан&quot;
+}
+</code></pre></li>
 </ul></li>
 </ol>
-
-<pre><code>* **Response** 404
-
-    Headers
-
-        Content-Type: application/json; charset=utf-8
-    Body
-
-        {
-            &quot;errorCode&quot;: 100166,
-            &quot;errorMessage&quot;: &quot;Пользователь не найден&quot;
-        }
-* **Response** 409
-
-    Headers
-
-        Content-Type: application/json; charset=utf-8
-    Body
-
-        {
-            &quot;errorCode&quot;: 100171,
-            &quot;errorMessage&quot;: &quot;Токен не указан&quot;
-        }
-</code></pre>
 
 <p><a name="anchor_recovery"></a></p>
 

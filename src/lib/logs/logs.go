@@ -52,8 +52,10 @@ type Cfglogs struct {
 //    + cfgLogs *Cfglogs конфигурация лога
 func Init(cfgLogs *Cfglogs) {
 	cfg = cfgLogs
-	Base = NewLog(`base`)
-	Base.Init(`base`, `server`)
+	if Base == nil {
+		Base = NewLog(`base`)
+		Base.Init(`base`, `server`)
+	}
 }
 
 // Системный или базовый лог

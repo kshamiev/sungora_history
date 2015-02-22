@@ -1,5 +1,5 @@
 // Запуск теста
-// SET GOPATH=C:\Work\sungora
+// SET GOPATH=C:\Work\projectName
 // go test -v lib/logs
 // go test -v -bench . lib/logs
 package logs_test
@@ -21,6 +21,7 @@ func TestLog(t *testing.T) {
 	cfglogs.Level = 6
 	cfglogs.Mode = `file`
 	cfglogs.Lang = `ru-ru`
+	cfglogs.Separator = ` `
 
 	cfglogs.File, _ = os.Getwd()
 	cfglogs.File = filepath.Dir(cfglogs.File)
@@ -42,8 +43,7 @@ func TestLog(t *testing.T) {
 	logs.Base.Database(100, `Message Database`)
 	logs.Base.Journal(100, `Message Journal`)
 
-	var flag = logs.GoClose()
-	if flag == false {
+	if logs.GoClose() == false {
 		t.Fatal(`Ошибка остановки службы логирования`)
 	}
 }

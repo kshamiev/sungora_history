@@ -124,9 +124,11 @@ application -h справка по запуску программы (проек
 	
 `go test -v lib/database/mysql`
 
+Системная библиотека работы с почтой:
+	
+`go test -v lib/mailer`
 
-
-
-
-
+Системная библиотека работы с кешем:
+	
+`go test -v lib/cache`
 

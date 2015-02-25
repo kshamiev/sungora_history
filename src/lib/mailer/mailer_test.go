@@ -1,6 +1,7 @@
-// запуск теста (внутри пакета)
+// запуск теста
 // SET GOPATH=C:\Work\projectName
-// go test -v lib/mailer | go test -v -bench . lib/mailer
+// go test -v lib/mailer
+// go test -v -bench . lib/mailer
 package mailer_test
 
 import (
@@ -20,8 +21,8 @@ func TestMailer(t *testing.T) {
 	path, _ := os.Getwd()
 	mailer.Init(cfgMailer)
 
-	msg := mailer.NewMessageTpl(`Тема`, `/test`)
-	msg.To(`info@jewerlystyle.ru`, `Шариков Полиграф Полиграфович`)
+	msg := mailer.NewMessageTpl(`Тема`, path+`/test`)
+	msg.To(`konstanta75@mail.ru`, `Шариков Полиграф Полиграфович`)
 	msg.Variables[`content`] = `Тело шаблонного сообщения`
 	if cnt, err := msg.Send(); err != nil {
 		t.Error(err.Error())
@@ -30,7 +31,7 @@ func TestMailer(t *testing.T) {
 	}
 
 	msg = mailer.NewMessageBody(`Тема`, `Фирма веников не вяжет`)
-	msg.To(`info@jewerlystyle.ru`, `Шариков Полиграф Полиграфович`)
+	msg.To(`konstanta75@mail.ru`, `Шариков Полиграф Полиграфович`)
 	if cnt, err := msg.Send(); err != nil {
 		t.Error(err.Error())
 	} else {

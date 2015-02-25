@@ -1,6 +1,7 @@
 // запуск теста
 // SET GOPATH=C:\Work\projectName
-// go test -v lib/cache | go test -v -bench . lib/cache
+// go test -v lib/cache
+// go test -v -bench . lib/cache
 package cache_test
 
 import (
@@ -92,7 +93,7 @@ func TestCache(t *testing.T) {
 	}
 
 	// Завершение
-	if false == cache.CacheCloseGo() {
+	if false == cache.GoClose() {
 		t.Fatal(`Ошибка завершения службы кеширования`)
 	}
 }

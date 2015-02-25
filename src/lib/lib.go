@@ -15,6 +15,6 @@ var (
 	String = str.NewString()
 	// Работа со срезами
 	Slice = slice.NewSlice()
-	// Работа с вводом и выводом (IO)
+	// Работа с вводом и выводом (FS & IO)
 	RW = rw.NewRW()
 )

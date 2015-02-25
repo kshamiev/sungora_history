@@ -162,11 +162,6 @@ Login           = xxx
 # Пароль подключения к почтовому серверу
 Password        = xxx
 
-# Шаблоны почтовых сообщений
-# Пример: %(RootFolder)s/templates/mail
-# Значение по умолчанию: %(RootFolder)s/templates/mail
-Templates        = %(RootFolder)s/templates/mail
-
 
 # Настройки авторизации
 [AUTH]

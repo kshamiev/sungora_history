@@ -13,15 +13,12 @@ import (
 func TestMailer(t *testing.T) {
 	var cfgMailer = new(mailer.CfgMailer)
 	cfgMailer.Server = `mail.shamiev.ru`
-	cfgMailer.Port = 25
 	cfgMailer.Login = `konstantin@shamiev.ru`
 	cfgMailer.Password = `LeRo_3riS`
 	cfgMailer.FromAddress = `konstantin@shamiev.ru`
 	cfgMailer.FromName = `Вася Пупкин`
-	cfgMailer.Templates, _ = os.Getwd()
-	if err := mailer.Init(cfgMailer); err != nil {
-		t.Error(err.Error())
-	}
+	path, _ := os.Getwd()
+	mailer.Init(cfgMailer)
 
 	msg := mailer.NewMessageTpl(`Тема`, `/test`)
 	msg.To(`info@jewerlystyle.ru`, `Шариков Полиграф Полиграфович`)

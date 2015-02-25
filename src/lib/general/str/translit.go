@@ -1,5 +1,19 @@
 package str
 
+// Трансилитирация строки
+//	+ str string Исходная строка
+//	- string Сконвертированная строка
+func (self *String) Translit(str string) (strTranslit string) {
+	for _, r := range []rune(str) {
+		if e, ok := translit[string(r)]; ok == true {
+			strTranslit += e
+		} else {
+			strTranslit += string(r)
+		}
+	}
+	return
+}
+
 var translit = map[string]string{
 	"а": "a",
 	"б": "b",
@@ -69,13 +83,4 @@ var translit = map[string]string{
 	"Я": "Ya",
 }
 
-func (self *String) Translit(str string) (strTranslit string) {
-	for _, r := range []rune(str) {
-		if e, ok := translit[string(r)]; ok == true {
-			strTranslit += e
-		} else {
-			strTranslit += string(r)
-		}
-	}
-	return
-}
+////

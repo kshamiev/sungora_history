@@ -1,4 +1,4 @@
-// Утилита. Работе с датой и временем
+// Библиотека для работы с датой и временем
 package times
 
 import (
@@ -12,27 +12,26 @@ const (
 	FORMAT string = "01.02.2006 15:04:05.000000000"
 )
 
+// Тип для агрегирования методов работы с датой и временем
 type Time struct {
 	Location *time.Location
 }
 
+// Конструктор
+//	+ timeZone string имя временной зоны
+//	- *Time объект агрегатор функций-методов
 func NewTime(timeZone string) *Time {
 	var self = new(Time)
-	self.Init(timeZone)
-	return self
-}
-
-// Now() time.Time Получение текущей даты и времени
-func (self *Time) Init(timeZone string) {
 	// Инициализация временной зоны
 	if loc, err := time.LoadLocation(timeZone); err == nil {
 		self.Location = loc
 	} else {
 		self.Location = time.UTC
 	}
+	return self
 }
 
-// Now() time.Time Получение текущей даты и времени
+// Получение текущей даты и времени
 func (self *Time) Now() time.Time {
 	return time.Now().In(self.Location)
 }
@@ -71,7 +70,7 @@ func (self *Time) ParseDuration(duration string) (t time.Duration, flag bool) {
 	return t, true
 }
 
-// TimeParse Парсинг строки даты и времени в объект time
+// Парсинг строки даты и времени в объект time
 // Использует timeLocation := time.UTC (see: time.LoadLocation(...))
 // sample: datetime := "y[-./]m[-./]d h:m:s" || "d[-./]m[-./]y h:m:s"
 func (self *Time) Parse(datetime string) (t time.Time, flag bool) {
@@ -104,8 +103,10 @@ func (self *Time) Parse(datetime string) (t time.Time, flag bool) {
 	return t, true
 }
 
-// TimeView return ( 18-05-2010 23:34:21 )
+// return ( 18-05-2010 23:34:21 )
 func (self *Time) View(t time.Time) string {
 	t.In(self.Location)
 	return fmt.Sprintf("%02d-%02d-%04d %02d:%02d:%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute(), t.Second())
 }
+
+////

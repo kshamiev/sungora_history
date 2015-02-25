@@ -13,6 +13,9 @@ import (
 )
 
 // Скачивание методом GET больших данных
+//	+ url string http ссылка на скачиваемый файл
+//	+ pathFile string полный путь до файла в который будут записаны скаченные данные
+//	- error ошибка операции
 func (self *RW) DownloadLongData(url, pathFile string) (err error) {
 	err = errors.New("Неизвестная ошибка")
 	var timeout time.Duration = time.Hour * 10
@@ -69,10 +72,20 @@ func timeoutDialler(timeout time.Duration) func(net, addr string) (client net.Co
 	}
 }
 
+////
+
+// Запрос к сторннему ресурсу в формате json
+// Для реализации запрос к сторонним API
+//	+ method string Метод запроса в парадигме REST
+//	+ url string Полная ссылка запроса
+//	+ requestData ...[]byte Данные запроса (POST)
+//	- []byte Данные полученные в ответ на запрос
+//	- error Ошибка операции
 func (self *RW) RequestJson(method, url string, requestData ...[]byte) (responseData []byte, err error) {
 	return request(method, url, "application/json; charset=utf-8", requestData...)
 }
 
+// Низкоуровневой запрос к сторннему ресурсу
 func request(method, url, typ string, requestData ...[]byte) (responseData []byte, err error) {
 	var request *http.Request
 	var response *http.Response

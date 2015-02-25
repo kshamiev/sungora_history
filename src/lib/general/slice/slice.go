@@ -1,5 +1,4 @@
-// lib Общие вспомогательные функци
-// Сортировка срезов
+// Библиотека для работы со срезами
 package slice
 
 import (
@@ -8,12 +7,54 @@ import (
 	"time"
 )
 
+// Тип для агрегирования методов работы со срезами
 type Slice struct {
 }
 
+// Конструктор
+//	- *Slice объект агрегатор функций-методов
 func NewSlice() *Slice {
 	var self = new(Slice)
 	return self
+}
+
+//// Сортировка срезов
+
+// Сортировка срезов любых типов по возрастанию
+//	+ slice interface{} срез значений структур или их ссылок
+//	+ property string свойство по которому сортируем элементы среза (строки, числа, дата и время)
+//	property должно быть публичным
+func (self *Slice) SortingSliceAsc(slice interface{}, property string) {
+	ps := &sorting{
+		direction: true,
+		data:      slice,
+		property:  property,
+	}
+	sort.Sort(ps)
+}
+
+// Сортировка срезов любых типов по убыванию
+//	+ slice interface{} срез значений структур или их ссылок
+//	+ property string свойство по которому сортируем элементы среза (строки, числа, дата и время)
+//	property должно быть публичным
+func (self *Slice) SortingSliceDesc(slice interface{}, property string) {
+	ps := &sorting{
+		direction: false,
+		data:      slice,
+		property:  property,
+	}
+	sort.Sort(ps)
+}
+
+// Сортировка срезов любых типов по пользовательской функции
+//	+ slice interface{} срез значений структур или их ссылок
+//	+ f func(... пользовательская функция сортировки
+func (self *Slice) SortingSliceFunc(slice interface{}, f func(left, right interface{}) bool) {
+	ps := &sorting{
+		data:     slice,
+		function: f,
+	}
+	sort.Sort(ps)
 }
 
 type sorting struct {
@@ -156,40 +197,4 @@ func (self sorting) Swap(i, j int) {
 	objValue2.Set(slc)
 }
 
-// SortingSliceAsc Сортировка срезов любых типов по возрастанию
-// slice - срез значений структур или их ссылок
-// property - свойство по которому сортируем объекты среза (строки, числа, дата и время)
-// property должно быть публичным
-func (self *Slice) SortingSliceAsc(slice interface{}, property string) {
-	ps := &sorting{
-		direction: true,
-		data:      slice,
-		property:  property,
-	}
-	sort.Sort(ps)
-}
-
-// SortingSliceDesc Сортировка срезов любых типов по убыванию
-// slice - срез значений структур или их ссылок
-// property - свойство по которому сортируем объекты среза (строки, числа, дата и время)
-// property должно быть публичным
-func (self *Slice) SortingSliceDesc(slice interface{}, property string) {
-	ps := &sorting{
-		direction: false,
-		data:      slice,
-		property:  property,
-	}
-	sort.Sort(ps)
-}
-
-// SortingSliceFunc Сортировка срезов любых типов по убыванию
-// slice - срез значений структур или их ссылок
-// property - свойство по которому сортируем объекты среза (строки, числа, дата и время)
-// property должно быть публичным
-func (self *Slice) SortingSliceFunc(slice interface{}, f func(left, right interface{}) bool) {
-	ps := &sorting{
-		data:     slice,
-		function: f,
-	}
-	sort.Sort(ps)
-}
+////

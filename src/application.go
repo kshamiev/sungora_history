@@ -144,7 +144,6 @@ func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 	if core.Config.Main.UseDb > 0 {
 		// Checking availability of databases
 		if err = database.CheckConnect(); err != nil {
-			logs.Base.Fatal(920, err.Error())
 			return err, 920
 		}
 	}

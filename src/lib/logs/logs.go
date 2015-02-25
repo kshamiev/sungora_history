@@ -52,6 +52,29 @@ type Cfglogs struct {
 //    + cfgLogs *Cfglogs конфигурация лога
 func Init(cfgLogs *Cfglogs) {
 	cfg = cfgLogs
+	if cfg.Mode == `` {
+		cfg.Mode = `file`
+	}
+	if cfg.Level == 0 {
+		cfg.Level = 6
+	}
+	if cfg.Separator == `` {
+		cfg.Separator = ` `
+	} else if cfg.Separator == `.,` {
+		cfg.Separator = `;`
+	}
+	if cfg.File == `` {
+		cfg.Mode = `system`
+	}
+	if cfg.Mode == `` {
+		cfg.Mode = `file`
+	}
+	if cfg.Size == 0 {
+		cfg.Size = 5
+	}
+	if cfg.Lang == `` {
+		cfg.Lang = `ru-ru`
+	}
 	Base = NewLog(`base`)
 	Base.Init(`base`, `server`)
 }

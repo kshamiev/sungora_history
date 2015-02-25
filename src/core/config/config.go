@@ -196,31 +196,6 @@ func initConfig(args *typConfig.CmdArgs) (err error) {
 		self.View.Tpl = self.View.Path + "/view"
 	}
 
-	// Файл системного журнала приложения
-	if self.Logs.Mode == `` {
-		self.Logs.Mode = `file`
-	}
-	if self.Logs.Level == 0 {
-		self.Logs.Level = 6
-	}
-	if self.Logs.Separator == `` {
-		self.Logs.Separator = ` `
-	} else if self.Logs.Separator == `.,` {
-		self.Logs.Separator = `;`
-	}
-	if self.Logs.File == `` {
-		self.Logs.Mode = `system`
-	}
-	if self.Logs.Mode == `` {
-		self.Logs.Mode = `file`
-	}
-	if self.Logs.Size == 0 {
-		self.Logs.Size = 5
-	}
-	if self.Logs.Lang == `` {
-		self.Logs.Lang = `ru-ru`
-	}
-
 	// Гость и разработчик
 	self.Auth.DevUID = 1
 	self.Auth.GuestUID = 2

@@ -7,6 +7,22 @@ import (
 	"unicode/utf16"
 )
 
+// Конвертация текстовых данных из кодировки Cp1251 (windows-1251) в UTF-8
+//	+ inp []byte Исходный текст
+//	- []byte Сконвертированный текст
+func (self *String) Cp1251ToUtf8(inp []byte) []byte {
+	buffer := bytes.NewBufferString("")
+	for _, char := range inp {
+		var ch = utfArray(char)
+		fmt.Fprintf(buffer, "%c", ch)
+	}
+	return buffer.Bytes()
+}
+
+func utfArray(a byte) uint16 {
+	return utf[a]
+}
+
 var utf = [256]uint16{
 	0x00: 0x0000,
 	0x01: 0x0001,
@@ -263,19 +279,7 @@ var utf = [256]uint16{
 	0xFC: 0x044C,
 	0xFD: 0x044D,
 	0xFE: 0x044E,
-	0xFF: 0x044F}
-
-func utfArray(a byte) uint16 {
-	return utf[a]
-}
-
-func (self *String) Cp1251ToUtf8(inp []byte) []byte {
-	buffer := bytes.NewBufferString("")
-	for _, char := range inp {
-		var ch = utfArray(char)
-		fmt.Fprintf(buffer, "%c", ch)
-	}
-	return buffer.Bytes()
+	0xFF: 0x044F,
 }
 
 // Конвертация UTF16 в string
@@ -300,3 +304,5 @@ func utf16toString(b []uint8) (string, error) {
 	}
 	return string(utf16.Decode(w)), nil
 }
+
+////

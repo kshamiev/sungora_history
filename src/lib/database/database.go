@@ -49,6 +49,7 @@ func NewQub(useDb int64) QubFace {
 //    - error Ошибка проверки
 func CheckConnect() (err error) {
 	if err = mysql.CheckConnect(); err != nil {
+		logs.Base.Fatal(814, err.Error())
 		return
 	}
 	return

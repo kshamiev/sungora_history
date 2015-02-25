@@ -1,6 +1,7 @@
 // запуск теста
 // SET GOPATH=C:\Work\projectName
-// go test -v lib | go test -v -bench . lib
+// go test -v lib
+// go test -v -bench . lib
 package lib_test
 
 import (

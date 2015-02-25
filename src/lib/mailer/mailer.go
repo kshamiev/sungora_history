@@ -1,5 +1,6 @@
-// Смотреть вот здесь http://godoc.org/github.com/gogits/gogs/modules/mailer
-// http://citforum.ru/internet/servers/glava2_4.shtml  (RFC-822)
+// Бибилотека для раюоты с электронной почтой (RFC-822).
+//
+// Источник: http://github.com/gogits/gogs/modules/mailer
 package mailer
 
 import (
@@ -16,7 +17,7 @@ import (
 // Конфигурация
 var cfgMailer *CfgMailer
 
-// Cекция настроек отправки почты
+// Структура конфигурации
 type CfgMailer struct {
 	Mailer      string // Строка, которой представляется почтовый клиент. Например 'Mac OS-X Mail'
 	FromAddress string // Почтовый адрес от которого приложение отправляет все письма
@@ -30,14 +31,21 @@ type CfgMailer struct {
 	CertPrivate string // Путь и имя файла с приватным ключом, для отправки почты по SSL протоколу (порт 465 или 587)
 	Login       string // Логин подключения к почтовому серверу
 	Password    string // Пароль подключения к почтовому серверу
-	Templates   string // Полный путь к папке с темплейтами
 }
 
 // Инициализация библиотеки
+//	+ cfg *CfgMailer конфигурация
 func Init(cfg *CfgMailer) {
+	if cfg.Port == 0 {
+		cfg.Port = 25
+	}
+	if cfg.Mode == `` {
+		cfg.Mode = `tcp`
+	}
 	cfgMailer = cfg
 }
 
+// Сообщение
 type Message struct {
 	to        []string
 	fromMail  string
@@ -51,7 +59,10 @@ type Message struct {
 	Functions map[string]interface{}
 }
 
-// NewMessageTpl Create html mail message
+// Create new mail message from html
+//	+ subject string Тема сообщения
+//	+ tpl string абсолютный путь до почтового шаблона
+//	- *Message объект сообщения
 func NewMessageTpl(subject, tpl string) *Message {
 	var self = new(Message)
 	self.fromMail = cfgMailer.FromAddress
@@ -64,7 +75,10 @@ func NewMessageTpl(subject, tpl string) *Message {
 	return self
 }
 
-// NewMessageBody
+// Create new mail message from body
+//	+ subject string Тема сообщения
+//	+ body string Тело (шаблон) сообщения
+//	- *Message объект сообщения
 func NewMessageBody(subject, body string) *Message {
 	var self = new(Message)
 	self.fromMail = cfgMailer.FromAddress
@@ -75,18 +89,24 @@ func NewMessageBody(subject, body string) *Message {
 	return self
 }
 
-// From
+// Отправитель сообщения
+//	+ fromMail string Адрес отправителя
+//	+ fromName string Имя отправителя
 func (self *Message) From(fromMail, fromName string) {
 	self.fromMail = fromMail
 	self.fromName = fromName
 }
 
-// To
+// Получатель сообщения
+//	+ toMail string Адрес получателя
+//	+ toName string Имя получателя
 func (self *Message) To(toMail, toName string) {
 	self.to = append(self.to, toName+" <"+toMail+">")
 }
 
-// Send Direct Send mail message
+// Отправка сообщения
+//	- num int количество отправленых сообщений
+//	- error ошибка операции
 func (self *Message) Send() (num int, err error) {
 	defer func() {
 		if err != nil {
@@ -103,7 +123,7 @@ func (self *Message) Send() (num int, err error) {
 	tpl.Functions = self.Functions
 	tpl.Variables = self.Variables
 	if self.tpl != `` && self.body == `` {
-		if data, err = tpl.ExecuteFile(cfgMailer.Templates + `/` + self.tpl); err != nil {
+		if data, err = tpl.ExecuteFile(self.tpl); err != nil {
 			return
 		}
 	} else {
@@ -137,27 +157,29 @@ func (self *Message) Send() (num int, err error) {
 		}
 		return num, nil
 	} else {
-		body := []byte("Content-Type: text/html; charset=utf-8\r\nTo: " + strings.Join(self.to, ";") + "\r\n" + content)
+		//body := []byte("Content-Type: text/html; charset=utf-8\r\nTo: " + strings.Join(self.to, ";") + "\r\n" + content)
+		body := []byte("To: " + strings.Join(self.to, ";") + "\r\n" + content)
 		// send to multiple emails in one message
 		err := smtp.SendMail(server, auth, self.fromMail, self.to, body)
 		if err != nil {
 			return 0, err
 		} else {
-			return 1, nil
+			return len(self.to), nil
 		}
 	}
 }
 
-// content create mail content
+// Формирование заголовков и тела сообщения
+//	- content string сформированное тело сообщения
 func (self *Message) content() (content string) {
-	// set mail type
 	contentType := "text/plain; charset=utf-8"
 	if self.typ == "html" {
 		contentType = "text/html; charset=utf-8"
 	}
-	// create mail content
 	content = "From: " + self.fromName + " <" + self.fromMail + ">\r\n"
 	content += "Subject: " + self.subject + "\r\nContent-Type: " + contentType + "\r\n\r\n"
 	content += self.body
 	return
 }
+
+////

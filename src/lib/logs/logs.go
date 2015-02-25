@@ -75,8 +75,10 @@ func Init(cfgLogs *Cfglogs) {
 	if cfg.Lang == `` {
 		cfg.Lang = `ru-ru`
 	}
-	Base = NewLog(`base`)
-	Base.Init(`base`, `server`)
+	if Base == nil {
+		Base = NewLog(`base`)
+		Base.Init(`base`, `server`)
+	}
 }
 
 // Системный или базовый лог

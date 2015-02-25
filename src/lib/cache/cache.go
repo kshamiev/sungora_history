@@ -63,7 +63,7 @@ func init() {
 	goCache()
 }
 
-// goCache Служба кеширования
+// Служба кеширования
 func goCache() {
 	// Запуск механизма кеширования
 	go func() {
@@ -117,13 +117,18 @@ func goCache() {
 	}()
 }
 
-// SetLink Связывание кешируемых данных между собой по сбросу кеша
-// при удалении кеша по целевому индексу будет удален кеш исходного индекса
+// Связывание кешируемых данных между собой по сбросу кеша
+// При удалении кеша по целевому индексу будет удален кеш исходного индекса
+//    + key string Индекс, кеш которого будет удален при удалении кеша целевого индекса
+//    + keyTarget string Индекс целевого кеша
 func SetLink(key, keyTarget string) {
 	storeLink[keyTarget] = append(storeLink[keyTarget], key)
 }
 
-// Set Добавление в кеш (Если timeout не указан - вечный кеш)
+// Добавление в кеш (Если timeout не указан - вечный кеш)
+//    + key string индекс кеша
+//    + value interface{} данные сохраняемые в кеш
+//    + timeout ...time.Duration время жизни кеша в секундах
 func Set(key string, value interface{}, timeout ...time.Duration) {
 	if len(timeout) == 0 {
 		commandControl <- commandCache{action: set, key: key, value: value}
@@ -132,9 +137,11 @@ func Set(key string, value interface{}, timeout ...time.Duration) {
 	}
 }
 
-// Get Получение из кеша с проверкой на существование
-// Если timeout указан то время жизни кеша переустанавливается в указанное
-// При усолвии что кеш существует
+// Получение из кеша с проверкой на существование
+// Если timeout указан то время жизни кеша переустанавливается в указанное, при усолвии что кеш существует.
+//    + key string индекс кеша
+//    + timeout ...time.Duration время жизни кеша в секундах
+//    - value interface{} данные получаемые из кеша по индексу
 func Get(key string, timeout ...time.Duration) (value interface{}) {
 	reply := make(chan interface{})
 	if len(timeout) == 0 {
@@ -145,19 +152,22 @@ func Get(key string, timeout ...time.Duration) (value interface{}) {
 	return <-reply
 }
 
-// Rem Удаление из кеша
+// Удаление из кеша
+//    + key string индекс кеша
 func Rem(key string) {
 	commandControl <- commandCache{action: rem, key: key}
 }
 
-// Len Количество данных в кеше
+// Количество данных в кеше
+//    - int количество элементов хранимых в кеше
 func Len() int {
 	reply := make(chan interface{})
 	commandControl <- commandCache{action: length, result: reply}
 	return (<-reply).(int)
 }
 
-// CacheCloseGo Завершение работы службы кеширования
+// Завершение работы службы кеширования
+//    - bool признак успешности заверешения работы
 func GoClose() bool {
 	reply := make(chan interface{})
 	commandControl <- commandCache{action: cacheClose, result: reply}

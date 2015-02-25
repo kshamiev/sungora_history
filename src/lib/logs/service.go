@@ -14,22 +14,31 @@ import (
 	"lib"
 )
 
+var cntStart = uint8(0)
+
 // Запуск работы службы логирования
 //	+ logSys service.Logger интерфейс логирования в системный лог
 func GoStart(logSys service.Logger) {
-	if cfg.Mode == `file` && fp == nil {
-		os.MkdirAll(filepath.Dir(cfg.File), 0755)
-		fp, _ = os.OpenFile(cfg.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	cntStart++
+	if cntStart == 1 {
+		if cfg.Mode == `file` && fp == nil {
+			os.MkdirAll(filepath.Dir(cfg.File), 0755)
+			fp, _ = os.OpenFile(cfg.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+		}
+		sys = logSys
+		gologs()
 	}
-	sys = logSys
-	gologs()
 }
 
 // Завершение работы службы логирования
 func GoClose() bool {
-	reply := make(chan interface{})
-	commandlogsControl <- command{action: logsClose, result: reply}
-	return (<-reply).(bool)
+	if cntStart == 0 {
+		reply := make(chan interface{})
+		commandlogsControl <- command{action: logsClose, result: reply}
+		return (<-reply).(bool)
+	}
+	cntStart--
+	return true
 }
 
 // Cammand channel

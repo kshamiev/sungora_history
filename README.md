@@ -118,7 +118,12 @@ application -h справка по запуску программы (проек
 
 Системная библиотека логирования:
 	
-`go test -v lib/logs``
+`go test -v lib/logs`
+
+Системная библиотека работы с БД mysql:
+	
+`go test -v lib/database/mysql`
+
 
 
 

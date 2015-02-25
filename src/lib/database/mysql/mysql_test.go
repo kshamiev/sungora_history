@@ -1,12 +1,14 @@
 // запуск теста
 // command unix: mysqladmin processlist
 // SET GOPATH=C:\Work\projectName
-// go test -v lib/database/mysql | go test -v -bench . lib/database/mysql
+// go test -v lib/database/mysql
+// go test -v -bench . lib/database/mysql
 package mysql_test
 
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -34,8 +36,10 @@ type TestAccessUsers struct {
 	Name            string    // Имя
 	MiddleName      string    // Отчество
 	LastFailed      time.Time // Дата последней не удачной попытки входа
+	IsAuthMemory    bool      // Помнить авторизацию в куках
 	IsAccess        bool      // Доступ разрешен
 	IsCondition     bool      // Условия пользователя
+	IsOnline        bool      // Онлайн статус
 	IsActivated     bool      // Активированный
 	DateOnline      time.Time // Дата последнего посещения
 	Date            time.Time // Дата регистрации
@@ -44,7 +48,26 @@ type TestAccessUsers struct {
 	CookieActivated string    // Кука активации и идентификации
 }
 
-func testAll(t *testing.T) {
+func TestAll(t *testing.T) {
+
+	var cfglogs = new(logs.Cfglogs)
+	cfglogs.Debug = true
+	cfglogs.DebugDetail = 0
+	cfglogs.Level = 6
+	cfglogs.Mode = `file`
+	cfglogs.Lang = `ru-ru`
+	cfglogs.Separator = ` `
+
+	cfglogs.File, _ = os.Getwd()
+	cfglogs.File = filepath.Dir(cfglogs.File)
+	cfglogs.File = filepath.Dir(cfglogs.File)
+	cfglogs.File = filepath.Dir(cfglogs.File) + `/log`
+	os.MkdirAll(cfglogs.File, 0777)
+	cfglogs.File += `/logs_test.log`
+
+	logs.Init(cfglogs)
+	logs.GoStart(nil)
+
 	var err error
 	var data []byte
 	var messages []string
@@ -59,7 +82,7 @@ func testAll(t *testing.T) {
 	var cfg = new(mysql.CfgMysql)
 	cfg.Login = `root`
 	cfg.Password = `root`
-	cfg.Name = `zegota`
+	cfg.Name = `sungora`
 	mysql.InitMysql(map[int8]*mysql.CfgMysql{0: cfg})
 
 	if db, err = mysql.NewDb(0); err != nil {
@@ -72,19 +95,22 @@ func testAll(t *testing.T) {
 	}
 	t.Log(messages)
 
-	chanenlControlSave := testSave(t)
+	chanenlControlInsert := testInsert(t)
 	chanenlControlLoad := testLoad(t)
-	chanenlControlLoadArray := testLoadArray(t)
+	chanenlControlLoadSlice := testLoadSlice(t)
+	chanenlControlLoadMap := testLoadMap(t)
 	chanenlControlQuery := testQuery(t)
 
-	var flag = 4
+	var flag = 5
 	for 0 < flag {
 		select {
-		case <-chanenlControlSave:
+		case <-chanenlControlInsert:
 			flag--
 		case <-chanenlControlLoad:
 			flag--
-		case <-chanenlControlLoadArray:
+		case <-chanenlControlLoadSlice:
+			flag--
+		case <-chanenlControlLoadMap:
 			flag--
 		case <-chanenlControlQuery:
 			flag--
@@ -93,10 +119,15 @@ func testAll(t *testing.T) {
 
 	db.Query(`DROP TABLE TestAccessUsers`)
 	db.Free()
-	//time.Sleep(time.Second * 10)
+
+	//testQub(t)
+
+	if logs.GoClose() == false {
+		t.Fatal(`Ошибка остановки службы логирования`)
+	}
 }
 
-func testSave(t *testing.T) chan Command {
+func testInsert(t *testing.T) chan Command {
 	var chanenlExit = make(chan Command)
 	go func() {
 
@@ -106,7 +137,7 @@ func testSave(t *testing.T) chan Command {
 		var cntrun = cntGo
 		var db, err = mysql.NewDb(0)
 		if err != nil {
-			t.Error(err.Error())
+			t.Error(err)
 			return
 		}
 
@@ -117,7 +148,7 @@ func testSave(t *testing.T) chan Command {
 					var user = new(TestAccessUsers)
 					user.Login = lib.String.CreatePassword() + fmt.Sprintf(`%d`, i)
 					user.Email = lib.String.CreatePassword() + fmt.Sprintf(`%d`, i)
-					if err := db.Save(user, `TestAccessUsers`, `Id`); err != nil {
+					if _, err := db.Insert(user, `TestAccessUsers`); err != nil {
 						t.Error(err.Error())
 					} else {
 						idCnt++
@@ -126,7 +157,7 @@ func testSave(t *testing.T) chan Command {
 				chanenl <- Command{}
 			}()
 		}
-		t.Logf("Запущено %d паралельных программ по %d итераций в каждой (проверка Save)\n", cntrun, cntIteration)
+		t.Logf("Запущено %d паралельных программ по %d итераций в каждой (проверка Insert)\n", cntrun, cntIteration)
 
 		// завершение
 		for cntrun > 0 {
@@ -160,7 +191,7 @@ func testLoad(t *testing.T) chan Command {
 			go func() {
 				for j := 0; j < cntIteration; j++ {
 					var user = new(TestAccessUsers)
-					if err := db.Load(user, `SELECT * FROM TestAccessUsers LIMIT 0, 1`); err != nil {
+					if err := db.Select(user, `SELECT * FROM TestAccessUsers LIMIT 0, 1`); err != nil {
 						t.Error(err.Error())
 					} else {
 						idCnt++
@@ -169,7 +200,7 @@ func testLoad(t *testing.T) chan Command {
 				chanenl <- Command{}
 			}()
 		}
-		t.Logf("Запущено %d паралельных программ по %d итераций в каждой (проверка Load)\n", cntrun, cntIteration)
+		t.Logf("Запущено %d паралельных программ по %d итераций в каждой (проверка Select)\n", cntrun, cntIteration)
 
 		// завершение
 		for cntrun > 0 {
@@ -185,7 +216,7 @@ func testLoad(t *testing.T) chan Command {
 	return chanenlExit
 }
 
-func testLoadArray(t *testing.T) chan Command {
+func testLoadSlice(t *testing.T) chan Command {
 	var chanenlExit = make(chan Command)
 	go func() {
 
@@ -204,7 +235,7 @@ func testLoadArray(t *testing.T) chan Command {
 			go func() {
 				for j := 0; j < cntIteration; j++ {
 					var user = make([]*TestAccessUsers, 0)
-					if err := db.LoadArray(&user, `SELECT * FROM TestAccessUsers LIMIT 0, 1000`); err != nil {
+					if err := db.SelectSlice(&user, `SELECT * FROM TestAccessUsers LIMIT 0, 1000`); err != nil {
 						t.Error(err.Error())
 					} else {
 						idCnt += uint64(len(user))
@@ -213,7 +244,50 @@ func testLoadArray(t *testing.T) chan Command {
 				chanenl <- Command{}
 			}()
 		}
-		t.Logf("Запущено %d паралельных программ по %d итераций в каждой (проверка LoadArray)\n", cntrun, cntIteration)
+		t.Logf("Запущено %d паралельных программ по %d итераций в каждой (проверка SelectSlice)\n", cntrun, cntIteration)
+
+		// завершение
+		for cntrun > 0 {
+			<-chanenl
+			cntrun--
+		}
+		t.Logf(`Количество прочитанных записей: %d`, idCnt)
+
+		db.Free()
+		chanenlExit <- Command{}
+	}()
+	return chanenlExit
+}
+
+func testLoadMap(t *testing.T) chan Command {
+	var chanenlExit = make(chan Command)
+	go func() {
+
+		// инициализация
+		var chanenl = make(chan Command)
+		var idCnt uint64
+		var cntrun = cntGo
+		var db, err = mysql.NewDb(0)
+		if err != nil {
+			t.Error(err.Error())
+			return
+		}
+
+		// запуск программ
+		for i := 0; i < cntrun; i++ {
+			go func() {
+				for j := 0; j < cntIteration; j++ {
+					var user = make(map[uint64]*TestAccessUsers)
+					if err := db.SelectMap(&user, `SELECT * FROM TestAccessUsers LIMIT 0, 1000`); err != nil {
+						t.Error(err.Error())
+					} else {
+						idCnt += uint64(len(user))
+					}
+				}
+				chanenl <- Command{}
+			}()
+		}
+		t.Logf("Запущено %d паралельных программ по %d итераций в каждой (проверка SelectMap)\n", cntrun, cntIteration)
 
 		// завершение
 		for cntrun > 0 {
@@ -288,55 +362,55 @@ func testQuery(t *testing.T) chan Command {
 //  PRIMARY KEY (`id`)
 //) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8
 
-type MdsRecords struct {
-	Id          uint64 `db:"id"`
-	IdCreator   uint64 `db:"tuzik"`
-	IdEditor    string
-	DateCreate  time.Time
-	DateEdit    time.Time
-	NameCreator string
-	NameEditor  string
-	AuthorName  string
-	RecordName  string
-	Date        time.Time
-	Stantion    string
-	Black       bool
-	Verdikt     string
-	Following   uint64
-}
+//type MdsRecords struct {
+//	Id          uint64 `db:"id"`
+//	IdCreator   uint64 `db:"tuzik"`
+//	IdEditor    string
+//	DateCreate  time.Time
+//	DateEdit    time.Time
+//	NameCreator string
+//	NameEditor  string
+//	AuthorName  string
+//	RecordName  string
+//	Date        time.Time
+//	Stantion    string
+//	Black       bool
+//	Verdikt     string
+//	Following   uint64
+//}
 
-func TestLoad(t *testing.T) {
-	var err error
-	//var data []byte
-	//var messages []string
-	var db *mysql.Db
+//func TestLoad(t *testing.T) {
+//	var err error
+//	//var data []byte
+//	//var messages []string
+//	var db *mysql.Db
 
-	var cfg = new(mysql.CfgMysql)
-	cfg.Login = `root`
-	cfg.Password = `root`
-	cfg.Name = `zegota`
-	mysql.InitMysql(map[int8]*mysql.CfgMysql{0: cfg})
+//	var cfg = new(mysql.CfgMysql)
+//	cfg.Login = `root`
+//	cfg.Password = `root`
+//	cfg.Name = `zegota`
+//	mysql.InitMysql(map[int8]*mysql.CfgMysql{0: cfg})
 
-	if db, err = mysql.NewDb(0); err != nil {
-		t.Fatal(err.Error())
-		return
-	}
-	defer db.Free()
+//	if db, err = mysql.NewDb(0); err != nil {
+//		t.Fatal(err.Error())
+//		return
+//	}
+//	defer db.Free()
 
-	var data []*MdsRecords
-	if err = db.LoadArray(&data, "SELECT * FROM `mdsrecords`"); err != nil {
-		t.Error(err.Error())
-		return
-	}
-	logs.Dumper(data)
+//	var data []*MdsRecords
+//	if err = db.LoadArray(&data, "SELECT * FROM `mdsrecords`"); err != nil {
+//		t.Error(err.Error())
+//		return
+//	}
+//	logs.Dumper(data)
 
-	var obj = new(MdsRecords)
-	if err = db.Load(obj, "SELECT * FROM `mdsrecords` WHERE id = 78"); err != nil {
-		t.Error(err.Error())
-		return
-	}
-	logs.Dumper(obj)
+//	var obj = new(MdsRecords)
+//	if err = db.Load(obj, "SELECT * FROM `mdsrecords` WHERE id = 78"); err != nil {
+//		t.Error(err.Error())
+//		return
+//	}
+//	logs.Dumper(obj)
 
-	t.Log("done ok")
-	logs.Dumper()
-}
+//	t.Log("done ok")
+//	logs.Dumper()
+//}

@@ -22,19 +22,20 @@ func TestMailer(t *testing.T) {
 	mailer.Init(cfgMailer)
 
 	msg := mailer.NewMessageTpl(`Тема`, path+`/test`)
-	msg.To(`konstanta75@mail.ru`, `Шариков Полиграф Полиграфович`)
+	msg.
+		msg.To(`konstanta75@mail.ru`, `Шариков Полиграф Полиграфович`)
 	msg.Variables[`content`] = `Тело шаблонного сообщения`
-	if cnt, err := msg.Send(); err != nil {
+	if _, err := msg.Send(); err != nil {
 		t.Error(err.Error())
 	} else {
-		t.Logf("Успешно отправлено: [%d] сообщений", cnt)
+		t.Logf("Успешно отправлено шаблонное сообщение на адрес [%s]", `konstanta75@mail.ru`)
 	}
 
 	msg = mailer.NewMessageBody(`Тема`, `Фирма веников не вяжет`)
 	msg.To(`konstanta75@mail.ru`, `Шариков Полиграф Полиграфович`)
-	if cnt, err := msg.Send(); err != nil {
+	if _, err := msg.Send(); err != nil {
 		t.Error(err.Error())
 	} else {
-		t.Logf("Успешно отправлено: [%d] сообщений", cnt)
+		t.Logf("Успешно отправлено обычное сообщение на адрес [%s]", `konstanta75@mail.ru`)
 	}
 }

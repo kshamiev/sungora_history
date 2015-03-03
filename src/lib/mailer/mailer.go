@@ -157,7 +157,6 @@ func (self *Message) Send() (num int, err error) {
 		}
 		return num, nil
 	} else {
-		//body := []byte("Content-Type: text/html; charset=utf-8\r\nTo: " + strings.Join(self.to, ";") + "\r\n" + content)
 		body := []byte("To: " + strings.Join(self.to, ";") + "\r\n" + content)
 		// send to multiple emails in one message
 		err := smtp.SendMail(server, auth, self.fromMail, self.to, body)

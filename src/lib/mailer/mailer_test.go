@@ -28,15 +28,15 @@ func TestMailer(t *testing.T) {
 	msg := mailer.NewMessageTpl(`Тема`, path+`/test`)
 	msg.To(to, toName)
 	msg.Variables[`content`] = `Вставленное в шаблон тело сообщения`
-	if cnt, err := msg.Send(); err != nil {
+	if _, err := msg.Send(); err != nil {
 		t.Error(err.Error())
 	} else {
 		t.Logf("Успешно отправлено: [%d] сообщение на адрес %s", cnt, to)
 	}
 
 	msg = mailer.NewMessageBody(`Тема`, `Фирма веников не вяжет`)
-	msg.To(to, `Шариков Полиграф Полиграфович`)
-	if cnt, err := msg.Send(); err != nil {
+	msg.To(to, toName)
+	if _, err := msg.Send(); err != nil {
 		t.Error(err.Error())
 	} else {
 		t.Logf("Успешно отправлено: [%d] сообщение на адрес %s", cnt, to)

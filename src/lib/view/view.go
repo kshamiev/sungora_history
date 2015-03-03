@@ -1,4 +1,6 @@
-// Работа шаблонизатора
+// Библиотека: Шаблонизатор.
+//
+// Компиляция или вставка данных в html шаблон.
 package view
 
 import (
@@ -7,13 +9,14 @@ import (
 	"text/template"
 )
 
-// Шаблонизатор
+// Структура шаблонизатора
 type View struct {
-	Variables map[string]interface{} // Variable (по умолчанию пустой)
-	Functions map[string]interface{} // html/template.FuncMap (по умолчанию пустой)
+	Variables map[string]interface{} // Данные вставляемые в шаблон
+	Functions map[string]interface{} // template.FuncMap (по умолчанию пустой)
 }
 
-// NewView Шаблонизатор (конструктор)
+// Создание объекта шаблонизатор
+//	- *View шаблонизатор
 func NewView() *View {
 	var self = new(View)
 	self.Variables = make(map[string]interface{})
@@ -21,8 +24,10 @@ func NewView() *View {
 	return self
 }
 
-// ExecuteFile Выполнение шаблона (вставка данных в шаблон)
-// path - путь до шаблона
+// Выполнение шаблона (вставка данных в шаблон)
+//	+ path string абсолютный путь до шаблона
+//	- bytes.Buffer буфер собранного шаблонга с данными
+//	- error ошибка операции
 func (self *View) ExecuteFile(path string) (bytes.Buffer, error) {
 	var err error
 	var tpl *template.Template
@@ -38,7 +43,10 @@ func (self *View) ExecuteFile(path string) (bytes.Buffer, error) {
 	return ret, err
 }
 
-// ExecuteBytes Выполнение шаблона (вставка данных в шаблон)
+// Выполнение шаблона (вставка данных в шаблон)
+//	+ data []byte исходный шаблон
+//	- bytes.Buffer буфер собранного шаблонга с данными
+//	- error ошибка операции
 func (self *View) ExecuteBytes(data []byte) (bytes.Buffer, error) {
 	var err error
 	var tpl *template.Template
@@ -55,7 +63,10 @@ func (self *View) ExecuteBytes(data []byte) (bytes.Buffer, error) {
 	return ret, err
 }
 
-// ExecuteString Выполнение шаблона (вставка данных в шаблон)
+// Выполнение шаблона (вставка данных в шаблон)
+//	+ str string исходный шаблон
+//	- bytes.Buffer буфер собранного шаблонга с данными
+//	- error ошибка операции
 func (self *View) ExecuteString(str string) (bytes.Buffer, error) {
 	var err error
 	var tpl *template.Template
@@ -71,3 +82,5 @@ func (self *View) ExecuteString(str string) (bytes.Buffer, error) {
 	}
 	return ret, err
 }
+
+////

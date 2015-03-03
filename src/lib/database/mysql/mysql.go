@@ -1,4 +1,4 @@
-// Библиотека работы с БД Mysql.
+// Библиотека: Работа с БД Mysql.
 //
 // Непосредственная работа с БД. Выполнение запросов.
 //
@@ -401,7 +401,7 @@ func (self *Db) SelectSlice(ObjectSlice interface{}, sql string, params ...inter
 	return
 }
 
-// Загрузка объекта (записи) из БД.
+// Загрузка одного объекта (записи) из БД.
 //    + Object interface{} Объект структуры переданный по ссылке (пример var Object = new(Users)).
 //    Свойства структуры соответсвуют полям или столбцам в таблице.
 //    Все загружаемые свойства должны быть публичны
@@ -1120,6 +1120,8 @@ func sqlParse(sql string, param []interface{}) (string, []interface{}) {
 	dataNew = append(dataNew, strings.Join(data[pos:], "?"))
 	return strings.Join(dataNew, ""), params
 }
+
+////
 
 /*
      0  []*mysql.Field (len = 23) {

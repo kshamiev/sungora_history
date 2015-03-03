@@ -1,3 +1,4 @@
+// Библиотека: Обеспечение уникальности запущенного процесса.
 package ensuring
 
 import (
@@ -9,7 +10,7 @@ import (
 
 var fl FLock
 
-// PidFileCreate Создание PID файла с ID текущего процесса
+// Создание PID файла с ID текущего процесса
 func PidFileCreate(fileName string) (err error) {
 	var unlocked bool
 	fl, err = NewFLock(fileName)
@@ -29,12 +30,12 @@ func PidFileCreate(fileName string) (err error) {
 	return
 }
 
-// PidFileUnlock Снятие блокировки с PID файла
+// Снятие блокировки с PID файла
 func PidFileUnlock() error {
 	return fl.Unlock()
 }
 
-// CheckMemory Проверка наличия свободной памяти
+// Проверка наличия свободной памяти
 func CheckMemory(minMem int) (err error) {
 	defer func() {
 		if errPanic := recover(); errPanic != nil {

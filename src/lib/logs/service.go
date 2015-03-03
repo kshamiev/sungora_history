@@ -31,37 +31,26 @@ func GoStart(logSys service.Logger) {
 }
 
 // Завершение работы службы логирования
+//	- bool флаг успешности операции
 func GoClose() bool {
 	if cntStart == 0 {
 		reply := make(chan interface{})
-		commandlogsControl <- command{action: logsClose, result: reply}
+		commandControl <- command{action: logsClose, result: reply}
 		return (<-reply).(bool)
 	}
 	cntStart--
 	return true
 }
 
-// Cammand channel
-var commandlogsControl = make(chan command, 1000)
+// Канал передачи данных
+var commandControl = make(chan command, 1000)
 
-// Command structure
+// Структура пересылаемых данных
 type command struct {
 	action int
 	log    Log
 	level  uint8
 	result chan<- interface{}
-}
-
-// Справочник уровня ошибок
-var logsLevel = map[uint8]string{
-	8: `database`,
-	7: `journal `,
-	6: `info    `,
-	5: `notice  `,
-	4: `warning `,
-	3: `error   `,
-	2: `critical`,
-	1: `fatal   `,
 }
 
 // Допустимые команды (action)
@@ -76,7 +65,7 @@ func gologs() {
 	go func() {
 		//msg := fmt.Sprintf("%s\t[start]\r", lib.Time.Label())
 		//logsSave(msg)
-		for command := range commandlogsControl {
+		for command := range commandControl {
 			switch command.action {
 			case logsMessage:
 				msg := logsMessageCalculate(command.log, command.level)
@@ -87,7 +76,7 @@ func gologs() {
 				if fp != nil {
 					fp.Close()
 				}
-				close(commandlogsControl)
+				close(commandControl)
 				command.result <- true
 			}
 		}
@@ -96,6 +85,18 @@ func gologs() {
 }
 
 //// Сохранение лога
+
+// Справочник уровня ошибок
+var logsLevel = map[uint8]string{
+	8: `database`,
+	7: `journal `,
+	6: `info    `,
+	5: `notice  `,
+	4: `warning `,
+	3: `error   `,
+	2: `critical`,
+	1: `fatal   `,
+}
 
 var fp *os.File
 var sys service.Logger
@@ -138,7 +139,7 @@ func logsSave(msg string, level uint8) {
 // Формирование сообщения для логирования
 func logsMessageCalculate(log Log, level uint8) string {
 	// временная отметка
-	var prefix = lib.Time.Label()
+	var prefix = lib.Time.LabelFull()
 
 	// формируем
 	log.Message = strings.Replace(log.Message, "\r\n", " ", -1)

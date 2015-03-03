@@ -19,7 +19,7 @@ import (
 )
 
 var cntGo = 10
-var cntIteration = 10
+var cntIteration = 1000
 
 type Command struct {
 	Id uint64
@@ -119,8 +119,6 @@ func TestAll(t *testing.T) {
 
 	db.Query(`DROP TABLE TestAccessUsers`)
 	db.Free()
-
-	//testQub(t)
 
 	if logs.GoClose() == false {
 		t.Fatal(`Ошибка остановки службы логирования`)

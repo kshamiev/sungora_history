@@ -1,4 +1,4 @@
-// Библиотека кеширования
+// Библиотека: Кеширование
 package cache
 
 import (
@@ -32,11 +32,11 @@ const (
 	TD30 = time.Hour * 24 * 30
 )
 
-// Канал передачи команд
-var commandControl = make(chan commandCache)
+// Канал передачи данных
+var commandControl = make(chan command)
 
-// Команда
-type commandCache struct {
+// Структура пересылаемых данных
+type command struct {
 	action  int
 	key     string
 	value   interface{}
@@ -53,6 +53,7 @@ const (
 	cacheClose
 )
 
+// Storage
 var (
 	store        = make(map[string]reflect.Value)
 	storeTimeOut = make(map[string]time.Time)
@@ -63,9 +64,8 @@ func init() {
 	goCache()
 }
 
-// Служба кеширования
 func goCache() {
-	// Запуск механизма кеширования
+	// Служба кеширования
 	go func() {
 		for command := range commandControl {
 			switch command.action {
@@ -131,9 +131,9 @@ func SetLink(key, keyTarget string) {
 //    + timeout ...time.Duration время жизни кеша в секундах
 func Set(key string, value interface{}, timeout ...time.Duration) {
 	if len(timeout) == 0 {
-		commandControl <- commandCache{action: set, key: key, value: value}
+		commandControl <- command{action: set, key: key, value: value}
 	} else {
-		commandControl <- commandCache{action: set, key: key, value: value, timeout: timeout[0]}
+		commandControl <- command{action: set, key: key, value: value, timeout: timeout[0]}
 	}
 }
 
@@ -145,9 +145,9 @@ func Set(key string, value interface{}, timeout ...time.Duration) {
 func Get(key string, timeout ...time.Duration) (value interface{}) {
 	reply := make(chan interface{})
 	if len(timeout) == 0 {
-		commandControl <- commandCache{action: get, key: key, result: reply}
+		commandControl <- command{action: get, key: key, result: reply}
 	} else {
-		commandControl <- commandCache{action: get, key: key, result: reply, timeout: timeout[0]}
+		commandControl <- command{action: get, key: key, result: reply, timeout: timeout[0]}
 	}
 	return <-reply
 }
@@ -155,14 +155,14 @@ func Get(key string, timeout ...time.Duration) (value interface{}) {
 // Удаление из кеша
 //    + key string индекс кеша
 func Rem(key string) {
-	commandControl <- commandCache{action: rem, key: key}
+	commandControl <- command{action: rem, key: key}
 }
 
 // Количество данных в кеше
 //    - int количество элементов хранимых в кеше
 func Len() int {
 	reply := make(chan interface{})
-	commandControl <- commandCache{action: length, result: reply}
+	commandControl <- command{action: length, result: reply}
 	return (<-reply).(int)
 }
 
@@ -170,6 +170,8 @@ func Len() int {
 //    - bool признак успешности заверешения работы
 func GoClose() bool {
 	reply := make(chan interface{})
-	commandControl <- commandCache{action: cacheClose, result: reply}
+	commandControl <- command{action: cacheClose, result: reply}
 	return (<-reply).(bool)
 }
+
+////

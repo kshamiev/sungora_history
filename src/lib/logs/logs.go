@@ -1,4 +1,5 @@
-// Логирование и журналирвоание работы приложения.
+// Библиотека: Логирование и журналирвоание работы приложения.
+//
 // Инструменты для вывода отладочной информации (dumper.go)
 package logs
 
@@ -121,7 +122,7 @@ func (self *Log) Init(moduleName, login string) {
 func (self *Log) Info(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 6 {
-		commandlogsControl <- command{action: logsMessage, log: *self, level: 6}
+		commandControl <- command{action: logsMessage, log: *self, level: 6}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -134,7 +135,7 @@ func (self *Log) Info(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Notice(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 5 {
-		commandlogsControl <- command{action: logsMessage, log: *self, level: 5}
+		commandControl <- command{action: logsMessage, log: *self, level: 5}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -147,7 +148,7 @@ func (self *Log) Notice(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Warning(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 4 {
-		commandlogsControl <- command{action: logsMessage, log: *self, level: 4}
+		commandControl <- command{action: logsMessage, log: *self, level: 4}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -160,7 +161,7 @@ func (self *Log) Warning(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Error(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 3 {
-		commandlogsControl <- command{action: logsMessage, log: *self, level: 3}
+		commandControl <- command{action: logsMessage, log: *self, level: 3}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -173,7 +174,7 @@ func (self *Log) Error(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Critical(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 2 {
-		commandlogsControl <- command{action: logsMessage, log: *self, level: 2}
+		commandControl <- command{action: logsMessage, log: *self, level: 2}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -186,7 +187,7 @@ func (self *Log) Critical(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Fatal(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Level >= 1 {
-		commandlogsControl <- command{action: logsMessage, log: *self, level: 1}
+		commandControl <- command{action: logsMessage, log: *self, level: 1}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -200,7 +201,7 @@ func (self *Log) Journal(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	self.Message = `[` + self.login + `] ` + self.Message
 	if cfg.Journal == true {
-		commandlogsControl <- command{action: logsMessage, log: *self, level: 7}
+		commandControl <- command{action: logsMessage, log: *self, level: 7}
 	}
 	self.Err = errors.New(self.Message)
 	return self
@@ -213,8 +214,10 @@ func (self *Log) Journal(codeLocal int, params ...interface{}) *Log {
 func (self *Log) Database(codeLocal int, params ...interface{}) *Log {
 	self.Code, self.Message = i18n.Message(self.moduleName, cfg.Lang, codeLocal, params...)
 	if cfg.Database == true {
-		commandlogsControl <- command{action: logsMessage, log: *self, level: 8}
+		commandControl <- command{action: logsMessage, log: *self, level: 8}
 	}
 	self.Err = errors.New(self.Message)
 	return self
 }
+
+////

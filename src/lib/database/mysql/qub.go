@@ -24,8 +24,7 @@ type Qub struct {
 // Создание объекта конструктора запросов
 //    - *Qub конструктор запросов
 func NewQub() face.QubFace {
-	var self = new(Qub)
-	return self
+	return new(Qub)
 }
 
 // Выборка

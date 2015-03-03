@@ -1,4 +1,4 @@
-// Бибилотека для раюоты с электронной почтой (RFC-822).
+// Бибилотека: Раюота с электронной почтой (RFC-822).
 //
 // Источник: http://github.com/gogits/gogs/modules/mailer
 package mailer

@@ -22,7 +22,6 @@ type Time struct {
 //	- *Time объект агрегатор функций-методов
 func NewTime(timeZone string) *Time {
 	var self = new(Time)
-	// Инициализация временной зоны
 	if loc, err := time.LoadLocation(timeZone); err == nil {
 		self.Location = loc
 	} else {
@@ -32,30 +31,44 @@ func NewTime(timeZone string) *Time {
 }
 
 // Получение текущей даты и времени
+//	- time.Time Дата и время в определенной конфигом временной зоне
 func (self *Time) Now() time.Time {
 	return time.Now().In(self.Location)
 }
 
-// Формирование даты и времени с наносекундами для записи в лог файл
-func (self *Time) Label() string {
-	t := self.Now()
-	return fmt.Sprintf("%04d.%02d.%02d %02d:%02d:%02d:%09d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond())
+// Формирование даты и времени с наносекундами для записи в лог файлы
+//	- string ГГГГ.ММ.ДД ЧЧ:ММ:СС:МЛМКНС
+func (self *Time) LabelFull(t ...time.Time) string {
+	if len(t) == 0 {
+		t = append(t, self.Now())
+	}
+	return fmt.Sprintf("%04d.%02d.%02d %02d:%02d:%02d:%09d",
+		t[0].Year(), t[0].Month(), t[0].Day(), t[0].Hour(), t[0].Minute(), t[0].Second(), t[0].Nanosecond())
 }
 
 // Формирование даты и времени
-func (self *Time) LabelTime() string {
-	t := self.Now()
-	return fmt.Sprintf("%04d.%02d.%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+//	- string ГГГГ.ММ.ДД ЧЧ:ММ:СС
+func (self *Time) LabelTime(t ...time.Time) string {
+	if len(t) == 0 {
+		t = append(t, self.Now())
+	}
+	return fmt.Sprintf("%04d.%02d.%02d %02d:%02d:%02d",
+		t[0].Year(), t[0].Month(), t[0].Day(), t[0].Hour(), t[0].Minute(), t[0].Second())
 }
 
 // Формирование даты
-func (self *Time) LabelDate() string {
-	t := self.Now()
-	return fmt.Sprintf("%04d.%02d.%02d", t.Year(), t.Month(), t.Day())
+//	- string ГГГГ.ММ.ДД
+func (self *Time) LabelDate(t ...time.Time) string {
+	if len(t) == 0 {
+		t = append(t, self.Now())
+	}
+	return fmt.Sprintf("%04d.%02d.%02d", t[0].Year(), t[0].Month(), t[0].Day())
 }
 
-// Перевод time.Duration в человеческий формат
-// 07:23:12 -> time.Duration
+// Перевод времени из человеческого формата в time.Duration (07:23:12 -> time.Duration)
+//	+ duration string 07:23:12
+//	- time.Duration
+//	- bool флаг успешности операции
 func (self *Time) ParseDuration(duration string) (t time.Duration, flag bool) {
 	list := strings.Split(duration, ":")
 	if len(list) != 3 {
@@ -70,9 +83,10 @@ func (self *Time) ParseDuration(duration string) (t time.Duration, flag bool) {
 	return t, true
 }
 
-// Парсинг строки даты и времени в объект time
-// Использует timeLocation := time.UTC (see: time.LoadLocation(...))
-// sample: datetime := "y[-./]m[-./]d h:m:s" || "d[-./]m[-./]y h:m:s"
+// Перевод даты и времени из человеческого формата в time.Time
+//	+ datetime string y[-./]m[-./]d h:m:s || d[-./]m[-./]y h:m:s
+//	- time.Time
+//	- bool флаг успешности операции
 func (self *Time) Parse(datetime string) (t time.Time, flag bool) {
 	datetime = strings.Trim(datetime, " ")
 	listRoot := strings.Split(datetime, " ")
@@ -101,12 +115,6 @@ func (self *Time) Parse(datetime string) (t time.Time, flag bool) {
 		return t, false
 	}
 	return t, true
-}
-
-// return ( 18-05-2010 23:34:21 )
-func (self *Time) View(t time.Time) string {
-	t.In(self.Location)
-	return fmt.Sprintf("%02d-%02d-%04d %02d:%02d:%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute(), t.Second())
 }
 
 ////

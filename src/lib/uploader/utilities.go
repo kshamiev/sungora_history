@@ -15,7 +15,7 @@ const (
 	characterMap string = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 )
 
-// randString Псевто-случайной строки символов указанной длинны из заданного набора символов
+// Псевто-случайной строки символов указанной длинны из заданного набора символов
 func randString(lenght int) string {
 	var buf bytes.Buffer
 
@@ -28,7 +28,7 @@ func randString(lenght int) string {
 	return buf.String()
 }
 
-// checkFile Проверка файла
+// Проверка файла
 func checkFile(fileName string) fileInfo {
 	var ret fileInfo
 	var err error

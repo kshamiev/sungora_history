@@ -35,11 +35,11 @@ func Message(moduleName, lang string, codeLocal int, params ...interface{}) (cod
 	var ok bool
 	// определение кода
 	if codeLocal == 0 {
-		code = 100000
+		code = 0
 	} else if _, ok = ModuleCode[moduleName]; ok == true {
 		code = ModuleCode[moduleName]*1000 + codeLocal
 	} else {
-		code = -1
+		code = codeLocal
 	}
 	// определение сообщения
 	if message, ok = Messages[lang][code]; ok == true {

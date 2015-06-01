@@ -159,8 +159,8 @@ func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 
 	// Запуск и остановка служб модулей приложения
 	// Destructor for the modules, daemons and etc.
-	setup.GoServiceStart1()
-	defer setup.GoServiceStop1()
+	setup.GoServiceStart()
+	defer setup.GoServiceStop()
 
 	// Running a web servers
 	for i := range core.Config.Server {

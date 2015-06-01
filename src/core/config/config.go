@@ -25,6 +25,7 @@ import (
 // Получение и инициализация параметров коммандной строки
 func GetCmdArgs() (args *typConfig.CmdArgs, err error) {
 	args = new(typConfig.CmdArgs)
+	logs.Dumper(os.Args)
 	if len(os.Args) > 1 {
 		args.Mode = os.Args[1]
 	}
@@ -34,8 +35,8 @@ func GetCmdArgs() (args *typConfig.CmdArgs, err error) {
 	// - проверки
 	if args.Mode == `-h` || args.Mode == `-help` || args.Mode == `--help` {
 		var str string
-		str += "Usage of %s: %s [-mode] [-cfgFile]\n"
-		str += "  -mode=\"\": Режим запуска приложения:\n"
+		str += "Usage of %s: %s [mode] [cfgFile]\n"
+		str += "  mode: Режим запуска приложения:\n"
 		str += "\tinstall - Установка сервиса в операционной системе, используется в windows, mac os x\n"
 		str += "\tremove - Удаление сервиса из операционной системы\n"
 		str += "\tstart - Запуск ранее установленного сервиса\n"
@@ -43,7 +44,7 @@ func GetCmdArgs() (args *typConfig.CmdArgs, err error) {
 		str += "\tupdate - Обновление приложенияv\n"
 		str += "\trun - Запуск в режиме разработки выход по 'Ctrl+C'\n"
 		str += "\ttest - Тестирование работоспособности и выход\n"
-		str += "  -cfgFile=\"\": Полный путь до конфигурационного файла:\n"
+		str += "  cfgFile: Полный путь до конфигурационного файла:\n"
 		fmt.Fprintf(os.Stderr, str, filepath.Base(os.Args[0]), filepath.Base(os.Args[0]))
 		return nil, errors.New("Help startup request")
 	}

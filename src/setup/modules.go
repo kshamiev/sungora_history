@@ -8,11 +8,11 @@ import (
 )
 
 // Запуск работы служб модулей приложения
-func GoServiceStart1() {
+func GoServiceStart() {
 	baseService.GoStart() // слжужбы базового модуля
 }
 
 // Завершение работы служб модулей приложения
-func GoServiceStop1() {
+func GoServiceStop() {
 	baseService.GoStop() // слжужбы базового модуля
 }

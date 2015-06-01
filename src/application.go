@@ -20,6 +20,7 @@ import (
 	"lib/database"
 	"lib/ensuring"
 	"lib/logs"
+	"setup"
 	typConfig "types/config"
 )
 
@@ -158,8 +159,8 @@ func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 
 	// Запуск и остановка служб модулей приложения
 	// Destructor for the modules, daemons and etc.
-	goServiceStart()
-	defer goServiceStop()
+	setup.GoServiceStart1()
+	defer setup.GoServiceStop1()
 
 	// Running a web servers
 	for i := range core.Config.Server {

@@ -1,6 +1,6 @@
 // Разработка динамической внутренней перезагрузки приложения при появлении обновления.
 //
-//
+// Запускается по адресу http://localhost:9001/
 package main
 
 import (
@@ -20,7 +20,7 @@ var tpl = `
 
     <form action="/" method="post">
         <input type="hidden" name="act" value="Login">
-        <table width="300px" cellspacing="1" cellpadding="0" border="0" align="center">
+        <table width="300px" cellspacing="2" cellpadding="4" border="1" align="center">
             <tr>
                 <th colspan="2">Вход</th>
             </tr>
@@ -48,6 +48,9 @@ var tpl = `
 <html>
 `
 
+var anError = `<p style="color: red;">%s</p>`
+var anSuccess = `<p style="color: green;"><pre>%s</pre></p>`
+
 func main() {
 	http.HandleFunc("/", homePage)
 	if err := http.ListenAndServe(":9001", nil); err != nil {
@@ -57,16 +60,11 @@ func main() {
 
 func homePage(writer http.ResponseWriter, request *http.Request) {
 	err := request.ParseForm() // Must be called before writing response
-	fmt.Fprint(writer, pageTop, form)
+	fmt.Fprint(writer, tpl)
 	if err != nil {
 		fmt.Fprintf(writer, anError, err)
 	} else {
-		if numbers, message, ok := processRequest(request); ok {
-			stats := getStats(numbers)
-			fmt.Fprint(writer, formatStats(stats))
-		} else if message != "" {
-			fmt.Fprintf(writer, anError, message)
-		}
+		fmt.Fprintf(writer, anSuccess, logs.DumperString(request.Form))
 	}
-	fmt.Fprint(writer, pageBottom)
+	fmt.Println("/ OK")
 }

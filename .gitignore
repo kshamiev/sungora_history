@@ -11,6 +11,7 @@ src/code.google.com
 src/speter.net
 src/bitbucket.org
 src/gopkg.in
+src/golang.org
 
 # IDE
 .project

@@ -50,7 +50,7 @@ git clone https://github.com/kshamiev/sungora projectName
 Инсталируем сторонние библотеки:
 
 	находясь в корневой папке проекта (репозитория):
-	go get bitbucket.org/kardianos/service
+	go get github.com/kardianos/service
 	go get github.com/dchest/captcha
 	go get github.com/robfig/config
 	go get github.com/ziutek/mymysql/mysql
@@ -128,7 +128,7 @@ application -h справка по запуску программы (проек
 `go test -v lib/cache`
 
 **Системная библиотека работы с БД mysql**
-	
+
 `go test -v lib/database/mysql`
 
 **Системная библиотека логирования и журналирования**
@@ -136,5 +136,5 @@ application -h справка по запуску программы (проек
 `go test -v lib/logs`
 
 **Системная библиотека работы с почтой**
-	
+
 `go test -v lib/mailer`

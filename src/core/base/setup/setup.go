@@ -16,7 +16,7 @@ func init() {
 	// Роутинг
 	initUri()
 
-	// Интернационализация. Код модуля
+	// Интернационализация
 	i18n.ModuleCode[config.MODULE_NAME] = config.MODULE_CODE
 
 	// Переопределения ядра

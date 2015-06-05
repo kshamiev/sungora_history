@@ -95,14 +95,14 @@ func CheckControllers() (data []*typDb.Controllers) {
 		// путь до контроллера и его метода в неправильном формате
 		l := strings.Split(c.Path, `/`)
 		if len(l) != 3 {
-			logs.Base.Critical(105, c.Path)
+			logs.Base.Critical(1050, c.Path)
 			data = append(data, c)
 			continue
 		}
 		// нет такого контроллера
 		ctrF, ok := Controller[l[0]+`/`+l[1]]
 		if false == ok {
-			logs.Base.Critical(106, l[0], l[1])
+			logs.Base.Critical(1060, l[0], l[1])
 			data = append(data, c)
 			continue
 		}
@@ -111,7 +111,7 @@ func CheckControllers() (data []*typDb.Controllers) {
 		objValue := reflect.ValueOf(ctr)
 		met := objValue.MethodByName(l[2])
 		if met.IsValid() == false {
-			logs.Base.Critical(107, l[0], l[1], l[2])
+			logs.Base.Critical(1070, l[0], l[1], l[2])
 			data = append(data, c)
 			continue
 		}

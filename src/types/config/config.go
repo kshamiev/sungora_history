@@ -10,7 +10,7 @@ import (
 
 // Воспринимаемые приложением параметры коммандной строки
 type CmdArgs struct {
-	Mode       string // Режим работы приложения
+	Service    string // Режим работы приложения
 	ConfigFile string // Явное указание месторасположения и имени конфигурационного файла
 }
 
@@ -33,6 +33,12 @@ type Configuration struct {
 
 // Главная конфигурация
 type Main struct {
+	// Название приложения (внутреннее)
+	AppName string
+	// Название приложения (на экране)
+	AppDisplay string
+	// Описание приложения
+	AppDescription string
 	// Рабочая папка приложения
 	WorkDir string
 	// Сертификаты SSL
@@ -60,7 +66,7 @@ type Main struct {
 	// Объем используемой оперативной памяти наличие которой нужно проверить
 	Memory int
 	// Режим работы приложения
-	Mode string
+	Service string
 	// Месторасположене и имя конфигурационного файла.
 	// Пример: /root/myconf.conf
 	ConfigFile string

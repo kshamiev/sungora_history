@@ -117,7 +117,7 @@ func (self *Db) SelectData(object interface{}) (err error) {
 			continue
 		}
 		if false == field.CanSet() {
-			return logs.Base.Error(803, source).Err
+			return logs.Base.Error(8030, source).Err
 		}
 		var sql string
 		if db == `cross` {
@@ -136,7 +136,7 @@ func (self *Db) SelectData(object interface{}) (err error) {
 				return
 			}
 		default:
-			return logs.Base.Error(812, source).Err
+			return logs.Base.Error(8120, source).Err
 		}
 	}
 	return err

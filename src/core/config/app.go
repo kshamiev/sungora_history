@@ -28,10 +28,13 @@ func App() (err error) {
 	if err != nil {
 		return
 	}
+
 	// инициализация роутинга
 	app.ReInitRoute()
+
 	// проверка контроллеров
 	app.CheckControllers()
+
 	return
 }
 
@@ -248,6 +251,7 @@ func loadDataFromDb() (err error) {
 	// Очистка
 	ConfigControllers = nil
 	ConfigUri = nil
+
 	return
 }
 
@@ -310,7 +314,7 @@ func loadDataFromMemory() (err error) {
 	u.Login = `developer`
 	u.Email = `developer@developer.developer`
 	if u.Id != core.Config.Auth.DevUID {
-		return logs.Base.Fatal(131).Err
+		return logs.Base.Fatal(1310).Err
 	}
 	app.Data.Users = append(app.Data.Users, u)
 	//
@@ -319,7 +323,7 @@ func loadDataFromMemory() (err error) {
 	u.Login = `guest`
 	u.Email = `guest@guest.guest`
 	if u.Id != core.Config.Auth.GuestUID {
-		return logs.Base.Fatal(132).Err
+		return logs.Base.Fatal(1320).Err
 	}
 	app.Data.Users = append(app.Data.Users, u)
 	core.Config.Auth.GuestUID = u.Id
@@ -330,7 +334,7 @@ func loadDataFromMemory() (err error) {
 	g.Id = model.GenerateId(`Groups`)
 	g.Name = `developer`
 	if g.Id != core.Config.Auth.DevUID {
-		return logs.Base.Fatal(133).Err
+		return logs.Base.Fatal(1330).Err
 	}
 	app.Data.Groups = append(app.Data.Groups, g)
 	core.Config.Auth.DevUID = g.Id
@@ -339,7 +343,7 @@ func loadDataFromMemory() (err error) {
 	g.Id = model.GenerateId(`Groups`)
 	g.Name = `guest`
 	if g.Id != core.Config.Auth.GuestUID {
-		return logs.Base.Fatal(134).Err
+		return logs.Base.Fatal(1340).Err
 	}
 	app.Data.Groups = append(app.Data.Groups, g)
 	core.Config.Auth.GuestUID = g.Id

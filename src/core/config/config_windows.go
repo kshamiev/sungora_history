@@ -8,7 +8,10 @@ import (
 
 // searchConfigPaths Инициализация списка путей расположения конфигурационного файла
 func searchConfigPaths() (pathConfig []string) {
-	var f = `/` + strings.Replace(filepath.Base(os.Args[0]), `.exe`, `.conf`, 1)
+
+	arr := strings.Split(filepath.Base(os.Args[0]), `.`)
+	arr[len(arr)-1] = `conf`
+	var f = `/` + strings.Join(arr, `.`)
 	p, _ := filepath.Abs(os.Args[0])
 	p = filepath.Dir(p)
 

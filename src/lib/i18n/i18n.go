@@ -15,12 +15,14 @@ var ModuleCode = map[string]int{
 
 // Сообщения всех уровней на разных языках
 // Заполняется в момент инициализации модулей при старте приложения
-var Messages = map[string]map[int]string{
-	`ru-ru`: {
-		100100: `Тестовое сообщение с параметром: [%s]`,
-	},
-	`en-en`: {
-		100100: `Test message with a parameter: [%s]`,
+var Messages = map[string]map[string]map[int]string{
+	`base`: {
+		`ru-ru`: {
+			1000: `Тестовое сообщение с параметром: [%s]`,
+		},
+		`en-en`: {
+			1000: `Test message with a parameter: [%s]`,
+		},
 	},
 }
 
@@ -33,17 +35,11 @@ var Messages = map[string]map[int]string{
 // - string сформированное сообщение на нужном языке
 func Message(moduleName, lang string, codeLocal int, params ...interface{}) (code int, message string) {
 	var ok bool
-	// определение кода
-	if codeLocal == 0 {
-		code = 0
-	} else if _, ok = ModuleCode[moduleName]; ok == true {
-		code = ModuleCode[moduleName]*1000 + codeLocal
-	} else {
-		code = codeLocal
-	}
-	// определение сообщения
-	if message, ok = Messages[lang][code]; ok == true {
+	code = codeLocal
+	if message, ok = Messages[moduleName][lang][codeLocal]; ok == true {
+		code = ModuleCode[moduleName]*10000 + codeLocal
 		message = fmt.Sprintf(message, params...)
+
 	} else if 0 < len(params) {
 		if s, ok := params[0].(string); ok == true {
 			message = fmt.Sprintf(s, params[1:]...)
@@ -53,7 +49,14 @@ func Message(moduleName, lang string, codeLocal int, params ...interface{}) (cod
 }
 
 // Текстовые данные на разных языках под текстовыми ключами
-var Data = make(map[string]map[string]string)
+var Data = map[string]map[string]string{
+	`ru-ru`: {
+		`key`: `value`,
+	},
+	`en-en`: {
+		`key`: `value`,
+	},
+}
 
 // Перевод по ключевому слову
 // + lang string язык

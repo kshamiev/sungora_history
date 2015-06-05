@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"bitbucket.org/kardianos/service"
+	"github.com/kardianos/service"
 
 	"lib"
 )

@@ -7,139 +7,117 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
-	"os/signal"
+	"log"
 	"runtime"
+	"time"
 
-	"bitbucket.org/kardianos/service"
+	"github.com/kardianos/service"
 
+	"app/setup"
 	"core"
 	coreConfig "core/config"
 	"core/server"
 	"lib/database"
 	"lib/ensuring"
 	"lib/logs"
-	"setup"
 	typConfig "types/config"
 )
 
-const (
-	APP_NAME         string = "Sungora"
-	APP_DISPLAY_NAME string = "Sungora CMF"
-	APP_DESCRIPTION  string = "Description Sungora CMF"
-)
+var logger service.Logger
 
-var log service.Logger
-
+// Service setup.
+//   Define service config.
+//   Create the service.
+//   Setup the logger.
+//   Handle service controls (optional).
+//   Run the service.
 func main() {
 
-	// Входные данные командной строки
-	var args, err = coreConfig.GetCmdArgs()
-	if err != nil {
-		return
-	}
+	var err error
+
+	// Входные параметры командной строки
+	p1 := flag.String("service", "", "Control the system service.")
+	p2 := flag.String("config", "", "Path config file.")
+	flag.Parse()
+	var cmdArgs = new(typConfig.CmdArgs)
+	cmdArgs.Service = (*p1)
+	cmdArgs.ConfigFile = (*p2)
 
 	// Глобальная конфигурация приложения
-	if err = coreConfig.Init(args); err != nil {
-		fmt.Println(err.Error())
+	if err = coreConfig.Init(cmdArgs); err != nil {
+		fmt.Println(err)
 		return
 	}
 
 	// Инициализация сервиса
-	var s service.Service
-	s, err = service.NewService(APP_NAME, APP_DISPLAY_NAME, APP_DESCRIPTION)
+	svcConfig := &service.Config{
+		Name:        core.Config.Main.AppName,
+		DisplayName: core.Config.Main.AppDisplay,
+		Description: core.Config.Main.AppDescription,
+	}
+
+	prg := new(app)
+	s, err := service.New(prg, svcConfig)
 	if err != nil {
-		fmt.Printf("%s unable to start: %s", APP_DISPLAY_NAME, err)
+		log.Fatal(err)
+	}
+	logger, err = s.Logger(nil)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
-	log = s
 
 	// Запуск приложения в выбранном режиме
-	switch args.Mode {
-	case "install":
-		err = s.Install()
+	if cmdArgs.Service != `` {
+		err := service.Control(s, cmdArgs.Service)
 		if err != nil {
-			fmt.Printf("Failed to install: %s\n", err)
-			return
+			fmt.Printf("Valid actions: %q\n", service.ControlAction)
+			fmt.Println(err)
 		}
-		fmt.Printf("Service \"%s\" installed.\n", APP_DISPLAY_NAME)
-	case "remove":
-		err = s.Remove()
-		if err != nil {
-			fmt.Printf("Failed to remove: %s\n", err)
-			return
-		}
-		fmt.Printf("Service \"%s\" removed.\n", APP_DISPLAY_NAME)
-	case "start":
-		err = s.Start()
-		if err != nil {
-			fmt.Printf("Failed to start: %s\n", err)
-			return
-		}
-		fmt.Printf("Service \"%s\" started.\n", APP_DISPLAY_NAME)
-	case "stop":
-		err = s.Stop()
-		if err != nil {
-			fmt.Printf("Failed to stop: %s\n", err)
-			return
-		}
-		fmt.Printf("Service \"%s\" stopped.\n", APP_DISPLAY_NAME)
-	case "run", "test":
-		goAppStart(args)
-	default:
-		err = s.Run(func() error {
-			// start
-			go goAppStart(args)
-			return nil
-		}, func() error {
-			// stop
-			goAppStop()
-			return nil
-		})
-		if err != nil {
-			s.Error(err.Error())
-		}
+		return
+	}
+	err = s.Run()
+	if err != nil || true {
+		logger.Error(err)
 	}
 }
 
-// Каналы управления запуском и остановом приложения
-var (
-	chanelAppStop    = make(chan os.Signal, 1)
-	chanelAppControl = make(chan os.Signal, 1)
-)
-
-// goAppStop Stop an application
-func goAppStop() {
-	chanelAppControl <- os.Interrupt
-	<-chanelAppStop
+// Program structures.
+//  Define Start and Stop methods.
+type app struct {
+	exit chan struct{}
 }
 
-// goAppStart Launch an application
-func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
-	defer func() {
-		if code != 910 {
-			ensuring.PidFileUnlock()
-		}
-		chanelAppStop <- os.Interrupt
-	}()
+// Запуск работы приложения
+func (self *app) Start(s service.Service) error {
+	self.exit = make(chan struct{})
+	go self.run()
+	return nil
+}
 
+// Приложение
+func (self *app) run() (err error) {
 	// Запуск и остановка службы логирования
-	logs.GoStart(log)
+	logs.GoStart(logger)
+	logger.Info("Start application: " + core.Config.Main.AppName)
 	defer logs.GoClose()
+	defer logger.Info("Stop application: " + core.Config.Main.AppName)
 
 	// Create a PID file and lock on record, control run one copy of the application
 	if err = ensuring.PidFileCreate(core.Config.Main.Pid); err != nil {
-		logs.Base.Fatal(910, err.Error())
-		return err, 910
+		logs.Base.Fatal(9100, err)
+		return
 	}
+	ensuring.PidFileUnlock()
 
 	// Setting to use the maximum number of sockets and cores
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Checking the available memory (in mb)
 	if err = ensuring.CheckMemory(core.Config.Main.Memory); err != nil {
-		logs.Base.Fatal(900, err.Error())
-		return err, 900
+		logs.Base.Fatal(9000, err)
+		return
 	}
 	runtime.GC()
 
@@ -147,14 +125,14 @@ func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 	if core.Config.Main.UseDb > 0 {
 		// Checking availability of databases
 		if err = database.CheckConnect(); err != nil {
-			return err, 920
+			return
 		}
 	}
 
-	// Инициализация системных данных
+	// Инициализация данных приложения
 	if err = coreConfig.App(); err != nil {
-		logs.Base.Fatal(930, err.Error())
-		return err, 930
+		logs.Base.Fatal(9300, err)
+		return
 	}
 
 	// Запуск и остановка служб модулей приложения
@@ -167,29 +145,31 @@ func goAppStart(args *typConfig.CmdArgs) (err error, code int) {
 		server.GoStart(fmt.Sprintf(`server%d`, i), core.Config.Server[i])
 	}
 
-	// The correctness of the application is closed by a signal
-	if args.Mode == `` || args.Mode == `run` {
-		signal.Notify(chanelAppControl, os.Interrupt)
-		<-chanelAppControl
+	// Контроль завершения работы приложения
+	var flag bool
+	for {
+		select {
+		case <-self.exit:
+			flag = true
+		default:
+			time.Sleep(time.Second * 1)
+			logger.Infof("Still running at %v...", time.Now().String())
+		}
+		if flag == true {
+			break
+		}
 	}
 
+	// Stopping a web servers
 	for i := range core.Config.Server {
 		server.GoStop(fmt.Sprintf(`server%d`, i))
 	}
 
-	// The correctness of the application is closed by a signal
-	//var appExit bool
-	//signal.Notify(chanelServerExit, os.Interrupt)
-	//for appExit == false {
-	//	select {
-	//	case <-chanelServerExit:
-	//		for i := range core.Config.Server {
-	//			server.GoStop(fmt.Sprintf(`server%d`, i))
-	//		}
-	//		appExit = true
-	//	default:
-	//		time.Sleep(time.Second * 1)
-	//	}
-	//}
 	return
+}
+
+// Завершение работы приложения
+func (self *app) Stop(s service.Service) error {
+	close(self.exit)
+	return nil
 }

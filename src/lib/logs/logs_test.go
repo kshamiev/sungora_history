@@ -34,14 +34,14 @@ func TestLog(t *testing.T) {
 	logs.GoStart(nil)
 
 	logs.Base.Info(0, `путь до файл лога %s`, cfglogs.File)
-	logs.Base.Info(100, `Message Info`)
-	logs.Base.Notice(100, `Message Notice`)
-	logs.Base.Warning(100, `Message Warning`)
-	logs.Base.Error(100, `Message Error`)
-	logs.Base.Critical(100, `Message Critical`)
-	logs.Base.Fatal(100, `Message Fatal`)
-	logs.Base.Database(100, `Message Database`)
-	logs.Base.Journal(100, `Message Journal`)
+	logs.Base.Info(1000, `Message Info`)
+	logs.Base.Notice(1000, `Message Notice`)
+	logs.Base.Warning(1000, `Message Warning`)
+	logs.Base.Error(1000, `Message Error`)
+	logs.Base.Critical(1000, `Message Critical`)
+	logs.Base.Fatal(1000, `Message Fatal`)
+	logs.Base.Database(1000, `Message Database`)
+	logs.Base.Journal(1000, `Message Journal`)
 
 	if logs.GoClose() == false {
 		t.Fatal(`Ошибка остановки службы логирования`)

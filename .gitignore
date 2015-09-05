@@ -5,6 +5,9 @@
 *.conf
 *.log
 
+# Project
+test.go
+
 # External dependences
 src/github.com
 src/code.google.com

@@ -41,5 +41,5 @@ _testmain.go
 *.exe
 *.test
 
-vendor/**
-!vendor/manifest
+src/vendor/**
+!src/vendor/manifest

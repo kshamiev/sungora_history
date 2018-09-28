@@ -26,6 +26,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/ziutek/mymysql",
+			"repository": "https://github.com/ziutek/mymysql",
+			"vcs": "git",
+			"revision": "6b05b0cf718f8ee11bc5e18fe78ea7cef0388dc6",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "golang.org/x/sys/windows",
 			"repository": "https://go.googlesource.com/sys",
 			"vcs": "git",

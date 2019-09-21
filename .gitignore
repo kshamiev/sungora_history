@@ -1,45 +1,35 @@
-# Compiled Object files, Static and Dynamic libs (Shared Objects)
-*.o
-*.a
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
 *.so
-*.conf
+*.dylib
+*.test
 *.log
+*.env
+*.out
 
-# External dependences
-src/github.com
-src/code.google.com
-src/speter.net
-src/bitbucket.org
-src/gopkg.in
+# Folder
+/config
+/api
+bin
+dev
+log
+logs
+vendor
+
+# Files
+/Makefile
+/*.xlsx
+/*.sql
+/*.yaml
+/*.yml
 
 # IDE
 .project
 .settings
 .idea
-
-# Folders
-_obj
-_test
-bin
-pkg
-run
-dev
-log
-
-# Architecture specific extensions/prefixes
-*.[568vq]
-[568vq].out
-
-*.cgo1.go
-*.cgo2.c
-_cgo_defun.c
-_cgo_gotypes.go
-_cgo_export.*
-
-_testmain.go
-
-*.exe
-*.test
-
-src/vendor/**
-!src/vendor/manifest
+.DS_Store
+.dbeaver
+/data/dbeaver/Scripts/migrations
+/data/dbeaver/.dbeaver-data-sources.xml

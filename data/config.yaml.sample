@@ -1,0 +1,39 @@
+app:
+  sessionTimeout: 604800s
+  domain: "localhost" # Change
+  mode: "dev" # Change
+  dirWork: "/home/kshamiev/work/sungora/assets" # Change
+  serviceName: "sungora"
+
+lg:
+  title:      "sungora-dev" # Change
+  output:     "stdout"
+  formatter:  "json"
+  level:      trace # Change enum (trace|info|error)
+
+http:
+  proto: "http"
+  host: "localhost"
+  port: 8080
+  writeTimeout: 60s  # Время ожидания окончания передачи ответа в секундах
+  readTimeout: 60s   # Время ожидания web запроса в секундах
+  requestTimeout: 60s # Время ожидания окончания выполнения запроса
+  maxHeaderBytes: 1048576 # Максимальный размер заголовка получаемого от браузера клиента в байтах
+  proxy: "" # proxy: login:pass@bproxy.msk.mts.ru:3131
+
+cors:
+  allowedOrigins: ["*"]
+  allowedMethods: ["HEAD", "GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"]
+  allowedHeaders: ["Accept", "Authorization", "Content-Type", "X-CSRF-Token"]
+  exposedHeaders: ["Link"]
+  allowCredentials: true
+  maxAge: 300
+
+postgresql:
+  host: "localhost" # Change (не пустое значение говорит об использовании)
+  port: 5432
+  dbName: "sungora" # Change
+  login: "postgres" # Change
+  password: "postgres" # Change
+  ssl: "disable"
+  charset: "utf8"

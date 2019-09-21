@@ -1,0 +1,113 @@
+# Инициализация
+DBHOST := "localhost"
+DBPORT := "5432"
+DBUSER := "postgres"
+DBPASS := "postgres"
+DBNAME := "sungora"
+DBMIG := "migrations"
+APP := github.com/kshamiev/sungora
+
+DIR := $(realpath -m .)
+DBDSN := "host=$(DBHOST) port=$(DBPORT) user=$(DBUSER) password=$(DBPASS) dbname=$(DBNAME) sslmode=disable"
+default: help
+
+# Зависимости
+dep:
+	@if [ ! -f $(DIR)/go.mod ]; then \
+		cd $(DIR); go mod init $(APP); \
+	fi
+	cd $(DIR); go mod tidy;
+#	cd $(DIR); go mod vendor;
+.PHONY: dep
+
+# Свагер
+swag:
+	@cd $(DIR);
+	swag i -o api/docs;
+#	swag i -o api/docs --parseVendor;
+.PHONY: swag
+
+# FMT & GOIMPORT
+fmt:
+	go fmt ./... && goimports -w .
+.PHONY: fmt
+
+# Linters
+lint:
+	golangci-lint run
+.PHONY: lint
+
+# Test
+test:
+	go test ./...
+.PHONY: test
+
+# Сборка
+com:
+	@cd $(DIR);
+	go build -i -o $(DIR)/bin/app $(DIR);
+#	go build -i -mod vendor -o $(DIR)/bin/app $(DIR);
+.PHONY: com
+
+# Запуск в режиме разработки
+run: com
+	$(DIR)/bin/app -c config.yaml;
+.PHONY: run
+
+# Запуск в режиме отладки
+dev: swag fmt lint test com
+	$(DIR)/bin/app -c config.yaml;
+.PHONY: dev
+
+# database restore
+dbinit:
+	/usr/bin/psql -h "$(DBHOST)" -p "$(DBPORT)" -U $(DBUSER) -w -d $(DBNAME) -f "data/dump.sql"
+.PHONY: dbinit
+
+# Создание шаблона миграции
+mig:
+	@gsmigrate --dir=${DBMIG} --drv="postgres" --dsn=${DBDSN} create tpl;
+.PHONY: mig
+
+# Статус миграции
+mig-st:
+	gsmigrate --dir=${DBMIG} --drv="postgres" --dsn=${DBDSN} status;
+.PHONY: mig-st
+
+# Миграция на одну позицию вниз
+mig-down:
+	gsmigrate --dir=${DBMIG} --drv="postgres" --dsn=${DBDSN} down;
+.PHONY: mig-down
+
+# Миграция вверх до конца
+mig-up:
+	gsmigrate --dir=${DBMIG} --drv="postgres" --dsn=${DBDSN} up;
+.PHONY: mig-up
+
+# Инженеринг моделей по существующей структуре БД
+models:
+	sqlboiler -c sqlboiler.yaml -p models -o pkg/models --no-auto-timestamps --no-tests --wipe psql
+#	go test $(APP)/pkg/models
+.PHONY: models
+
+# Help
+h:
+	@echo "Usage: make [target]"
+	@echo "  target is:"
+	@echo "    h			- Вывод этой документации"
+	@echo "    dep			- Загрузка и обновление зависимостей"
+	@echo "    swag		- Генерация документации на api (свагер)"
+	@echo "    fmt			- Форматирование кодовой базы"
+	@echo "    lint		- Проверка кодовой базы линтерами"
+	@echo "    test		- Запуск тестов"
+	@echo "    run			- Запуск в режиме разработки с конфигом config.yaml"
+	@echo "    dev			- Запуск в режиме отладки перед пушем с конфигом config.yaml"
+	@echo "    mig			- Создание шаблона миграции "
+	@echo "    mig-st		- Статус миграции"
+	@echo "    mig-down		- Миграция на одну позицию вниз"
+	@echo "    mig-up		- Миграция вверх до конца"
+	@echo "    dbinit		- Восстановление БД из дампа data/dump.sql"
+	@echo "    models		- Инженеринг моделей по существующей структуре БД"
+.PHONY: h
+help: h
+.PHONY: help

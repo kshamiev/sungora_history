@@ -1,7 +1,10 @@
-FROM registry.services.mts.ru/docker/oraclelinux:7-slim
-WORKDIR /bin
+FROM golang:latest
+MAINTAINER kshamiev konstantin@shamiev.ru
 
-COPY torgi-back /bin/torgi-back
-COPY data/config.yaml.sample /bin/application/config.yaml
-EXPOSE 80
-CMD ["/bin/torgi-back", "-c", "/etc/application/config.yaml"]
+WORKDIR /usr/src/app
+COPY . .
+
+RUN go build -i -mod vendor -o bin/app .;
+EXPOSE 8080
+
+CMD bin/app -c config.yaml;

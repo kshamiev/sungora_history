@@ -16,15 +16,13 @@ dep:
 	@if [ ! -f $(DIR)/go.mod ]; then \
 		cd $(DIR); go mod init $(APP); \
 	fi
-	cd $(DIR); go mod tidy;
-#	cd $(DIR); go mod vendor;
+	cd $(DIR); go mod tidy; go mod vendor;
 .PHONY: dep
 
 # Свагер
 swag:
 	@cd $(DIR);
 	swag i -o api/docs;
-#	swag i -o api/docs --parseVendor;
 .PHONY: swag
 
 # FMT & GOIMPORT
@@ -46,7 +44,6 @@ test:
 com:
 	@cd $(DIR);
 	go build -i -o $(DIR)/bin/app $(DIR);
-#	go build -i -mod vendor -o $(DIR)/bin/app $(DIR);
 .PHONY: com
 
 # Запуск в режиме разработки
@@ -87,7 +84,6 @@ mig-up:
 # Инженеринг моделей по существующей структуре БД
 models:
 	sqlboiler -c sqlboiler.yaml -p models -o pkg/models --no-auto-timestamps --no-tests --wipe psql
-#	go test $(APP)/pkg/models
 .PHONY: models
 
 # Help

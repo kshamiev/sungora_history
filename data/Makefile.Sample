@@ -23,6 +23,7 @@ dep:
 swag:
 	@cd $(DIR);
 	swag i -o api/docs;
+#	swag i -o api/docs --parseVendor;
 .PHONY: swag
 
 # FMT & GOIMPORT
@@ -37,13 +38,14 @@ lint:
 
 # Test
 test:
-	go test ./...
+	export CONF="$(DIR)/config.yaml" && go test ./...
 .PHONY: test
 
 # Сборка
 com:
 	@cd $(DIR);
 	go build -i -o $(DIR)/bin/app $(DIR);
+#	go build -i -mod vendor -o $(DIR)/bin/app $(DIR);
 .PHONY: com
 
 # Запуск в режиме разработки
@@ -58,7 +60,8 @@ dev: swag fmt lint test com
 
 # database restore
 dbinit:
-	/usr/bin/psql -h "$(DBHOST)" -p "$(DBPORT)" -U $(DBUSER) -w -d $(DBNAME) -f "data/dump.sql"
+    # pg_dump -f data.sql -d sungora -p 5432
+	psql -h "$(DBHOST)" -p "$(DBPORT)" -U $(DBUSER) -w -d $(DBNAME) -f "data/dump.sql"
 .PHONY: dbinit
 
 # Создание шаблона миграции

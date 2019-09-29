@@ -12,9 +12,10 @@ import (
 )
 
 type Main struct {
-	db      *sql.DB
-	cfg     *config.Config
-	general *General
+	db         *sql.DB
+	cfg        *config.Config
+	middleware *Middleware
+	general    *General
 }
 
 // NewMain
@@ -23,12 +24,14 @@ func NewMain(db *sql.DB, lg logger.Logger, cfg *config.Config) *chi.Mux {
 		db:  db,
 		cfg: cfg,
 	}
+	c.middleware = NewMiddleware(c)
+
 	router := chi.NewRouter()
-	router.Use(c.Cors().Handler)
+	router.Use(c.middleware.Cors().Handler)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Timeout(cfg.ServHTTP.RequestTimeout))
-	router.Use(c.Logger(lg))
-	router.NotFound(c.Static())
+	router.Use(c.middleware.Logger(lg))
+	router.NotFound(c.middleware.Static())
 	router.Get("/api/docs/*", httpSwagger.Handler()) // swagger
 
 	c.general = NewGeneral(c)

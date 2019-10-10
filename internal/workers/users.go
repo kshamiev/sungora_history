@@ -28,8 +28,9 @@ func newUserOnlineOff(db *sql.DB, lg logger.Logger, cfg *config.Config) *userOnl
 	return w
 }
 
-func (task *userOnlineOff) Action() {
+func (task *userOnlineOff) Action() (err error) {
 	task.lg.Infof("execute task: %s", task.name)
+	return
 }
 
 func (task *userOnlineOff) Info() (string, time.Duration) {

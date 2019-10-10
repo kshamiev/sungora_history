@@ -12,7 +12,6 @@ func NewWSBus() WSBus {
 	bus := make(WSBus)
 	go bus.controlBus()
 	return bus
-
 }
 
 // controlBus жизненный цикл шины чатов

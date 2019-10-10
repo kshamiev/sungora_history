@@ -11,7 +11,7 @@ type SchedulerTask interface {
 	// информация о задаче
 	Info() (name string, t time.Duration)
 	// выполняемая задача
-	Action()
+	Action() (err error)
 }
 
 type Scheduler struct {
@@ -64,11 +64,13 @@ func (wf *Scheduler) run(task SchedulerTask) {
 }
 
 func (wf *Scheduler) action(task SchedulerTask) {
+	name, _ := task.Info()
 	defer func() {
-		name, _ := task.Info()
 		if rvr := recover(); rvr != nil {
 			wf.lg.Errorf("task: %s %+v", name, rvr)
 		}
 	}()
-	task.Action()
+	if err := task.Action(); err != nil {
+		wf.lg.Errorf("task: %s %+v", name, err)
+	}
 }

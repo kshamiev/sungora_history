@@ -14,14 +14,6 @@ type UUID struct {
 	uuid.UUID
 }
 
-func (u UUID) Value() (driver.Value, error) {
-	if u.ID() == 0 {
-		return nil, nil
-	}
-	return u.String(), nil
-
-}
-
 func UUIDNew() UUID {
 	return UUID{UUID: uuid.Must(uuid.NewRandom())}
 }
@@ -36,6 +28,14 @@ func UUIDParse(s string) (UUID, error) {
 
 func UUIDMustParse(s string) UUID {
 	return UUID{uuid.MustParse(s)}
+}
+
+func (u UUID) Value() (driver.Value, error) {
+	if u.ID() == 0 {
+		return nil, nil
+	}
+	return u.String(), nil
+
 }
 
 // ////

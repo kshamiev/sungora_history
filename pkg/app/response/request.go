@@ -2,6 +2,7 @@ package response
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -16,13 +17,13 @@ type Request struct {
 func (r *Request) JSONBodyDecode(object interface{}) (err error) {
 	var body []byte
 	if body, err = ioutil.ReadAll(r.request.Body); err != nil {
-		return errs.NewInternalServer(err)
+		return errs.NewBadRequest(err)
 	}
 	if len(body) == 0 {
-		return errs.NewBadRequest(nil, "пустое тело запроса")
+		return errs.NewBadRequest(errors.New("пустое тело запроса"))
 	}
 	if err = json.Unmarshal(body, object); err != nil {
-		return errs.NewBadRequest(err, err.Error())
+		return errs.NewBadRequest(err)
 	}
 	return nil
 }

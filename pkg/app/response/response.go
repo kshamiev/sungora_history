@@ -26,6 +26,7 @@ type Response struct {
 
 // New Функционал по работе с входящим запросом для формирования ответа
 func New(r *http.Request, w http.ResponseWriter) *Response {
+	_ = r.ParseForm()
 	var rw = &Response{
 		response: w,
 		lg:       logger.GetLogger(r.Context()),
@@ -40,12 +41,15 @@ func (rw *Response) CookieGet(name string) (c string, err error) {
 	if err != nil {
 		return "", err
 	}
+	lg := logger.GetLogger(rw.Request.request.Context())
+	lg.WithField("COOKIE", "GET").Infof("%s = %s", name, sessionID.Value)
 	return sessionID.Value, nil
 }
 
 // CookieSet Установка куки. Если время не указано кука сессионная (пока открыт браузер).
 func (rw *Response) CookieSet(name, value string, t ...time.Time) {
 	var cookie = new(http.Cookie)
+	cookie.HttpOnly = true
 	cookie.Name = name
 	cookie.Value = value
 	cookie.Domain = strings.Split(rw.Request.request.Host, ":")[0]
@@ -53,16 +57,21 @@ func (rw *Response) CookieSet(name, value string, t ...time.Time) {
 	if len(t) > 0 {
 		cookie.Expires = t[0]
 	}
+	lg := logger.GetLogger(rw.Request.request.Context())
+	lg.WithField("COOKIE", "SET").Infof("%s = %s", name, value)
 	http.SetCookie(rw.response, cookie)
 }
 
 // CookieRem Удаление куков.
 func (rw *Response) CookieRem(name string) {
 	var cookie = new(http.Cookie)
+	cookie.HttpOnly = true
 	cookie.Name = name
 	cookie.Domain = strings.Split(rw.Request.request.Host, ":")[0]
 	cookie.Path = cookiePath
 	cookie.Expires = time.Now()
+	lg := logger.GetLogger(rw.Request.request.Context())
+	lg.WithField("COOKIE", "REM").Infof("%s", name)
 	http.SetCookie(rw.response, cookie)
 }
 

@@ -9,7 +9,7 @@ import (
 )
 
 // NewConnectPostgres создание соединения с postgres
-func NewConnectPostgres(cfg *ConfigPostgres) (db *sql.DB, err error) {
+func NewConnectPostgres(cfg *ConfigPostgres) (*sql.DB, error) {
 	strCon := fmt.Sprintf("dbname=%s host=%s port=%d user=%s password=%s sslmode=%s",
 		cfg.DbName,
 		cfg.Host,
@@ -18,11 +18,12 @@ func NewConnectPostgres(cfg *ConfigPostgres) (db *sql.DB, err error) {
 		cfg.Password,
 		cfg.Ssl,
 	)
-	if db, err = sql.Open("postgres", strCon); err != nil {
-		return
+	db, err := sql.Open("postgres", strCon)
+	if err != nil {
+		return nil, err
 	}
 	err = db.Ping()
-	return
+	return db, err
 }
 
 // NewConnectMysql создание соединения с mysql

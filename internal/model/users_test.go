@@ -2,32 +2,19 @@ package model
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/volatiletech/sqlboiler/boil"
 
-	"github.com/kshamiev/sungora/internal/config"
-	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/models"
 	"github.com/kshamiev/sungora/pkg/typ"
+	"github.com/kshamiev/sungora/test"
 )
 
 func TestUsers(t *testing.T) {
 	var err error
-	var db *sql.DB
-	var cfg *config.Config
-
-	// ConfigApp загрузка конфигурации
-	if cfg, err = config.Get("../../config.yaml"); err != nil {
-		t.Fatal(err)
-	}
-
-	// ConnectDB
-	if db, err = app.NewConnectPostgres(&cfg.Postgresql); err != nil {
-		t.Fatal(err)
-	}
-	boil.DebugMode = true
+	ctx := context.Background()
+	env := test.GetEnvironment(t)
 
 	var user = &models.User{
 		Login: "qwerty",
@@ -47,14 +34,14 @@ func TestUsers(t *testing.T) {
 		},
 	}
 	user.SampleJS = js
-	if err = user.Insert(context.Background(), db, boil.Infer()); err != nil {
+	if err = user.Insert(ctx, env.DB, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 	user.Login = "test-test@test.ru"
-	if _, err = user.Update(context.Background(), db, boil.Infer()); err != nil {
+	if _, err = user.Update(ctx, env.DB, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = user.Delete(context.Background(), db); err != nil {
+	if _, err = user.Delete(ctx, env.DB); err != nil {
 		t.Fatal(err)
 	}
 }

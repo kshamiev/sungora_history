@@ -14,8 +14,8 @@ import (
 type Main struct {
 	db         *sql.DB
 	cfg        *config.Config
-	general    *General
 	middleware *Middleware
+	general    *General
 }
 
 // NewMain

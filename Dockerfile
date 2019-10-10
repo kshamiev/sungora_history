@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN go build -i -mod vendor -o bin/app .;
+
 EXPOSE 8080
 
-CMD bin/app -c config.yaml;
+CMD bin/app -c config.docker.yaml;

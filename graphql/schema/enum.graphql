@@ -1,0 +1,14 @@
+# GraphQL schema example
+
+enum Episode {
+  NEWHOPE
+  EMPIRE
+  JEDI
+}
+
+enum Role {
+    ADMIN
+    GUEST
+    LOGIST
+    TK
+}

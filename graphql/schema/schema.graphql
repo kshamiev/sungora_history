@@ -1,12 +1,21 @@
 # GraphQL schema example
-#
 # https://gqlgen.com/getting-started/
+scalar Time
+
 
 type Todo {
+  "идентификатор"
   id: ID!
+  "какой-то текст"
   text: String!
+  "вот фишка"
   done: Boolean!
+  "пользователь"
   user: User!
+  "дата и время"
+  create_at: Time
+  "роль пользователя"
+  role: Role!
 }
 
 type User {
@@ -15,8 +24,10 @@ type User {
 }
 
 type Query {
-    "Comment method"
+    "Comment method 1"
     todos: [Todo!]!
+    "Comment method 2"
+    funtik: [Todo!]!
 }
 
 input NewTodo {
@@ -26,9 +37,10 @@ input NewTodo {
 
 type Mutation {
     """
-    Comment method 1
-    Comment method 2
-    Comment method 3
+    Comment method 1.
+    Comment method 2.
+    Comment method 3.
     """
     createTodo(input: NewTodo!): Todo!
 }
+

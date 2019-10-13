@@ -15,7 +15,8 @@ type User {
 }
 
 type Query {
-  todos: [Todo!]!
+    "Comment method"
+    todos: [Todo!]!
 }
 
 input NewTodo {
@@ -24,5 +25,10 @@ input NewTodo {
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+    """
+    Comment method 1
+    Comment method 2
+    Comment method 3
+    """
+    createTodo(input: NewTodo!): Todo!
 }

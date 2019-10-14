@@ -1,0 +1,8 @@
+# GraphQL schema example
+# https://gqlgen.com/getting-started/
+type Query {
+    "Comment method 1"
+    todos: [Todo!]!
+    "Comment method 2"
+    funtik: [Todo!]!
+}

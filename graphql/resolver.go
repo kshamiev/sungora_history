@@ -55,8 +55,7 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*mod.Todo, error) {
 		Done:     false,
 		CreateAt: &d,
 		Role:     &mod.Role{},
-	},
-	}
+	}}
 	return data, nil
 }
 
@@ -81,7 +80,6 @@ func (r *queryResolver) Funtik(ctx context.Context) ([]*mod.Todo, error) {
 		Done:     false,
 		CreateAt: &d,
 		Role:     &mod.Role{},
-	},
-	}
+	}}
 	return data, nil
 }

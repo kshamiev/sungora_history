@@ -1,46 +1,22 @@
 # GraphQL schema example
 # https://gqlgen.com/getting-started/
-scalar Time
-scalar UUID
-scalar Decimal
-scalar NullTime
-
-enum Episode {
-    NEWHOPE
-    EMPIRE
-    JEDI
-}
-
-enum Access {
-    ADMIN
-    GUEST
-    LOGIST
-    TK
-}
-
-enum LengthUnit {
-    METER
-    KM
-    MILE
-}
-
 type Todo {
     "идентификатор"
     id: ID!
-    "какой-то текст"
+    "пример строки"
     text: String!
-    "какой-то текст"
+    "пример целого числа"
     number: Int!
-    "какой-то текст"
+    "пример дробного числа"
     price: Float!
-    "вот фишка"
+    "пример флага Boolean"
     done: Boolean!
-    "дата и время"
+    "пример дата и время"
     create_at: Time
-    "роль пользователя"
-    role: Role!
-    "sample enum"
+    "пример перечисления"
     access: Access!
+    "пример пользовательского типа - роль пользователя"
+    role: Role!
 }
 
 type Role {

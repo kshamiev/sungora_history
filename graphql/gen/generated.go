@@ -444,11 +444,33 @@ type Query {
 `},
 	&ast.Source{Name: "graphql/schema/type.graphql", Input: `# GraphQL schema example
 # https://gqlgen.com/getting-started/
-scalar Time
-scalar UUID
-scalar Decimal
-scalar NullTime
+type Todo {
+    "идентификатор"
+    id: ID!
+    "пример строки"
+    text: String!
+    "пример целого числа"
+    number: Int!
+    "пример дробного числа"
+    price: Float!
+    "пример флага Boolean"
+    done: Boolean!
+    "пример дата и время"
+    create_at: Time
+    "пример перечисления"
+    access: Access!
+    "пример пользовательского типа - роль пользователя"
+    role: Role!
+}
 
+type Role {
+    id: ID!
+    code: String!
+    description: String!
+}
+`},
+	&ast.Source{Name: "graphql/schema/type_enum.graphql", Input: `# GraphQL schema example
+# https://gqlgen.com/getting-started/
 enum Episode {
     NEWHOPE
     EMPIRE
@@ -467,31 +489,13 @@ enum LengthUnit {
     KM
     MILE
 }
-
-type Todo {
-    "идентификатор"
-    id: ID!
-    "какой-то текст"
-    text: String!
-    "какой-то текст"
-    number: Int!
-    "какой-то текст"
-    price: Float!
-    "вот фишка"
-    done: Boolean!
-    "дата и время"
-    create_at: Time
-    "роль пользователя"
-    role: Role!
-    "sample enum"
-    access: Access!
-}
-
-type Role {
-    id: ID!
-    code: String!
-    description: String!
-}
+`},
+	&ast.Source{Name: "graphql/schema/type_scalar.graphql", Input: `# GraphQL schema example
+# https://gqlgen.com/getting-started/
+scalar Time
+scalar UUID
+scalar Decimal
+scalar NullTime
 `},
 )
 
@@ -1607,43 +1611,6 @@ func (ec *executionContext) _Todo_create_at(ctx context.Context, field graphql.C
 	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_role(ctx context.Context, field graphql.CollectedField, obj *mod.Todo) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Todo",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Role, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*mod.Role)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋgraphqlᚋmodᚐRole(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Todo_access(ctx context.Context, field graphql.CollectedField, obj *mod.Todo) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1679,6 +1646,43 @@ func (ec *executionContext) _Todo_access(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNAccess2githubᚗcomᚋkshamievᚋsungoraᚋgraphqlᚋmodᚐAccess(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Todo_role(ctx context.Context, field graphql.CollectedField, obj *mod.Todo) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Todo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Role, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*mod.Role)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNRole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋgraphqlᚋmodᚐRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3163,13 +3167,13 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "create_at":
 			out.Values[i] = ec._Todo_create_at(ctx, field, obj)
-		case "role":
-			out.Values[i] = ec._Todo_role(ctx, field, obj)
+		case "access":
+			out.Values[i] = ec._Todo_access(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "access":
-			out.Values[i] = ec._Todo_access(ctx, field, obj)
+		case "role":
+			out.Values[i] = ec._Todo_role(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

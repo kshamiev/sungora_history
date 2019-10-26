@@ -54,20 +54,20 @@ type Starship struct {
 type Todo struct {
 	// идентификатор
 	ID string `json:"id"`
-	// какой-то текст
+	// пример строки
 	Text string `json:"text"`
-	// какой-то текст
+	// пример целого числа
 	Number int `json:"number"`
-	// какой-то текст
+	// пример дробного числа
 	Price float64 `json:"price"`
-	// вот фишка
+	// пример флага Boolean
 	Done bool `json:"done"`
-	// дата и время
+	// пример дата и время
 	CreateAt *time.Time `json:"create_at"`
-	// роль пользователя
-	Role *Role `json:"role"`
-	// sample enum
+	// пример перечисления
 	Access Access `json:"access"`
+	// пример пользовательского типа - роль пользователя
+	Role *Role `json:"role"`
 }
 
 type Access string

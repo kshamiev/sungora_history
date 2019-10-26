@@ -27,65 +27,60 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input mod.NewTodo) (*
 		ID:       "uid 1",
 		Text:     "popcorn 1",
 		Done:     false,
-		User:     nil,
 		CreateAt: &d,
-		Role:     mod.RoleAdmin,
+		Role:     &mod.Role{},
 	}, nil
 }
 
 type queryResolver struct{ *Resolver }
 
+// nolint[:dupl]
 func (r *queryResolver) Todos(ctx context.Context) ([]*mod.Todo, error) {
 	d := time.Now()
 	data := []*mod.Todo{{
 		ID:       "uid 1",
 		Text:     "popcorn 1",
 		Done:     false,
-		User:     nil,
 		CreateAt: &d,
-		Role:     mod.RoleAdmin,
+		Role:     &mod.Role{},
 	}, {
 		ID:       "uid 2",
 		Text:     "popcorn 2",
 		Done:     false,
-		User:     nil,
 		CreateAt: &d,
-		Role:     mod.RoleGuest,
+		Role:     &mod.Role{},
 	}, {
 		ID:       "uid 3",
 		Text:     "popcorn 3",
 		Done:     false,
-		User:     nil,
 		CreateAt: &d,
-		Role:     mod.RoleTk,
+		Role:     &mod.Role{},
 	},
 	}
 	return data, nil
 }
 
+// nolint[:dupl]
 func (r *queryResolver) Funtik(ctx context.Context) ([]*mod.Todo, error) {
 	d := time.Now()
 	data := []*mod.Todo{{
 		ID:       "uid 1",
 		Text:     "popcorn 1",
 		Done:     false,
-		User:     nil,
 		CreateAt: &d,
-		Role:     mod.RoleAdmin,
+		Role:     &mod.Role{},
 	}, {
 		ID:       "uid 2",
 		Text:     "popcorn 2",
 		Done:     false,
-		User:     nil,
 		CreateAt: &d,
-		Role:     mod.RoleGuest,
+		Role:     &mod.Role{},
 	}, {
 		ID:       "uid 3",
 		Text:     "popcorn 3",
 		Done:     false,
-		User:     nil,
 		CreateAt: &d,
-		Role:     mod.RoleTk,
+		Role:     &mod.Role{},
 	},
 	}
 	return data, nil

@@ -39,6 +39,12 @@ type NewTodo struct {
 	UserID string `json:"userId"`
 }
 
+type Role struct {
+	ID          string `json:"id"`
+	Code        string `json:"code"`
+	Description string `json:"description"`
+}
+
 type Starship struct {
 	ID     string   `json:"id"`
 	Name   string   `json:"name"`
@@ -56,17 +62,57 @@ type Todo struct {
 	Price float64 `json:"price"`
 	// вот фишка
 	Done bool `json:"done"`
-	// пользователь
-	User *User `json:"user"`
 	// дата и время
 	CreateAt *time.Time `json:"create_at"`
 	// роль пользователя
-	Role Role `json:"role"`
+	Role *Role `json:"role"`
+	// sample enum
+	Access Access `json:"access"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type Access string
+
+const (
+	AccessAdmin  Access = "ADMIN"
+	AccessGuest  Access = "GUEST"
+	AccessLogist Access = "LOGIST"
+	AccessTk     Access = "TK"
+)
+
+var AllAccess = []Access{
+	AccessAdmin,
+	AccessGuest,
+	AccessLogist,
+	AccessTk,
+}
+
+func (e Access) IsValid() bool {
+	switch e {
+	case AccessAdmin, AccessGuest, AccessLogist, AccessTk:
+		return true
+	}
+	return false
+}
+
+func (e Access) String() string {
+	return string(e)
+}
+
+func (e *Access) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Access(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Access", str)
+	}
+	return nil
+}
+
+func (e Access) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type Episode string
@@ -152,50 +198,5 @@ func (e *LengthUnit) UnmarshalGQL(v interface{}) error {
 }
 
 func (e LengthUnit) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type Role string
-
-const (
-	RoleAdmin  Role = "ADMIN"
-	RoleGuest  Role = "GUEST"
-	RoleLogist Role = "LOGIST"
-	RoleTk     Role = "TK"
-)
-
-var AllRole = []Role{
-	RoleAdmin,
-	RoleGuest,
-	RoleLogist,
-	RoleTk,
-}
-
-func (e Role) IsValid() bool {
-	switch e {
-	case RoleAdmin, RoleGuest, RoleLogist, RoleTk:
-		return true
-	}
-	return false
-}
-
-func (e Role) String() string {
-	return string(e)
-}
-
-func (e *Role) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = Role(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Role", str)
-	}
-	return nil
-}
-
-func (e Role) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

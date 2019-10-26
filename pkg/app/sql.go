@@ -43,5 +43,6 @@ func (q SQL) Replace(tag, value string) SQL {
 
 // String возвращает очищенный конечный запрос
 func (q SQL) String() string {
-	return strings.Replace(string(q), "\n", "", -1)
+	s := strings.ReplaceAll(string(q), "\n", " ")
+	return strings.ReplaceAll(s, "\t", "")
 }

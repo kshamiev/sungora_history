@@ -1,7 +1,7 @@
-
 -- +goose Up
 -- SQL in this section is executed when the migration is applied.
- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE status_orders AS enum (
 	'DRAFT',
@@ -40,16 +40,10 @@ CREATE TABLE public.users_roles (
 );
 
 ALTER TABLE public.users_roles ADD CONSTRAINT users_roles_fk FOREIGN KEY (user_id) REFERENCES users(id) ON
-UPDATE
-	CASCADE ON
-	DELETE
-	CASCADE;
+UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE public.users_roles ADD CONSTRAINT users_roles_fk_1 FOREIGN KEY (role_id) REFERENCES roles(id) ON
-UPDATE
-	CASCADE ON
-	DELETE
-	CASCADE;
+UPDATE CASCADE ON DELETE CASCADE;
 
 CREATE TABLE public.orders (
 	id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -63,13 +57,13 @@ CREATE TABLE public.orders (
 );
 
 ALTER TABLE public.orders ADD CONSTRAINT orders_fk FOREIGN KEY (user_id) REFERENCES users(id) ON
-UPDATE
-	CASCADE ON
-	DELETE
-	RESTRICT;
+UPDATE CASCADE ON DELETE RESTRICT;
+
+
 -- +goose Down
 -- SQL in this section is executed when the migration is rolled back.
- DROP TABLE public.orders;
+
+DROP TABLE public.orders;
 
 DROP TABLE public.users_roles;
 

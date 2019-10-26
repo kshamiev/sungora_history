@@ -16,14 +16,14 @@ dep:
 	@if [ ! -f $(DIR)/go.mod ]; then \
 		cd $(DIR); go mod init $(APP); \
 	fi
-	cd $(DIR); go mod tidy; go mod vendor;
+	cd $(DIR); go mod tidy;
+#	cd $(DIR); go mod vendor;
 .PHONY: dep
 
 # Свагер
 swag:
 	@cd $(DIR);
 	swag i -o api/docs;
-#	swag i -o api/docs --parseVendor;
 .PHONY: swag
 
 # FMT & GOIMPORT
@@ -60,7 +60,6 @@ dev: swag fmt lint test com
 
 # database restore
 dbinit:
-    # pg_dump -f data.sql -d sungora -p 5432
 	psql -h "$(DBHOST)" -p "$(DBPORT)" -U $(DBUSER) -w -d $(DBNAME) -f "data/dump.sql"
 .PHONY: dbinit
 

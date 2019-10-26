@@ -1,0 +1,16 @@
+# GraphQL schema example
+# https://gqlgen.com/getting-started/
+input NewTodo {
+    text: String!
+    userId: String!
+}
+
+type Mutation {
+    """
+    Comment method 1.
+    Comment method 2.
+    Comment method 3.
+    """
+    createTodo(input: NewTodo!): Todo!
+}
+

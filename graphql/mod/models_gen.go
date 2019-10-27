@@ -53,21 +53,29 @@ type Starship struct {
 
 type Todo struct {
 	// идентификатор
-	ID string `json:"id"`
+	ID  string  `json:"id"`
+	Idn *string `json:"idn"`
 	// пример строки
-	Text string `json:"text"`
+	Text  string  `json:"text"`
+	Textn *string `json:"textn"`
 	// пример целого числа
-	Number int `json:"number"`
+	Number  int  `json:"number"`
+	Numbern *int `json:"numbern"`
 	// пример дробного числа
-	Price float64 `json:"price"`
+	Price  float64  `json:"price"`
+	Pricen *float64 `json:"pricen"`
 	// пример флага Boolean
-	Done bool `json:"done"`
+	Done  bool  `json:"done"`
+	Donen *bool `json:"donen"`
 	// пример дата и время
-	CreateAt *time.Time `json:"create_at"`
+	CreateAt time.Time  `json:"create_at"`
+	DeleteAt *time.Time `json:"delete_at"`
 	// пример перечисления
-	Access Access `json:"access"`
+	Access  Access  `json:"access"`
+	Accessn *Access `json:"accessn"`
 	// пример пользовательского типа - роль пользователя
-	Role *Role `json:"role"`
+	Role  *Role `json:"role"`
+	Rolen *Role `json:"rolen"`
 }
 
 type Access string

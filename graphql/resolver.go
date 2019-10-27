@@ -7,6 +7,7 @@ import (
 	"github.com/kshamiev/sungora/graphql/gen"
 	"github.com/kshamiev/sungora/graphql/mod"
 	"github.com/kshamiev/sungora/pkg/app"
+	"github.com/kshamiev/sungora/pkg/typ"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct{}
@@ -27,7 +28,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input mod.NewTodo) (*
 		ID:       "uid 1",
 		Text:     "popcorn 1",
 		Done:     false,
-		CreateAt: &d,
+		CreateAt: d,
 		Role:     &mod.Role{},
 	}, nil
 }
@@ -36,24 +37,36 @@ type queryResolver struct{ *Resolver }
 
 // nolint[:dupl]
 func (r *queryResolver) Todos(ctx context.Context) ([]*mod.Todo, error) {
-	d := time.Now()
+	ac := mod.Access(mod.AccessAdmin)
 	data := []*mod.Todo{{
-		ID:       "uid 1",
+		ID:       typ.UUIDNew().String(),
 		Text:     "popcorn 1",
+		Number:   34,
+		Price:    45.78,
 		Done:     false,
-		CreateAt: &d,
+		CreateAt: time.Now(),
+		Access:   mod.AccessAdmin,
+		Accessn:  &ac,
 		Role:     &mod.Role{},
 	}, {
-		ID:       "uid 2",
+		ID:       typ.UUIDNew().String(),
 		Text:     "popcorn 2",
+		Number:   876,
+		Price:    45.80,
 		Done:     false,
-		CreateAt: &d,
+		CreateAt: time.Now(),
+		Access:   mod.AccessAdmin,
+		Accessn:  &ac,
 		Role:     &mod.Role{},
 	}, {
-		ID:       "uid 3",
+		ID:       typ.UUIDNew().String(),
 		Text:     "popcorn 3",
+		Number:   768,
+		Price:    86.78,
 		Done:     false,
-		CreateAt: &d,
+		CreateAt: time.Now(),
+		Access:   mod.AccessAdmin,
+		Accessn:  &ac,
 		Role:     &mod.Role{},
 	}}
 	return data, nil
@@ -61,24 +74,36 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*mod.Todo, error) {
 
 // nolint[:dupl]
 func (r *queryResolver) Funtik(ctx context.Context) ([]*mod.Todo, error) {
-	d := time.Now()
+	ac := mod.Access(mod.AccessAdmin)
 	data := []*mod.Todo{{
-		ID:       "uid 1",
+		ID:       typ.UUIDNew().String(),
 		Text:     "popcorn 1",
+		Number:   34,
+		Price:    45.78,
 		Done:     false,
-		CreateAt: &d,
+		CreateAt: time.Now(),
+		Access:   mod.AccessAdmin,
+		Accessn:  &ac,
 		Role:     &mod.Role{},
 	}, {
-		ID:       "uid 2",
+		ID:       typ.UUIDNew().String(),
 		Text:     "popcorn 2",
+		Number:   876,
+		Price:    45.80,
 		Done:     false,
-		CreateAt: &d,
+		CreateAt: time.Now(),
+		Access:   mod.AccessAdmin,
+		Accessn:  &ac,
 		Role:     &mod.Role{},
 	}, {
-		ID:       "uid 3",
+		ID:       typ.UUIDNew().String(),
 		Text:     "popcorn 3",
+		Number:   768,
+		Price:    86.78,
 		Done:     false,
-		CreateAt: &d,
+		CreateAt: time.Now(),
+		Access:   mod.AccessAdmin,
+		Accessn:  &ac,
 		Role:     &mod.Role{},
 	}}
 	return data, nil

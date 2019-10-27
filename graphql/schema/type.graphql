@@ -3,20 +3,28 @@
 type Todo {
     "идентификатор"
     id: ID!
+    idn: ID
     "пример строки"
     text: String!
+    textn: String
     "пример целого числа"
     number: Int!
+    numbern: Int
     "пример дробного числа"
     price: Float!
+    pricen: Float
     "пример флага Boolean"
     done: Boolean!
+    donen: Boolean
     "пример дата и время"
-    create_at: Time
+    create_at: Time!
+    delete_at: Time
     "пример перечисления"
     access: Access!
+    accessn: Access
     "пример пользовательского типа - роль пользователя"
     role: Role!
+    rolen: Role
 }
 
 type Role {

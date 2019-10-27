@@ -2,7 +2,9 @@
 # https://gqlgen.com/getting-started/
 type Query {
     "Comment method 1"
-    todos: [Todo!]!
+    todos(limit: Int = 25, offset: Int = 0): [Todo!]!
     "Comment method 2"
-    funtik: [Todo!]!
+    users: [User!]!
+    "Comment method 3"
+    roles: [Role!]!
 }

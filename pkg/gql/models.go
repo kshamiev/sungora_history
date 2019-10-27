@@ -39,15 +39,15 @@ type Human struct {
 
 func (Human) IsCharacter() {}
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
-}
-
-type Role struct {
+type Item struct {
 	ID          typ.UUID `json:"id"`
 	Code        string   `json:"code"`
 	Description string   `json:"description"`
+}
+
+type NewTodo struct {
+	Text   string `json:"text"`
+	UserID string `json:"userId"`
 }
 
 type Starship struct {
@@ -75,14 +75,16 @@ type Todo struct {
 	// пример дата и время
 	CreateAt time.Time `json:"create_at"`
 	DeleteAt null.Time `json:"delete_at"`
-	// пример пользовательского типа - роль пользователя
-	Role *Role `json:"role"`
-	// пример массива
-	Roles []*Role `json:"roles"`
 	// пример поля связи
 	LinkID typ.UUID `json:"link_id"`
+	// пример пользовательского типа
+	Item *Item `json:"item"`
+	// пример массива элементов
+	Items []*Item `json:"items"`
 	// поле с параметрами
-	TestParam []*models.User `json:"test_param"`
+	Users []*models.User `json:"users"`
+	// поле с параметрами
+	Roles []*models.Role `json:"roles"`
 }
 
 type Access string

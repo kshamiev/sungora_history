@@ -8,13 +8,14 @@ import (
 	"github.com/volatiletech/null"
 
 	"github.com/kshamiev/sungora/pkg/gql"
+	"github.com/kshamiev/sungora/pkg/models"
 	"github.com/kshamiev/sungora/pkg/typ"
 )
 
 type queryResolver struct{ *Resolver }
 
 // nolint[:dupl]
-func (r *queryResolver) Todos(ctx context.Context) ([]*gql.Todo, error) {
+func (r *queryResolver) Todos(ctx context.Context, limit, offset *int) ([]*gql.Todo, error) {
 	data := []*gql.Todo{{
 		ID:       typ.UUIDNew(),
 		Number:   34,
@@ -26,8 +27,8 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*gql.Todo, error) {
 		TextNull: null.String{},
 		CreateAt: time.Now(),
 		DeleteAt: null.Time{},
-		Role:     &gql.Role{Code: "111"},
-		Roles: []*gql.Role{
+		Item:     &gql.Item{Code: "111"},
+		Items: []*gql.Item{
 			{Code: "ONE"},
 			{Code: "TWO"},
 			{Code: "TREE"},
@@ -41,7 +42,7 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*gql.Todo, error) {
 		Done:     false,
 		CreateAt: time.Now(),
 		Access:   gql.AccessAdmin,
-		Role:     &gql.Role{Code: "222"},
+		Item:     &gql.Item{Code: "222"},
 		LinkID:   typ.UUID{},
 	}, {
 		ID:       typ.UUIDNew(),
@@ -51,52 +52,15 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*gql.Todo, error) {
 		Done:     false,
 		CreateAt: time.Now(),
 		Access:   gql.AccessAdmin,
-		Role:     &gql.Role{Code: "333"},
+		Item:     &gql.Item{Code: "333"},
 		LinkID:   typ.UUID{},
 	}}
 	return data, nil
 }
 
-// nolint[:dupl]
-func (r *queryResolver) Funtik(ctx context.Context) ([]*gql.Todo, error) {
-	data := []*gql.Todo{{
-		ID:       typ.UUIDNew(),
-		Number:   34,
-		Price:    45.78,
-		Decimal:  decimal.NewFromFloat(56.87),
-		Done:     false,
-		Access:   gql.AccessAdmin,
-		Text:     "popcorn 1",
-		TextNull: null.String{},
-		CreateAt: time.Now(),
-		DeleteAt: null.Time{},
-		Role:     &gql.Role{Code: "111"},
-		Roles: []*gql.Role{
-			{Code: "ONE"},
-			{Code: "TWO"},
-			{Code: "TREE"},
-		},
-		LinkID: typ.UUIDNew(),
-	}, {
-		ID:       typ.UUIDNew(),
-		Text:     "popcorn 2",
-		Number:   876,
-		Price:    45.80,
-		Done:     false,
-		CreateAt: time.Now(),
-		Access:   gql.AccessAdmin,
-		Role:     &gql.Role{Code: "222"},
-		LinkID:   typ.UUID{},
-	}, {
-		ID:       typ.UUIDNew(),
-		Text:     "popcorn 3",
-		Number:   768,
-		Price:    86.78,
-		Done:     false,
-		CreateAt: time.Now(),
-		Access:   gql.AccessAdmin,
-		Role:     &gql.Role{Code: "333"},
-		LinkID:   typ.UUID{},
-	}}
-	return data, nil
+func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Roles(ctx context.Context) ([]*models.Role, error) {
+	panic("not implemented")
 }

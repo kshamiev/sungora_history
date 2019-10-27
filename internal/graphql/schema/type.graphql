@@ -1,5 +1,28 @@
 # GraphQL schema example
 # https://gqlgen.com/getting-started/
+scalar UUID
+scalar Decimal
+scalar Time
+scalar NullTime
+scalar NullString
+
+enum Episode {
+    NEWHOPE
+    EMPIRE
+    JEDI
+}
+enum Access {
+    ADMIN
+    GUEST
+    LOGIST
+    TK
+}
+enum LengthUnit {
+    METER
+    KM
+    MILE
+}
+
 type Todo {
     "идентификатор"
     id: UUID!
@@ -19,18 +42,28 @@ type Todo {
     "пример дата и время"
     create_at: Time!
     delete_at: NullTime!
-    "пример пользовательского типа - роль пользователя"
-    role: Role!
-    "пример массива"
-    roles: [Role]
     "пример поля связи"
     link_id: UUID!,
+    "пример пользовательского типа"
+    item: Item!
+    "пример массива элементов"
+    items: [Item]
     "поле с параметрами"
-    test_param(limit: Int = 25, offset: Int = 0): [User]
+    users(limit: Int = 25, offset: Int = 0): [User]
+    "поле с параметрами"
+    roles(limit: Int = 25, offset: Int = 0): [Role]
 }
 
-type Role {
+type Item {
     id: UUID!
     code: String!
     description: String!
+}
+
+type User {
+    roles(limit: Int = 25, offset: Int = 0): [Role]
+}
+
+type Role {
+    users(limit: Int = 25, offset: Int = 0): [User]
 }

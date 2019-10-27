@@ -18,6 +18,6 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input gql.NewTodo) (*
 		Text:     "popcorn 1",
 		Done:     false,
 		CreateAt: time.Now(),
-		Role:     &gql.Role{},
+		Item:     &gql.Item{},
 	}, nil
 }

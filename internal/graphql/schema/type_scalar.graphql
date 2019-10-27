@@ -1,9 +1,0 @@
-# GraphQL schema example
-# https://gqlgen.com/getting-started/
-scalar UUID
-scalar Decimal
-scalar Time
-scalar NullTime
-scalar NullString
-
-scalar User

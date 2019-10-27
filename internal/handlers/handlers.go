@@ -9,9 +9,9 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gitlab.services.mts.ru/libs/logger"
 
-	"github.com/kshamiev/sungora/graphql"
-	"github.com/kshamiev/sungora/graphql/gen"
 	"github.com/kshamiev/sungora/internal/config"
+	"github.com/kshamiev/sungora/internal/graphql"
+	"github.com/kshamiev/sungora/pkg/gql"
 )
 
 type Main struct {
@@ -40,7 +40,7 @@ func NewMain(db *sql.DB, lg logger.Logger, cfg *config.Config) *chi.Mux {
 	// GRAPHQL
 	router.Handle("/api/playground", handler.Playground("GraphQL playground", "/api/graphql/gql"))
 	router.Route("/api/graphql", func(r chi.Router) {
-		r.Handle("/gql", handler.GraphQL(gen.NewExecutableSchema(gen.Config{Resolvers: &graphql.Resolver{}})))
+		r.Handle("/gql", handler.GraphQL(gql.NewExecutableSchema(gql.Config{Resolvers: &graphql.Resolver{}})))
 	})
 
 	// REST

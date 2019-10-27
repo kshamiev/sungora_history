@@ -29,8 +29,14 @@ func (u *UUID) UnmarshalGQL(v interface{}) error {
 }
 
 func (u UUID) MarshalGQL(w io.Writer) {
-	_, _ = io.WriteString(w, strconv.Quote(u.String()))
+	if u.ID() > 0 {
+		_, _ = io.WriteString(w, strconv.Quote(u.String()))
+		return
+	}
+	_, _ = io.WriteString(w, `""`)
 }
+
+// Decimal
 
 func MarshalDecimal(d decimal.Decimal) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
@@ -57,9 +63,15 @@ func UnmarshalDecimal(v interface{}) (decimal.Decimal, error) {
 	}
 }
 
+// NullTime
+
 func MarshalNullTime(t null.Time) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
-		_, _ = io.WriteString(w, strconv.Quote(t.Time.String()))
+		if t.Valid {
+			_, _ = io.WriteString(w, strconv.Quote(t.Time.String()))
+			return
+		}
+		_, _ = io.WriteString(w, `""`)
 	})
 }
 
@@ -69,5 +81,27 @@ func UnmarshalNullTime(v interface{}) (null.Time, error) {
 		return val, nil
 	default:
 		return null.Time{}, fmt.Errorf("%T is not a null.Time", v)
+	}
+}
+
+// NullString
+
+func MarshalNullString(s null.String) graphql.Marshaler {
+	return graphql.WriterFunc(func(w io.Writer) {
+		_, _ = io.WriteString(w, strconv.Quote(s.String))
+	})
+}
+
+func UnmarshalNullString(v interface{}) (null.String, error) {
+	switch val := v.(type) {
+	case null.String:
+		return val, nil
+	case string:
+		if val == "" {
+			return null.StringFrom(val), nil
+		}
+		return null.String{}, nil
+	default:
+		return null.String{}, fmt.Errorf("%T is not a null.String", v)
 	}
 }

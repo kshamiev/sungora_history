@@ -51,6 +51,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Character struct {
+		AppearsIn func(childComplexity int) int
+		Name      func(childComplexity int) int
+	}
+
 	Droid struct {
 		AppearsIn       func(childComplexity int) int
 		Friends         func(childComplexity int) int
@@ -79,12 +84,15 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Roles func(childComplexity int) int
-		Todos func(childComplexity int, limit *int, offset *int) int
-		Users func(childComplexity int) int
+		Interfaces func(childComplexity int) int
+		Roles      func(childComplexity int) int
+		Todos      func(childComplexity int, limit *int, offset *int) int
+		Union      func(childComplexity int) int
+		Users      func(childComplexity int) int
 	}
 
 	Role struct {
+		ID    func(childComplexity int) int
 		Users func(childComplexity int, limit *int, offset *int) int
 	}
 
@@ -113,6 +121,7 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
+		ID    func(childComplexity int) int
 		Roles func(childComplexity int, limit *int, offset *int) int
 	}
 }
@@ -124,6 +133,8 @@ type QueryResolver interface {
 	Todos(ctx context.Context, limit *int, offset *int) ([]*Todo, error)
 	Users(ctx context.Context) ([]*models.User, error)
 	Roles(ctx context.Context) ([]*models.Role, error)
+	Interfaces(ctx context.Context) ([]Characters, error)
+	Union(ctx context.Context) ([]SearchResult, error)
 }
 type RoleResolver interface {
 	Users(ctx context.Context, obj *models.Role, limit *int, offset *int) ([]*models.User, error)
@@ -150,6 +161,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Character.appearsIn":
+		if e.complexity.Character.AppearsIn == nil {
+			break
+		}
+
+		return e.complexity.Character.AppearsIn(childComplexity), true
+
+	case "Character.name":
+		if e.complexity.Character.Name == nil {
+			break
+		}
+
+		return e.complexity.Character.Name(childComplexity), true
 
 	case "Droid.appearsIn":
 		if e.complexity.Droid.AppearsIn == nil {
@@ -261,6 +286,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(NewTodo)), true
 
+	case "Query.interfaces":
+		if e.complexity.Query.Interfaces == nil {
+			break
+		}
+
+		return e.complexity.Query.Interfaces(childComplexity), true
+
 	case "Query.roles":
 		if e.complexity.Query.Roles == nil {
 			break
@@ -280,12 +312,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Todos(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
 
+	case "Query.union":
+		if e.complexity.Query.Union == nil {
+			break
+		}
+
+		return e.complexity.Query.Union(childComplexity), true
+
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
 			break
 		}
 
 		return e.complexity.Query.Users(childComplexity), true
+
+	case "Role.id":
+		if e.complexity.Role.ID == nil {
+			break
+		}
+
+		return e.complexity.Role.ID(childComplexity), true
 
 	case "Role.users":
 		if e.complexity.Role.Users == nil {
@@ -440,6 +486,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.Users(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
 
+	case "User.id":
+		if e.complexity.User.ID == nil {
+			break
+		}
+
+		return e.complexity.User.ID(childComplexity), true
+
 	case "User.roles":
 		if e.complexity.User.Roles == nil {
 			break
@@ -514,20 +567,14 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "internal/graphql/schema/intreface.graphql", Input: `type Starship {
-    id: ID!
-    name: String!
-    length(unit: LengthUnit = METER): Float
-}
-
-interface Character {
+	&ast.Source{Name: "internal/graphql/schema/intreface.graphql", Input: `interface Characters {
     id: ID!
     name: String!
     friends: [Character]
     appearsIn: [Episode]!
 }
 
-type Human implements Character {
+type Human implements Characters {
     id: ID!
     name: String!
     friends: [Character]
@@ -536,14 +583,27 @@ type Human implements Character {
     totalCredits: Int
 }
 
-type Droid implements Character {
+type Droid implements Characters {
     id: ID!
     name: String!
     friends: [Character]
     appearsIn: [Episode]!
     primaryFunction: String
 }
-`},
+
+type Starship {
+    id: ID!
+    name: String!
+    length(unit: LengthUnit = METER): Float
+}
+
+type Character {
+    name: String!
+    appearsIn: [Episode!]!
+}
+
+# UNION
+union SearchResult = Human | Droid | Starship`},
 	&ast.Source{Name: "internal/graphql/schema/mutation.graphql", Input: `# GraphQL schema example
 # https://gqlgen.com/getting-started/
 input NewTodo {
@@ -570,6 +630,10 @@ type Query {
     users: [User!]!
     "Comment method 3"
     roles: [Role!]!
+    "Пример разные типы через интерфейсы полей"
+    interfaces: [Characters]
+    "Пример обьединений"
+    union: [SearchResult]
 }
 `},
 	&ast.Source{Name: "internal/graphql/schema/type.graphql", Input: `# GraphQL schema example
@@ -635,10 +699,12 @@ type Item {
 }
 
 type User {
+    id: UUID!
     roles(limit: Int = 25, offset: Int = 0): [Role]
 }
 
 type Role {
+    id: UUID!
     users(limit: Int = 25, offset: Int = 0): [User]
 }`},
 )
@@ -835,6 +901,80 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Character_name(ctx context.Context, field graphql.CollectedField, obj *Character) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Character",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Character_appearsIn(ctx context.Context, field graphql.CollectedField, obj *Character) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Character",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AppearsIn, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Episode)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNEpisode2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐEpisode(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Droid_id(ctx context.Context, field graphql.CollectedField, obj *Droid) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -937,10 +1077,10 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]Character)
+	res := resTmp.([]*Character)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOCharacter2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx, field.Selections, res)
+	return ec.marshalOCharacter2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Droid_appearsIn(ctx context.Context, field graphql.CollectedField, obj *Droid) (ret graphql.Marshaler) {
@@ -1116,10 +1256,10 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]Character)
+	res := resTmp.([]*Character)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOCharacter2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx, field.Selections, res)
+	return ec.marshalOCharacter2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Human_appearsIn(ctx context.Context, field graphql.CollectedField, obj *Human) (ret graphql.Marshaler) {
@@ -1500,6 +1640,74 @@ func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.Coll
 	return ec.marshalNRole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_interfaces(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Interfaces(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]Characters)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOCharacters2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacters(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_union(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Union(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]SearchResult)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOSearchResult2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐSearchResult(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1573,6 +1781,43 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Role_id(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Role",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(typ.UUID)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Role_users(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
@@ -2289,6 +2534,43 @@ func (ec *executionContext) _Todo_roles(ctx context.Context, field graphql.Colle
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(typ.UUID)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_roles(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
@@ -3511,7 +3793,7 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj inter
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet, obj Character) graphql.Marshaler {
+func (ec *executionContext) _Characters(ctx context.Context, sel ast.SelectionSet, obj Characters) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -3528,11 +3810,64 @@ func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet
 	}
 }
 
+func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.SelectionSet, obj SearchResult) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case Human:
+		return ec._Human(ctx, sel, &obj)
+	case *Human:
+		return ec._Human(ctx, sel, obj)
+	case Droid:
+		return ec._Droid(ctx, sel, &obj)
+	case *Droid:
+		return ec._Droid(ctx, sel, obj)
+	case Starship:
+		return ec._Starship(ctx, sel, &obj)
+	case *Starship:
+		return ec._Starship(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
 
-var droidImplementors = []string{"Droid", "Character"}
+var characterImplementors = []string{"Character"}
+
+func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet, obj *Character) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, characterImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Character")
+		case "name":
+			out.Values[i] = ec._Character_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "appearsIn":
+			out.Values[i] = ec._Character_appearsIn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var droidImplementors = []string{"Droid", "Characters", "SearchResult"}
 
 func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, obj *Droid) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, droidImplementors)
@@ -3573,7 +3908,7 @@ func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
-var humanImplementors = []string{"Human", "Character"}
+var humanImplementors = []string{"Human", "Characters", "SearchResult"}
 
 func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, obj *Human) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, humanImplementors)
@@ -3741,6 +4076,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "interfaces":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_interfaces(ctx, field)
+				return res
+			})
+		case "union":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_union(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -3767,6 +4124,11 @@ func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Role")
+		case "id":
+			out.Values[i] = ec._Role_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "users":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -3789,7 +4151,7 @@ func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-var starshipImplementors = []string{"Starship"}
+var starshipImplementors = []string{"Starship", "SearchResult"}
 
 func (ec *executionContext) _Starship(ctx context.Context, sel ast.SelectionSet, obj *Starship) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, starshipImplementors)
@@ -3940,6 +4302,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
+		case "id":
+			out.Values[i] = ec._User_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "roles":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4242,6 +4609,72 @@ func (ec *executionContext) marshalNDecimal2githubᚗcomᚋshopspringᚋdecimal�
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNEpisode2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐEpisode(ctx context.Context, v interface{}) (Episode, error) {
+	var res Episode
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNEpisode2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐEpisode(ctx context.Context, sel ast.SelectionSet, v Episode) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNEpisode2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐEpisode(ctx context.Context, v interface{}) ([]Episode, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]Episode, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNEpisode2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐEpisode(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNEpisode2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐEpisode(ctx context.Context, sel ast.SelectionSet, v []Episode) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEpisode2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐEpisode(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) unmarshalNEpisode2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐEpisode(ctx context.Context, v interface{}) ([]*Episode, error) {
@@ -4829,13 +5262,10 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 }
 
 func (ec *executionContext) marshalOCharacter2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx context.Context, sel ast.SelectionSet, v Character) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Character(ctx, sel, v)
+	return ec._Character(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOCharacter2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx context.Context, sel ast.SelectionSet, v []Character) graphql.Marshaler {
+func (ec *executionContext) marshalOCharacter2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx context.Context, sel ast.SelectionSet, v []*Character) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4862,7 +5292,61 @@ func (ec *executionContext) marshalOCharacter2ᚕgithubᚗcomᚋkshamievᚋsungo
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOCharacter2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx, sel, v[i])
+			ret[i] = ec.marshalOCharacter2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOCharacter2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacter(ctx context.Context, sel ast.SelectionSet, v *Character) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Character(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOCharacters2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacters(ctx context.Context, sel ast.SelectionSet, v Characters) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Characters(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOCharacters2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacters(ctx context.Context, sel ast.SelectionSet, v []Characters) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOCharacters2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐCharacters(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5069,6 +5553,53 @@ func (ec *executionContext) marshalORole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋ
 		return graphql.Null
 	}
 	return ec._Role(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOSearchResult2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v SearchResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SearchResult(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOSearchResult2ᚕgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v []SearchResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOSearchResult2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐSearchResult(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOStarship2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋgqlᚐStarship(ctx context.Context, sel ast.SelectionSet, v Starship) graphql.Marshaler {

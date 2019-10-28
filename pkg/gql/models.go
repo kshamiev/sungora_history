@@ -14,30 +14,41 @@ import (
 	"github.com/volatiletech/null"
 )
 
-type Character interface {
-	IsCharacter()
+type Characters interface {
+	IsCharacters()
+}
+
+type SearchResult interface {
+	IsSearchResult()
+}
+
+type Character struct {
+	Name      string    `json:"name"`
+	AppearsIn []Episode `json:"appearsIn"`
 }
 
 type Droid struct {
-	ID              string      `json:"id"`
-	Name            string      `json:"name"`
-	Friends         []Character `json:"friends"`
-	AppearsIn       []*Episode  `json:"appearsIn"`
-	PrimaryFunction *string     `json:"primaryFunction"`
+	ID              string       `json:"id"`
+	Name            string       `json:"name"`
+	Friends         []*Character `json:"friends"`
+	AppearsIn       []*Episode   `json:"appearsIn"`
+	PrimaryFunction *string      `json:"primaryFunction"`
 }
 
-func (Droid) IsCharacter() {}
+func (Droid) IsCharacters()   {}
+func (Droid) IsSearchResult() {}
 
 type Human struct {
-	ID           string      `json:"id"`
-	Name         string      `json:"name"`
-	Friends      []Character `json:"friends"`
-	AppearsIn    []*Episode  `json:"appearsIn"`
-	Starships    []*Starship `json:"starships"`
-	TotalCredits *int        `json:"totalCredits"`
+	ID           string       `json:"id"`
+	Name         string       `json:"name"`
+	Friends      []*Character `json:"friends"`
+	AppearsIn    []*Episode   `json:"appearsIn"`
+	Starships    []*Starship  `json:"starships"`
+	TotalCredits *int         `json:"totalCredits"`
 }
 
-func (Human) IsCharacter() {}
+func (Human) IsCharacters()   {}
+func (Human) IsSearchResult() {}
 
 type Item struct {
 	ID          typ.UUID `json:"id"`
@@ -55,6 +66,8 @@ type Starship struct {
 	Name   string   `json:"name"`
 	Length *float64 `json:"length"`
 }
+
+func (Starship) IsSearchResult() {}
 
 type Todo struct {
 	// идентификатор

@@ -1,17 +1,11 @@
-type Starship {
-    id: ID!
-    name: String!
-    length(unit: LengthUnit = METER): Float
-}
-
-interface Character {
+interface Characters {
     id: ID!
     name: String!
     friends: [Character]
     appearsIn: [Episode]!
 }
 
-type Human implements Character {
+type Human implements Characters {
     id: ID!
     name: String!
     friends: [Character]
@@ -20,10 +14,24 @@ type Human implements Character {
     totalCredits: Int
 }
 
-type Droid implements Character {
+type Droid implements Characters {
     id: ID!
     name: String!
     friends: [Character]
     appearsIn: [Episode]!
     primaryFunction: String
 }
+
+type Starship {
+    id: ID!
+    name: String!
+    length(unit: LengthUnit = METER): Float
+}
+
+type Character {
+    name: String!
+    appearsIn: [Episode!]!
+}
+
+# UNION
+union SearchResult = Human | Droid | Starship

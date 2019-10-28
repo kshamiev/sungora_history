@@ -64,3 +64,9 @@ func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
 func (r *queryResolver) Roles(ctx context.Context) ([]*models.Role, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) Interfaces(ctx context.Context) ([]gql.Characters, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Union(ctx context.Context) ([]gql.SearchResult, error) {
+	panic("not implemented")
+}

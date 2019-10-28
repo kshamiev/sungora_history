@@ -61,9 +61,11 @@ type Item {
 }
 
 type User {
+    id: UUID!
     roles(limit: Int = 25, offset: Int = 0): [Role]
 }
 
 type Role {
+    id: UUID!
     users(limit: Int = 25, offset: Int = 0): [User]
 }

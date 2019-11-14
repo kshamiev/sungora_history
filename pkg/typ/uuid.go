@@ -33,5 +33,4 @@ func (u UUID) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return u.String(), nil
-
 }

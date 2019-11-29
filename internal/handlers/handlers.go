@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"gitlab.services.mts.ru/libs/logger"
+	logger "github.com/kshamiev/sungora/pkg/logger"
 
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/internal/graphql"

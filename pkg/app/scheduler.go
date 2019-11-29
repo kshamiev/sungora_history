@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.services.mts.ru/libs/logger"
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 type SchedulerTask interface {

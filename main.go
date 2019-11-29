@@ -12,7 +12,6 @@ import (
 
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
-	"gitlab.services.mts.ru/libs/logger"
 
 	_ "github.com/kshamiev/sungora/api/docs"
 	"github.com/kshamiev/sungora/internal/config"
@@ -20,6 +19,7 @@ import (
 	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/internal/workers"
 	"github.com/kshamiev/sungora/pkg/app"
+	"github.com/kshamiev/sungora/pkg/logger"
 	"github.com/kshamiev/sungora/pkg/models"
 )
 
@@ -90,6 +90,5 @@ func main() {
 		return
 	}
 	defer server.Wait()
-
 	app.Lock(make(chan os.Signal, 1))
 }

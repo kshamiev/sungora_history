@@ -24,7 +24,8 @@ vendor
 /*.sql
 /*.yaml
 /*.yml
-
+makefile
+Makefile
 # IDE
 .project
 .settings

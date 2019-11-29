@@ -1,9 +1,9 @@
 package config
 
 import (
-	"gitlab.services.mts.ru/libs/logger"
 
 	"github.com/kshamiev/sungora/pkg/app"
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 type Config struct {

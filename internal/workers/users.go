@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"gitlab.services.mts.ru/libs/logger"
+ logger	"github.com/kshamiev/sungora/pkg/logger"
 
 	"github.com/kshamiev/sungora/internal/config"
 )

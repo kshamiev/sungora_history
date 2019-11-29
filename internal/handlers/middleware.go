@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-chi/cors"
 	"github.com/google/uuid"
-	"gitlab.services.mts.ru/libs/logger"
 
 	"github.com/kshamiev/sungora/pkg/app/response"
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 type Middleware struct {

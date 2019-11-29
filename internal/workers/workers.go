@@ -3,8 +3,7 @@ package workers
 import (
 	"database/sql"
 
-	"gitlab.services.mts.ru/libs/logger"
-
+	logger "github.com/kshamiev/sungora/pkg/logger"
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/pkg/app"
 )

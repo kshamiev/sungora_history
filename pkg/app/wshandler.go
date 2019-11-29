@@ -2,7 +2,8 @@ package app
 
 import (
 	"github.com/gorilla/websocket"
-	"gitlab.services.mts.ru/libs/logger"
+
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 // интерфейс обработчика сообщений

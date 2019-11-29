@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	logger "github.com/kshamiev/sungora/pkg/logger"
 
-	"gitlab.services.mts.ru/libs/logger"
 )
 
 const cookiePath = "/"

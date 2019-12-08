@@ -7,11 +7,11 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
-	logger "github.com/kshamiev/sungora/pkg/logger"
 
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/internal/graphql"
 	"github.com/kshamiev/sungora/pkg/gql"
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 type Main struct {

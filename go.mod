@@ -11,6 +11,7 @@ require (
 	github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40 // indirect
 	github.com/dgryski/trifles v0.0.0-20190809233526-a06f71cd0619 // indirect
 	github.com/evalphobia/logrus_sentry v0.8.2
+	github.com/friendsofgo/errors v0.9.2
 	github.com/getsentry/raven-go v0.2.0
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/cors v1.0.0
@@ -25,7 +26,6 @@ require (
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/onrik/logrus v0.4.1
-	github.com/pkg/errors v0.8.1
 	github.com/shopspring/decimal v0.0.0-20190905144223-a36b5d85f337
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cast v1.3.0 // indirect
@@ -36,7 +36,7 @@ require (
 	github.com/vektah/gqlparser v1.1.2
 	github.com/volatiletech/inflect v0.0.0-20170731032912-e7201282ae8d // indirect
 	github.com/volatiletech/null v8.0.0+incompatible
-	github.com/volatiletech/sqlboiler v3.5.0+incompatible
+	github.com/volatiletech/sqlboiler v3.6.1+incompatible
 	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect
 	golang.org/x/tools v0.0.0-20191026034945-b2104f82a97d // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect

@@ -4,9 +4,8 @@ import (
 	"database/sql"
 	"time"
 
- logger	"github.com/kshamiev/sungora/pkg/logger"
-
 	"github.com/kshamiev/sungora/internal/config"
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 // Обновление онлайн статуса ушедших пользователей

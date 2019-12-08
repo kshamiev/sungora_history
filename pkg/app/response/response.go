@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	logger "github.com/kshamiev/sungora/pkg/logger"
 
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 const cookiePath = "/"

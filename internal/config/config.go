@@ -1,7 +1,6 @@
 package config
 
 import (
-
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/logger"
 )

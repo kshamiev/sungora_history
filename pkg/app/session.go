@@ -15,6 +15,7 @@ type SessionBus map[string]interface{}
 func NewSessionBus(sessionTimeout time.Duration) SessionBus {
 	var sessions = make(SessionBus)
 	go sessions.controlSessionBus(sessionTimeout)
+
 	return sessions
 }
 
@@ -22,6 +23,7 @@ func NewSessionBus(sessionTimeout time.Duration) SessionBus {
 func (bus SessionBus) controlSessionBus(sessionTimeout time.Duration) {
 	for {
 		time.Sleep(time.Minute)
+
 		for key := range bus {
 			if s, ok := bus[key].(*Session); ok {
 				if sessionTimeout < time.Since(s.t) {
@@ -42,6 +44,7 @@ func (bus SessionBus) Get(key string) interface{} {
 	if _, ok := bus[key]; ok {
 		return bus[key]
 	}
+
 	return nil
 }
 
@@ -57,6 +60,7 @@ func (bus SessionBus) GetSessionCookie(rw *response.Response, cookieName string)
 		token = newRandomString(10)
 		rw.CookieSet(cookieName, token)
 	}
+
 	return bus.GetSession(token)
 }
 
@@ -66,10 +70,12 @@ func (bus SessionBus) GetSession(token string) *Session {
 		elm.t = time.Now()
 		return elm
 	}
+
 	elm := new(Session)
 	elm.t = time.Now()
 	elm.data = make(map[string]interface{})
 	bus[token] = elm
+
 	return elm
 }
 
@@ -84,6 +90,7 @@ func (s *Session) Get(key string) interface{} {
 	if _, ok := s.data[key]; ok {
 		return s.data[key]
 	}
+
 	return nil
 }
 
@@ -116,16 +123,20 @@ func randChar(length int, chars []byte) string {
 	clen := byte(len(chars))
 	maxrb := byte(256 - (256 % len(chars)))
 	i := 0
+
 	for {
 		if _, err := io.ReadFull(rand.Reader, data); err != nil {
 			panic(err)
 		}
+
 		for _, c := range data {
 			if c >= maxrb {
 				continue
 			}
+
 			pword[i] = chars[c%clen]
 			i++
+
 			if i == length {
 				return string(pword)
 			}

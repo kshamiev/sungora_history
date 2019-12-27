@@ -32,12 +32,15 @@ func NewServer(cfg *ConfigServer, mux http.Handler) (com *Server, err error) {
 // Старт сервера HTTP(S)
 func (comp *Server) Run() (err error) {
 	comp.chControl = make(chan struct{})
+
 	go func() {
 		if err = comp.Server.ListenAndServe(); err != http.ErrServerClosed {
 			return
 		}
+
 		close(comp.chControl)
 	}()
+
 	return
 }
 
@@ -47,9 +50,11 @@ func (comp *Server) Wait() {
 	if comp.Server == nil {
 		return
 	}
+
 	if err := comp.Server.Shutdown(context.Background()); err != nil {
 		return
 	}
+
 	<-comp.chControl
 }
 

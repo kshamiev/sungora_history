@@ -2,6 +2,7 @@ package response
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kshamiev/sungora/pkg/errs"
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
@@ -19,7 +21,7 @@ const cookiePath = "/"
 
 // Структура для работы с входящим запросом
 type Response struct {
-	Request  Request
+	Request  *http.Request
 	response http.ResponseWriter
 	lg       logger.Logger
 }
@@ -27,22 +29,26 @@ type Response struct {
 // New Функционал по работе с входящим запросом для формирования ответа
 func New(r *http.Request, w http.ResponseWriter) *Response {
 	_ = r.ParseForm()
+
 	var rw = &Response{
 		response: w,
 		lg:       logger.GetLogger(r.Context()),
-		Request:  Request{request: r},
+		Request:  r,
 	}
+
 	return rw
 }
 
 // CookieGet Получение куки.
 func (rw *Response) CookieGet(name string) (c string, err error) {
-	sessionID, err := rw.Request.request.Cookie(name)
+	sessionID, err := rw.Request.Cookie(name)
 	if err != nil {
 		return "", err
 	}
-	lg := logger.GetLogger(rw.Request.request.Context())
+
+	lg := logger.GetLogger(rw.Request.Context())
 	lg.WithField("COOKIE", "GET").Infof("%s = %s", name, sessionID.Value)
+
 	return sessionID.Value, nil
 }
 
@@ -52,12 +58,14 @@ func (rw *Response) CookieSet(name, value string, t ...time.Time) {
 	cookie.HttpOnly = true
 	cookie.Name = name
 	cookie.Value = value
-	cookie.Domain = strings.Split(rw.Request.request.Host, ":")[0]
+	cookie.Domain = strings.Split(rw.Request.Host, ":")[0]
 	cookie.Path = cookiePath
+
 	if len(t) > 0 {
 		cookie.Expires = t[0]
 	}
-	lg := logger.GetLogger(rw.Request.request.Context())
+
+	lg := logger.GetLogger(rw.Request.Context())
 	lg.WithField("COOKIE", "SET").Infof("%s = %s", name, value)
 	http.SetCookie(rw.response, cookie)
 }
@@ -67,12 +75,31 @@ func (rw *Response) CookieRem(name string) {
 	var cookie = new(http.Cookie)
 	cookie.HttpOnly = true
 	cookie.Name = name
-	cookie.Domain = strings.Split(rw.Request.request.Host, ":")[0]
+	cookie.Domain = strings.Split(rw.Request.Host, ":")[0]
 	cookie.Path = cookiePath
 	cookie.Expires = time.Now()
-	lg := logger.GetLogger(rw.Request.request.Context())
+	lg := logger.GetLogger(rw.Request.Context())
 	lg.WithField("COOKIE", "REM").Infof("%s", name)
 	http.SetCookie(rw.response, cookie)
+}
+
+// JsonBodyDecode декодирование полученного тела запроса в формате json в объект
+func (rw *Response) JSONBodyDecode(object interface{}) error {
+	body, err := ioutil.ReadAll(rw.Request.Body)
+	if err != nil {
+		return errs.NewBadRequest(err)
+	}
+
+	if len(body) == 0 {
+		return errs.NewBadRequest(errors.New("the request body is empty"))
+	}
+
+	err = json.Unmarshal(body, object)
+	if err != nil {
+		return errs.NewBadRequest(err)
+	}
+
+	return nil
 }
 
 // interface for responses with an error
@@ -87,9 +114,11 @@ type Error interface {
 func (rw *Response) JSONError(err error) {
 	if e, ok := err.(Error); ok {
 		rw.lg.Error(e.Error())
+
 		for _, t := range e.Trace() {
 			rw.lg.Trace(t)
 		}
+
 		rw.JSON(e.Response(), e.HTTPCode())
 	} else {
 		rw.lg.WithError(err).Error("Other (unexpected) error")
@@ -106,16 +135,18 @@ func (rw *Response) JSON(object interface{}, status ...int) {
 		rw.generalHeaderSet("application/json; charset=utf-8", int64(len(data)), status[0])
 		// Тело документа
 		_, _ = rw.response.Write([]byte(http.StatusText(http.StatusBadRequest)))
+
 		return
 	}
 	// Статус ответа
 	if len(status) == 0 {
 		status = append(status, http.StatusOK)
 	}
+
 	if status[0] < http.StatusBadRequest {
-		rw.lg.Infof("%d:%s:%s", status[0], rw.Request.request.Method, rw.Request.request.URL.Path)
+		rw.lg.Infof("%d:%s:%s", status[0], rw.Request.Method, rw.Request.URL.Path)
 	} else {
-		rw.lg.Errorf("%d:%s:%s", status[0], rw.Request.request.Method, rw.Request.request.URL.Path)
+		rw.lg.Errorf("%d:%s:%s", status[0], rw.Request.Method, rw.Request.URL.Path)
 	}
 	// Заголовки
 	rw.generalHeaderSet("application/json; charset=utf-8", int64(len(data)), status[0])
@@ -125,35 +156,43 @@ func (rw *Response) JSON(object interface{}, status ...int) {
 
 // Static ответ - отдача статических данных
 func (rw *Response) Static(pathFile string) {
-	var fi os.FileInfo
-	var err error
-	if fi, err = os.Stat(pathFile); err != nil {
+	fi, err := os.Stat(pathFile)
+	if err != nil {
 		d := []byte(http.StatusText(http.StatusNotFound))
 		rw.Bytes(d, filepath.Base(pathFile), "text/html; charset=utf-8", http.StatusNotFound)
+
 		return
 	}
+
 	if fi.IsDir() {
-		if rw.Request.request.URL.Path != "/" {
+		if rw.Request.URL.Path != "/" {
 			pathFile += string(os.PathSeparator)
 		}
+
 		pathFile += "index.html"
+
 		if _, err = os.Stat(pathFile); err != nil {
 			d := []byte(http.StatusText(http.StatusNotFound))
 			rw.Bytes(d, filepath.Base(pathFile), "text/html; charset=utf-8", http.StatusNotFound)
+
 			return
 		}
 	}
+
 	// content
-	var data []byte
-	if data, err = ioutil.ReadFile(pathFile); err != nil {
+	data, err := ioutil.ReadFile(pathFile)
+	if err != nil {
 		d := []byte(http.StatusText(http.StatusInternalServerError))
 		rw.Bytes(d, filepath.Base(pathFile), "text/html; charset=utf-8", http.StatusInternalServerError)
+
 		return
 	}
 	// type
 	var typ = `application/octet-stream`
+
 	l := strings.Split(pathFile, ".")
 	fileExt := `.` + l[len(l)-1]
+
 	if mimeType := mime.TypeByExtension(fileExt); mimeType != `` {
 		typ = mimeType
 	}
@@ -213,9 +252,11 @@ func (rw *Response) generalHeaderSet(contentTyp string, l int64, status int) {
 	rw.response.Header().Set("Last-Modified", t.Format(time.RFC3339))
 	// размер и тип контента
 	rw.response.Header().Set("Content-Type", contentTyp)
+
 	if l > 0 {
 		rw.response.Header().Set("Content-Length", fmt.Sprintf("%d", l))
 	}
+
 	// status
 	rw.response.WriteHeader(status)
 }

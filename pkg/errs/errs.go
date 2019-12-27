@@ -1,55 +1,167 @@
 package errs
 
-import "net/http"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
 
 // NewUnauthorized new error type
-func NewUnauthorized(err error) *Errs {
+func NewUnauthorized(err error, msg ...string) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusUnauthorized))
+	}
+
 	return &Errs{
 		codeHTTP: http.StatusUnauthorized,
 		err:      err,
 		kind:     trace(2),
 		trace:    Traces(err),
+		message:  msg,
+	}
+}
+
+// NewUnauthorizedCode new error type
+func NewUnauthorizedCode(err error, code int, msg ...interface{}) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusUnauthorized))
+	}
+
+	return &Errs{
+		codeHTTP: http.StatusUnauthorized,
+		err:      err,
+		kind:     trace(2),
+		trace:    Traces(err),
+		message:  messageGet(code, msg...),
 	}
 }
 
 // NewNotFound new error type
-func NewNotFound(err error) *Errs {
+func NewNotFound(err error, msg ...string) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusNotFound))
+	}
+
 	return &Errs{
 		codeHTTP: http.StatusNotFound,
 		err:      err,
 		kind:     trace(2),
 		trace:    Traces(err),
+		message:  msg,
+	}
+}
+
+// NewNotFoundCode new error type
+func NewNotFoundCode(err error, code int, msg ...interface{}) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusNotFound))
+	}
+
+	return &Errs{
+		codeHTTP: http.StatusNotFound,
+		err:      err,
+		kind:     trace(2),
+		trace:    Traces(err),
+		message:  messageGet(code, msg...),
 	}
 }
 
 // NewInternalServer new error type
-func NewInternalServer(err error) *Errs {
+func NewInternalServer(err error, msg ...string) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusInternalServerError))
+	}
+
 	return &Errs{
 		codeHTTP: http.StatusInternalServerError,
 		err:      err,
 		kind:     trace(2),
 		trace:    Traces(err),
+		message:  msg,
+	}
+}
+
+// NewInternalServerCode new error type
+func NewInternalServerCode(err error, code int, msg ...interface{}) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusInternalServerError))
+	}
+
+	return &Errs{
+		codeHTTP: http.StatusInternalServerError,
+		err:      err,
+		kind:     trace(2),
+		trace:    Traces(err),
+		message:  messageGet(code, msg...),
 	}
 }
 
 // NewForbidden new error type
-func NewForbidden(err error) *Errs {
+func NewForbidden(err error, msg ...string) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusForbidden))
+	}
+
 	return &Errs{
 		codeHTTP: http.StatusForbidden,
 		err:      err,
 		kind:     trace(2),
 		trace:    Traces(err),
+		message:  msg,
 	}
 }
 
-// Errs new error type
-func NewBadRequest(err error) *Errs {
+// NewForbiddenCode new error type
+func NewForbiddenCode(err error, code int, msg ...interface{}) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusForbidden))
+	}
+
+	return &Errs{
+		codeHTTP: http.StatusForbidden,
+		err:      err,
+		kind:     trace(2),
+		trace:    Traces(err),
+		message:  messageGet(code, msg...),
+	}
+}
+
+// NewBadRequest new error type
+func NewBadRequest(err error, msg ...string) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusBadRequest))
+	}
+
 	return &Errs{
 		codeHTTP: http.StatusBadRequest,
 		err:      err,
 		kind:     trace(2),
 		trace:    Traces(err),
+		message:  msg,
 	}
+}
+
+// NewBadRequestCode new error type
+func NewBadRequestCode(err error, code int, msg ...interface{}) *Errs {
+	if err == nil {
+		err = errors.New(http.StatusText(http.StatusBadRequest))
+	}
+
+	return &Errs{
+		codeHTTP: http.StatusBadRequest,
+		err:      err,
+		kind:     trace(2),
+		trace:    Traces(err),
+		message:  messageGet(code, msg...),
+	}
+}
+
+func messageGet(code int, msg ...interface{}) []string {
+	if _, ok := messageCode[code]; ok {
+		return []string{fmt.Sprintf(messageCode[code], msg...)}
+	}
+
+	return []string{fmt.Sprintf("message %d not implemented", code)}
 }
 
 type Errs struct {
@@ -57,6 +169,7 @@ type Errs struct {
 	err      error    // сама ошибка от внешнего сервиса или либы
 	kind     string   // где произошла ошибка
 	trace    []string // трассировка ошибки
+	message  []string // сообщение для пользователя
 }
 
 // Error for logs
@@ -64,6 +177,7 @@ func (e *Errs) Error() string {
 	if e.err != nil {
 		return e.err.Error() + "; " + e.kind
 	}
+
 	return http.StatusText(e.codeHTTP) + "; " + e.kind
 }
 
@@ -74,9 +188,12 @@ func (e *Errs) Trace() []string {
 
 // Response response message to user
 func (e *Errs) Response() string {
-	if e.codeHTTP != http.StatusInternalServerError && e.err != nil {
+	if len(e.message) > 0 {
+		return e.message[0]
+	} else if e.err != nil {
 		return e.err.Error()
 	}
+
 	return http.StatusText(e.codeHTTP)
 }
 

@@ -23,8 +23,6 @@ type WSHandlerSample struct {
 // HookStartClient метод при старте чата
 func (h *WSHandlerSample) HookStartClient(cntClient int) {
 	h.Log.Info("WS hook start client ", cntClient)
-	// it`s work
-	// ...
 }
 
 // HookGetMessage метод при получении сообщения чата для конкретного клиента
@@ -34,6 +32,7 @@ func (h *WSHandlerSample) HookGetMessage(cntClient int) (interface{}, error) {
 		h.Log.Error("WS hook get message error: ", err.Error())
 		return nil, err
 	}
+
 	h.Log.Info("WS hook get message: ", msg)
 	// it`s work
 	// ...
@@ -46,9 +45,8 @@ func (h *WSHandlerSample) HookSendMessage(msg interface{}, cntClient int) {
 		h.Log.Error("WS send message err: ", err.Error())
 		return
 	}
+
 	h.Log.Info("WS hook send message: ", msg)
-	// it`s work
-	// ...
 }
 
 // Ping проверка соединения с клиентом

@@ -9,12 +9,14 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 // Структура для работы с исходящими запросами
 type Request struct {
-	url    string
-	Header http.Header
+	url          string
+	ResponseBody []byte
+	Header       http.Header
 }
 
 // New Функционал по работе с исходящими запросами к внешним ресурсам
@@ -51,32 +53,43 @@ func (r *Request) OPTIONS(uri string, requestBody, responseBody interface{}) (*h
 }
 
 func (r *Request) request(method, uri string, requestBody, responseBody interface{}) (*http.Response, error) {
-	var query = r.url + uri
-	var request *http.Request
-	body := new(bytes.Buffer)
+	var (
+		query   = r.url + uri
+		request *http.Request
+		body    = new(bytes.Buffer)
+	)
+
+	const headerTypeJSON = "application/json"
+
 	// Данные исходящего запроса
-	if method == http.MethodPost || method == http.MethodPut {
+	if (method == http.MethodPost || method == http.MethodPut) && strings.Split(r.Header.Get("Content-Type"), ";")[0] == headerTypeJSON {
 		data, err := json.Marshal(requestBody)
 		if err != nil {
 			return nil, err
 		}
+
 		if _, err = body.Write(data); err != nil {
 			return nil, err
 		}
-	} else if p, ok := requestBody.(map[string]interface{}); ok {
+	}
+
+	if p, ok := requestBody.(map[string]interface{}); ok {
 		query += "?" + uriParamsCompile(p)
 	}
+
 	// Запрос
 	request, err := http.NewRequest(method, query, body)
 	if err != nil {
 		return nil, err
 	}
+
 	// Заголовки
 	request.Header = r.Header
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: false}, // ignore expired SSL certificates
 	}
 	c := http.Client{Transport: transCfg}
+
 	response, err := c.Do(request)
 	if err != nil {
 		return nil, err
@@ -85,23 +98,26 @@ func (r *Request) request(method, uri string, requestBody, responseBody interfac
 	defer func() {
 		_ = response.Body.Close()
 	}()
-	bodyResponse, err := ioutil.ReadAll(response.Body)
-	if err != nil {
+
+	if r.ResponseBody, err = ioutil.ReadAll(response.Body); err != nil {
 		return nil, err
 	}
-	if r.Header.Get("Content-Type") == "application/json" {
-		err = json.Unmarshal(bodyResponse, responseBody)
+
+	if responseBody != nil && strings.Split(response.Header.Get("Content-Type"), ";")[0] == headerTypeJSON {
+		_ = json.Unmarshal(r.ResponseBody, responseBody)
 	}
+
 	if response.StatusCode != 200 {
 		err = fmt.Errorf("%s:[%d]:%s", method, response.StatusCode, query)
 	}
+
 	return response, err
 }
 
 // uriParamsCompile
 func uriParamsCompile(postData map[string]interface{}) string {
-	u := new(url.URL)
-	q := u.Query()
+	q := &url.Values{}
+
 	for k, v := range postData {
 		switch v1 := v.(type) {
 		case uint64:
@@ -118,5 +134,6 @@ func uriParamsCompile(postData map[string]interface{}) string {
 			q.Add(k, v1)
 		}
 	}
+
 	return q.Encode()
 }

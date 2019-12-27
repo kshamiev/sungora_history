@@ -19,15 +19,18 @@ func TestSession(t *testing.T) {
 	if _, ok := ses.Get("key 1").(string); !ok {
 		t.Fatal("error get value from 'key 1'")
 	}
+
 	if _, ok := ses.Get("key 2").(string); !ok {
 		t.Fatal("error get value from 'key 2'")
 	}
+
 	if _, ok := ses.Get("key 3").(string); !ok {
 		t.Fatal("error get value from 'key 3'")
 	}
 
 	// CHECK DELETE
 	ses.Del("key 2")
+
 	if _, ok := ses.Get("key 2").(string); ok {
 		t.Fatal("error delete value from 'key 2'")
 	}

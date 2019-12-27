@@ -1,10 +1,9 @@
 package app
 
 import (
-	"errors"
 	"io/ioutil"
+	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -31,6 +30,12 @@ type ConfigServer struct {
 	RequestTimeout time.Duration `yaml:"requestTimeout"` // Время ожидания окончания выполнения запроса
 	IdleTimeout    time.Duration `yaml:"idleTimeout"`    // Время ожидания следующего запроса
 	MaxHeaderBytes int           `yaml:"maxHeaderBytes"` // Максимальный размер заголовка получаемого от браузера клиента в байтах
+	Header         string        `yaml:"header"`         // Пользовательский заголовок
+}
+
+// HeaderCheck проверка валидности значения пользовательского заголовка
+func (c *ConfigServer) HeaderCheck(r *http.Request, val string) bool {
+	return r.Header.Get(c.Header) == val
 }
 
 type ConfigCors struct {
@@ -61,32 +66,13 @@ type ConfigPostgres struct {
 	Ssl      string `yaml:"ssl"`      // Ssl
 }
 
-const configYaml = "config.yaml"
-
-// ConfigSearchPath поиск конфигурации
-func ConfigSearchPath(serviceName string) (string, error) {
-	sep := string(os.PathSeparator)
-	path := filepath.Dir(filepath.Dir(os.Args[0]))
-	if path == "." {
-		path, _ = os.Getwd()
-		path = filepath.Dir(path)
-	}
-	path += sep + configYaml
-	//
-	if inf, err := os.Stat(path); err == nil {
-		if inf.Mode().IsRegular() {
-			return path, nil
-		}
-	}
-	return "", errors.New("config file not found")
-}
-
 // ConfigLoad загрузка конфигурации
-func ConfigLoad(path string, cfg interface{}) (err error) {
-	var data []byte
-	if data, err = ioutil.ReadFile(path); err != nil {
-		return
+func ConfigLoad(path string, cfg interface{}) error {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
 	}
+
 	return yaml.Unmarshal(data, cfg)
 }
 
@@ -101,12 +87,15 @@ func ConfigSetDefault(cfg *ConfigApp) {
 	}
 	// пути
 	sep := string(os.PathSeparator)
+
 	if cfg.DirWork == "" {
 		cfg.DirWork, _ = os.Getwd()
 		sl := strings.Split(cfg.DirWork, sep)
+
 		if sl[len(sl)-1] == "bin" {
 			sl = sl[:len(sl)-1]
 		}
+
 		cfg.DirWork = strings.Join(sl, sep)
 	}
 	// сессия

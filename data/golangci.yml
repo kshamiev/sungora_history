@@ -1,0 +1,62 @@
+linters-settings:
+  govet:
+    check-shadowing: true
+  gocyclo:
+    min-complexity: 15
+  maligned:
+    suggest-new: true
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  depguard:
+    list-type: blacklist
+    packages:
+  misspell:
+    locale: US
+  lll:
+    line-length: 225
+  goimports:
+    local-prefixes: github.com/golangci/golangci-lint
+  gocritic:
+    enabled-tags:
+      - performance
+      - style
+      - experimental
+    disabled-checks:
+      - wrapperFunc
+
+linters:
+  enable-all: true
+  disable:
+    - interfacer
+    - godox
+    - funlen
+
+run:
+  deadline: 6m
+  skip-dirs:
+    - api
+    - static
+    - data
+    - docs
+    - migrations
+    - vendor
+    - backups
+    - config
+    - dev
+  skip-files:
+    - generated.go
+
+issues:
+  exclude-rules:
+    - text: "weak cryptographic primitive"
+      linters:
+        - gosec
+    - text: "Potential HTTP request made with variable url"
+      linters:
+        - gosec
+
+# golangci.com configuration
+# https://github.com/golangci/golangci/wiki/Configunolintration

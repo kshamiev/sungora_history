@@ -23,12 +23,14 @@ func newUserOnlineOff(db *sql.DB, cfg *config.Config) *userOnlineOff {
 		db:  db,
 		cfg: cfg,
 	}
+
 	return w
 }
 
 func (task *userOnlineOff) Action(ctx context.Context) (err error) {
 	lg := logger.GetLogger(ctx)
 	lg.Infof("execute task: %s", userOnlineOffName)
+
 	return
 }
 

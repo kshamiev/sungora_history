@@ -12,5 +12,6 @@ type FileName struct {
 func filenameHook(config *FileName) logrus.Hook {
 	filenameHook := filename.NewHook()
 	filenameHook.Field = config.SourceField
+
 	return filenameHook
 }

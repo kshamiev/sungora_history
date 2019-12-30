@@ -59,25 +59,29 @@ func main() {
 	if cfg, err = config.Get(*flagConfigPath); err != nil {
 		lg.WithError(err).Fatal("couldn't get config")
 	}
+
 	lg = logger.CreateLogger(&cfg.Lg)
 
 	// ConnectDB SqlBoiler
 	if db, err = app.NewConnectPostgres(&cfg.Postgresql); err != nil {
 		lg.WithError(err).Fatal("couldn't connect to postgres")
 	}
-	if cfg.Lg.Level > 4 {
-		boil.DebugMode = true
-		boil.DebugWriter = lg.Writer()
-	}
+
 	var o models.GooseDBVersion
 	if err = queries.Raw(model.SQLAppVersion.String()).Bind(context.Background(), db, &o); err != nil {
 		lg.WithError(err).Fatal("couldn't get version DB")
 	}
+
 	cfg.App.Version = strconv.FormatInt(o.VersionID, 10) + time.Now().Format("-2006-01-02-15-04-05")
+
+	if cfg.Lg.Level > 4 {
+		boil.DebugMode = true
+	}
 
 	// Workflow
 	wp = workers.Init(db, cfg, lg)
 	wp.Run()
+
 	defer wp.Wait()
 
 	// Server & Handlers
@@ -85,10 +89,14 @@ func main() {
 		lg.WithError(err).Fatal("new web server error")
 		return
 	}
+
 	if err = server.Run(); err != nil {
 		lg.WithError(err).Fatal("error web server start")
 		return
 	}
+
 	defer server.Wait()
+	lg.Info("start web server: ", server.Server.Addr)
+
 	app.Lock(make(chan os.Signal, 1))
 }

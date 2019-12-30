@@ -101,6 +101,7 @@ func GetLogger(ctx context.Context) Logger {
 	if !ok {
 		l = initLogger(&Config{Output: "stdout", Level: InfoLevel})
 	}
+
 	return l
 }
 
@@ -144,9 +145,11 @@ func (level Level) MarshalText() ([]byte, error) {
 		"debug",
 		"trace",
 	}
+
 	if int(level) < len(levelArray) {
 		return []byte(levelArray[level]), nil
 	}
+
 	return nil, fmt.Errorf("not a valid level %d", level)
 }
 func (level *Level) UnmarshalText(text []byte) error {
@@ -159,6 +162,7 @@ func (level *Level) UnmarshalText(text []byte) error {
 		"debug":   DebugLevel,
 		"trace":   TraceLevel,
 	}
+
 	l, ok := levelMap[string(text)]
 	if !ok {
 		return fmt.Errorf("not a valid level %d", level)
@@ -180,9 +184,11 @@ func (level Level) MarshalYAML() (interface{}, error) {
 func (level *Level) UnmarshalJSON(value []byte) error {
 	var temp string
 	err := json.Unmarshal(value, &temp)
+
 	if err != nil {
 		return err
 	}
+
 	return level.UnmarshalText([]byte(temp))
 }
 
@@ -191,5 +197,6 @@ func (level Level) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(string(data))
 }

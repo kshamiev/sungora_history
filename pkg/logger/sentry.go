@@ -30,6 +30,7 @@ func logLevels(config *Sentry) []logrus.Level {
 	for i := PanicLevel; i <= config.Level; i++ {
 		levels = append(levels, logrus.Level(i))
 	}
+
 	return levels
 }
 
@@ -38,11 +39,14 @@ func sentryHook(config *Sentry) (*logrus_sentry.SentryHook, error) {
 		hook *logrus_sentry.SentryHook
 		err  error
 	)
+
 	levels := logLevels(config)
 	client, err := raven.New(config.DSN)
+
 	if err != nil {
 		return nil, err
 	}
+
 	if len(config.Tags) != 0 {
 		client.Tags = config.Tags
 	}

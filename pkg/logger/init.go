@@ -15,12 +15,15 @@ func CreateLogger(config *Config) Logger {
 
 func initLogger(config *Config) Logger {
 	logger := logrus.New()
+
 	if config == nil {
 		logger.SetOutput(os.Stdout)
 		logger.SetLevel(logrus.Level(TraceLevel))
 		logger.SetFormatter(&logrus.TextFormatter{})
+
 		return logrusWrapper{logger.WithFields(map[string]interface{}{})}
 	}
+
 	switch config.Output {
 	case Stdout:
 		logger.SetOutput(os.Stdout)
@@ -37,6 +40,7 @@ func initLogger(config *Config) Logger {
 			logger.SetOutput(f)
 		}
 	}
+
 	switch config.Formatter {
 	case JSONFormatter:
 		logger.SetFormatter(&logrus.JSONFormatter{})
@@ -46,10 +50,11 @@ func initLogger(config *Config) Logger {
 
 	logger.SetLevel(logrus.Level(config.Level))
 	addHooks(logger, config)
+
 	if config.Title == "" {
 		return logrusWrapper{logger.WithField(TitleField, config.Title)}
-
 	}
+
 	return logrusWrapper{logger.WithFields(map[string]interface{}{})}
 }
 
@@ -62,6 +67,7 @@ func addHooks(logger *logrus.Logger, config *Config) {
 			logger.WithError(err).Debug("can't add hook sentry")
 		}
 	}
+
 	if config.Hooks.Syslog != nil {
 		sh, err := sysloggerHook(config.Hooks.Syslog)
 		if err == nil {
@@ -70,6 +76,7 @@ func addHooks(logger *logrus.Logger, config *Config) {
 			logger.WithError(err).Debug("can't add hook syslog")
 		}
 	}
+
 	if config.Hooks.Logstash != nil {
 		sh, err := logstashHook(config.Hooks.Logstash)
 		if err == nil {
@@ -78,8 +85,8 @@ func addHooks(logger *logrus.Logger, config *Config) {
 			logger.WithError(err).Debug("can't add hook logstash")
 		}
 	}
+
 	if config.Hooks.FileName != nil {
 		logger.AddHook(filenameHook(config.Hooks.FileName))
-
 	}
 }

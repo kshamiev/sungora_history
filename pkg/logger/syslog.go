@@ -28,6 +28,7 @@ func sysloggerHook(config *Syslog) (log.Hook, error) {
 		"LOG_INFO":    syslog.LOG_INFO,
 		"LOG_DEBUG":   syslog.LOG_DEBUG,
 	}
+
 	var logFacility = map[string]syslog.Priority{
 		"LOG_KERN":     syslog.LOG_KERN,
 		"LOG_USER":     syslog.LOG_USER,
@@ -51,6 +52,7 @@ func sysloggerHook(config *Syslog) (log.Hook, error) {
 		"LOG_LOCAL6": syslog.LOG_LOCAL6,
 		"LOG_LOCAL7": syslog.LOG_LOCAL7,
 	}
+
 	return logrus_syslog.NewSyslogHook(
 		config.NetworkType,
 		config.Host+":"+config.Port,

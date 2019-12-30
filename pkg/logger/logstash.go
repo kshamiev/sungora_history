@@ -19,5 +19,6 @@ func logstashHook(config *Logstash) (*logrustash.Hook, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return logrustash.NewHookWithFieldsAndConnAndPrefix(conn, "", logrus.Fields{"type": "logstash"}, "")
 }

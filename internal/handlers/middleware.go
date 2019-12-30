@@ -54,7 +54,7 @@ func (c *Middleware) Cors() *cors.Cors {
 func (c *Middleware) Static() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rw := response.New(r, w)
-		rw.Static(c.cfg.App.DirWork + r.URL.Path)
+		rw.Static(c.cfg.App.DirStatic + r.URL.Path)
 	})
 }
 
@@ -65,6 +65,7 @@ func (c *Middleware) SampleOne(next http.Handler) http.Handler {
 		lg.Info("Middleware SampleOne")
 		next.ServeHTTP(w, r)
 	}
+
 	return http.HandlerFunc(fn)
 }
 
@@ -75,5 +76,6 @@ func (c *Middleware) SampleTwo(next http.Handler) http.Handler {
 		lg.Info("Middleware SampleTwo")
 		next.ServeHTTP(w, r)
 	}
+
 	return http.HandlerFunc(fn)
 }

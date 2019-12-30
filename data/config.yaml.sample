@@ -2,7 +2,8 @@ app:
   sessionTimeout: 604800s
   domain: "localhost" # Change
   mode: "dev" # Change
-  dirWork: "/home/kshamiev/work/sungora/assets" # Change
+  dirWork: "/home/kvshamiy/work/sungora" # Change
+  dirStatic: "/static" # Change
   serviceName: "sungora"
 
 lg:
@@ -13,13 +14,13 @@ lg:
 
 http:
   proto: "http"
-  host: "localhost"
+  host: "localhost" # 0.0.0.0
   port: 8080
   writeTimeout: 60s  # Время ожидания окончания передачи ответа в секундах
   readTimeout: 60s   # Время ожидания web запроса в секундах
   requestTimeout: 60s # Время ожидания окончания выполнения запроса
   maxHeaderBytes: 1048576 # Максимальный размер заголовка получаемого от браузера клиента в байтах
-  proxy: "" # proxy: login:pass@bproxy.msk.mts.ru:3131
+  header: X-Is-From
 
 cors:
   allowedOrigins: ["*"]
@@ -30,7 +31,7 @@ cors:
   maxAge: 300
 
 postgresql:
-  host: "localhost" # Change (не пустое значение говорит об использовании)
+  host: "localhost" # Change (не пустое значение говорит об использовании) (172.17.0.1)
   port: 5432
   dbName: "sungora" # Change
   login: "postgres" # Change

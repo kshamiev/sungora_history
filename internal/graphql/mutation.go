@@ -13,6 +13,7 @@ type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateTodo(ctx context.Context, input gql.NewTodo) (*gql.Todo, error) {
 	app.Dumper(input)
+
 	return &gql.Todo{
 		ID:       typ.UUIDNew(),
 		Text:     "popcorn 1",

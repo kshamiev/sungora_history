@@ -50,8 +50,8 @@ func WrapLogrusEntry(l *logrus.Entry) (Logger, error) {
 	if l != nil {
 		return &logrusWrapper{l}, nil
 	}
-	return nil, errors.New("can't wrap nil")
 
+	return nil, errors.New("can't wrap nil")
 }
 
 // WrapLogrusLogger wrap logrus entry to our interface
@@ -59,6 +59,6 @@ func WrapLogrusLogger(l *logrus.Logger) (Logger, error) {
 	if l != nil {
 		return &logrusWrapper{l.WithField("wrapped", "wrapped")}, nil
 	}
-	return nil, errors.New("can't wrap nil")
 
+	return nil, errors.New("can't wrap nil")
 }

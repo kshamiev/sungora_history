@@ -16,6 +16,7 @@ type ConfigApp struct {
 	Domain         string        `yaml:"domain"`         //
 	Mode           string        `yaml:"mode"`           //
 	DirWork        string        `yaml:"dirWork"`        //
+	DirStatic      string        `yaml:"DirStatic"`      //
 	ServiceName    string        `yaml:"serviceName"`    //
 	Version        string
 }
@@ -98,6 +99,9 @@ func ConfigSetDefault(cfg *ConfigApp) {
 
 		cfg.DirWork = strings.Join(sl, sep)
 	}
+
+	cfg.DirStatic = cfg.DirWork + cfg.DirStatic
+
 	// сессия
 	if cfg.SessionTimeout == 0 {
 		cfg.SessionTimeout = time.Duration(14400) * time.Second

@@ -11,5 +11,6 @@ import (
 func Init(db *sql.DB, cfg *config.Config, lg logger.Logger) *app.Scheduler {
 	wp := app.NewScheduler(lg)
 	wp.Add(newUserOnlineOff(db, cfg))
+
 	return wp
 }

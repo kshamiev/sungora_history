@@ -30,6 +30,8 @@ func GetEnvironment(t *testing.T) *ENV {
 	if db, err = app.NewConnectPostgres(&cfg.Postgresql); err != nil {
 		t.Fatal(err)
 	}
+
 	boil.DebugMode = true
+
 	return &ENV{cfg, db}
 }

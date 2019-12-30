@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/volatiletech/sqlboiler/boil"
+
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 

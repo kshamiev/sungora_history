@@ -37,6 +37,7 @@ func (u UUID) MarshalGQL(w io.Writer) {
 		_, _ = io.WriteString(w, strconv.Quote(u.String()))
 		return
 	}
+
 	_, _ = io.WriteString(w, `""`)
 }
 

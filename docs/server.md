@@ -20,10 +20,6 @@
     kubectl get pods -n project-staging    - вывод запущенных подов на stage
     kubectl get pods -n project-production    - вывод запущенных подов на prod
 
-Подсключение и проброс портов для docom
-
-    sudo kubectl port-forward docom-f9b6c86cf-7hjr6 90:80
-
 Подсключение и проброс портов для просмотра логов на стендах
 
     kubectl logs -f [NAME|ID пода]   - просмотр логов на стендах

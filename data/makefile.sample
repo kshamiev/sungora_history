@@ -16,8 +16,7 @@ dep:
 	@if [ ! -f $(DIR)/go.mod ]; then \
 		cd $(DIR); go mod init $(APP); \
 	fi
-	cd $(DIR); go mod tidy;
-#	cd $(DIR); go mod vendor;
+	cd $(DIR); go mod tidy; go mod vendor;
 .PHONY: dep
 
 # Свагер

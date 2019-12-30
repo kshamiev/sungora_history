@@ -2,7 +2,7 @@ app:
   sessionTimeout: 604800s
   domain: "localhost" # Change
   mode: "dev" # Change
-  dirWork: "/home/kvshamiy/work/sungora" # Change
+  dirWork: "/home/kshamiev/work/sungora" # Change
   dirStatic: "/static" # Change
   serviceName: "sungora"
 

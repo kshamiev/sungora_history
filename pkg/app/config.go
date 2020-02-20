@@ -36,7 +36,7 @@ type ConfigServer struct {
 
 // HeaderCheck проверка валидности значения пользовательского заголовка
 func (c *ConfigServer) HeaderCheck(r *http.Request, val string) bool {
-	return r.Header.Get(c.Header) == val
+	return val != "" && r.Header.Get(c.Header) == val
 }
 
 type ConfigCors struct {

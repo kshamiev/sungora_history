@@ -6,10 +6,18 @@ import (
 	"net/http"
 )
 
+var (
+	ErrNotFound       = errors.New(http.StatusText(http.StatusNotFound))
+	ErrUnauthorized   = errors.New(http.StatusText(http.StatusUnauthorized))
+	ErrInternalServer = errors.New(http.StatusText(http.StatusInternalServerError))
+	ErrForbidden      = errors.New(http.StatusText(http.StatusForbidden))
+	ErrBadRequest     = errors.New(http.StatusText(http.StatusBadRequest))
+)
+
 // NewUnauthorized new error type
 func NewUnauthorized(err error, msg ...string) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusUnauthorized))
+		err = ErrUnauthorized
 	}
 
 	return &Errs{
@@ -24,7 +32,7 @@ func NewUnauthorized(err error, msg ...string) *Errs {
 // NewUnauthorizedCode new error type
 func NewUnauthorizedCode(err error, code int, msg ...interface{}) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusUnauthorized))
+		err = ErrUnauthorized
 	}
 
 	return &Errs{
@@ -39,7 +47,7 @@ func NewUnauthorizedCode(err error, code int, msg ...interface{}) *Errs {
 // NewNotFound new error type
 func NewNotFound(err error, msg ...string) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusNotFound))
+		err = ErrNotFound
 	}
 
 	return &Errs{
@@ -54,7 +62,7 @@ func NewNotFound(err error, msg ...string) *Errs {
 // NewNotFoundCode new error type
 func NewNotFoundCode(err error, code int, msg ...interface{}) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusNotFound))
+		err = ErrNotFound
 	}
 
 	return &Errs{
@@ -69,7 +77,7 @@ func NewNotFoundCode(err error, code int, msg ...interface{}) *Errs {
 // NewInternalServer new error type
 func NewInternalServer(err error, msg ...string) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusInternalServerError))
+		err = ErrInternalServer
 	}
 
 	return &Errs{
@@ -84,7 +92,7 @@ func NewInternalServer(err error, msg ...string) *Errs {
 // NewInternalServerCode new error type
 func NewInternalServerCode(err error, code int, msg ...interface{}) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusInternalServerError))
+		err = ErrInternalServer
 	}
 
 	return &Errs{
@@ -99,7 +107,7 @@ func NewInternalServerCode(err error, code int, msg ...interface{}) *Errs {
 // NewForbidden new error type
 func NewForbidden(err error, msg ...string) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusForbidden))
+		err = ErrForbidden
 	}
 
 	return &Errs{
@@ -114,7 +122,7 @@ func NewForbidden(err error, msg ...string) *Errs {
 // NewForbiddenCode new error type
 func NewForbiddenCode(err error, code int, msg ...interface{}) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusForbidden))
+		err = ErrForbidden
 	}
 
 	return &Errs{
@@ -129,7 +137,7 @@ func NewForbiddenCode(err error, code int, msg ...interface{}) *Errs {
 // NewBadRequest new error type
 func NewBadRequest(err error, msg ...string) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusBadRequest))
+		err = ErrBadRequest
 	}
 
 	return &Errs{
@@ -144,7 +152,7 @@ func NewBadRequest(err error, msg ...string) *Errs {
 // NewBadRequestCode new error type
 func NewBadRequestCode(err error, code int, msg ...interface{}) *Errs {
 	if err == nil {
-		err = errors.New(http.StatusText(http.StatusBadRequest))
+		err = ErrBadRequest
 	}
 
 	return &Errs{

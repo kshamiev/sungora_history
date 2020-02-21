@@ -26,6 +26,8 @@ vendor
 /*.yml
 makefile
 Makefile
+test.sql
+
 # IDE
 .project
 .settings

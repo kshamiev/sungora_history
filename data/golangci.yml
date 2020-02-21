@@ -46,6 +46,7 @@ run:
     - backups
     - config
     - dev
+    - gql
   skip-files:
     - generated.go
 

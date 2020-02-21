@@ -6,10 +6,23 @@
 schema:
   - graphql/schema/**/*.graphql
 exec:
-  filename: graphql/generated.go
+  filename: graphql/gen/generated.go
 model:
-  filename: graphql/models_gen.go
+  filename: graphql/mod/models_gen.go
 resolver:
   filename: graphql/resolver.go
   type: Resolver
 autobind: []
+models:
+  Role:
+    model: github.com/kshamiev/sungora/pkg/models.Role
+
+  UUID:
+    model:
+      - github.com/kshamiev/sungora/pkg/typ.UUID
+  Decimal:
+    model:
+      - github.com/kshamiev/sungora/pkg/typ.Decimal
+  NullTime:
+    model:
+      - github.com/kshamiev/sungora/pkg/typ.NullTime

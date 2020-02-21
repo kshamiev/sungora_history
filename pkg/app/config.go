@@ -18,10 +18,11 @@ type ConfigApp struct {
 	DirWork        string        `yaml:"dirWork"`        //
 	DirStatic      string        `yaml:"DirStatic"`      //
 	ServiceName    string        `yaml:"serviceName"`    //
+	ServiceID      string        `yaml:"serviceID"`      //
 	Version        string
 }
 
-// конфигурация
+// конфигурация HTTP
 type ConfigServer struct {
 	Proto          string        `yaml:"proto"`          // Server Proto
 	Host           string        `yaml:"host"`           // Server Host
@@ -32,6 +33,12 @@ type ConfigServer struct {
 	IdleTimeout    time.Duration `yaml:"idleTimeout"`    // Время ожидания следующего запроса
 	MaxHeaderBytes int           `yaml:"maxHeaderBytes"` // Максимальный размер заголовка получаемого от браузера клиента в байтах
 	Header         string        `yaml:"header"`         // Пользовательский заголовок
+}
+
+// конфигурация GRPC
+type ConfigGRPC struct {
+	Host string `yaml:"host"` // Server Host
+	Port int    `yaml:"port"` // Server Port
 }
 
 // HeaderCheck проверка валидности значения пользовательского заголовка

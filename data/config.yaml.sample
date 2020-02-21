@@ -5,6 +5,7 @@ app:
   dirWork: "/home/kshamiev/work/sungora" # Change
   dirStatic: "/static" # Change
   serviceName: "sungora"
+  serviceID: "011a4314-aeb8-48b1-b978-58ae8f2c89af"
 
 lg:
   title:      "sungora-dev" # Change
@@ -21,6 +22,10 @@ http:
   requestTimeout: 60s # Время ожидания окончания выполнения запроса
   maxHeaderBytes: 1048576 # Максимальный размер заголовка получаемого от браузера клиента в байтах
   header: X-Is-From
+
+grpcServer:
+  host: "localhost"
+  port: 9090
 
 cors:
   allowedOrigins: ["*"]

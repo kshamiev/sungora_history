@@ -9,17 +9,17 @@ import (
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
-const userOnlineOffName = "userOnlineOff"
+const UserOnlineOffName = "UserOnlineOff"
 
 // Обновление онлайн статуса ушедших пользователей
-type userOnlineOff struct {
+type UserOnlineOff struct {
 	db  *sql.DB
 	cfg *config.Config
 }
 
 // NewUserOnlineOff
-func newUserOnlineOff(db *sql.DB, cfg *config.Config) *userOnlineOff {
-	w := &userOnlineOff{
+func NewUserOnlineOff(db *sql.DB, cfg *config.Config) *UserOnlineOff {
+	w := &UserOnlineOff{
 		db:  db,
 		cfg: cfg,
 	}
@@ -27,13 +27,17 @@ func newUserOnlineOff(db *sql.DB, cfg *config.Config) *userOnlineOff {
 	return w
 }
 
-func (task *userOnlineOff) Action(ctx context.Context) (err error) {
+func (task *UserOnlineOff) Action(ctx context.Context) (err error) {
 	lg := logger.GetLogger(ctx)
-	lg.Infof("execute task: %s", userOnlineOffName)
+	lg.Infof("execute task: %s", UserOnlineOffName)
 
 	return
 }
 
-func (task *userOnlineOff) Info() (string, time.Duration) {
-	return userOnlineOffName, time.Minute
+func (task *UserOnlineOff) WaitFor() time.Duration {
+	return time.Minute
+}
+
+func (task *UserOnlineOff) Name() string {
+	return UserOnlineOffName
 }

@@ -16,9 +16,9 @@
 
 **дополнительно для справки:**
 создание дампа БД
-pg_dumpall -c -U postgres --database=dbName > data/dump_import.sql
-pg_dump --file "data/dump.sql" --host "localhost" --port "5433" --username "postgres" --no-password --verbose --format=p "test"
+pg_dumpall -c -U postgres --database=teleport > data/dump_import.sql
+pg_dump --file "/home/.../work/temp/back.sql" --host "localhost" --port "5432" --username "postgres" --no-password --verbose --format=p "dev"
 
 востановление БД
 createdb -U postgres $(DBNAME)
-psql -h "localhost" -p "5432" -U postgres -w -d test -f "data/dump.sql"
+/usr/bin/psql -h "localhost" -p "5432" -U postgres -w -d $(DBNAME) -f "data/dump.sql"

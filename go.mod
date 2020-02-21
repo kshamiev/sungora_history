@@ -39,6 +39,7 @@ require (
 	github.com/volatiletech/sqlboiler v3.6.1+incompatible
 	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect
 	golang.org/x/tools v0.0.0-20191026034945-b2104f82a97d // indirect
+	google.golang.org/grpc v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.2.4 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20190924164351-c8b7dadae555

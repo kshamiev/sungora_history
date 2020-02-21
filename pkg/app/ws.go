@@ -9,8 +9,8 @@ const countReadWSError = 100
 // шина чатов
 type WSBus map[string]*WSClient
 
-// NewWSBus создание шины чатов
-func NewWSBus() WSBus {
+// NewWS создание шины чатов
+func NewWS() WSBus {
 	bus := make(WSBus)
 	go bus.controlBus()
 

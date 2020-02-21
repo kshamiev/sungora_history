@@ -232,12 +232,14 @@ func (rw *Response) Bytes(data []byte, fileName, mimeType string, status int) {
 
 // Redirect 301
 func (rw *Response) Redirect301(redirectURL string) {
+	rw.lg.Infof("%d:%s:%s", 301, rw.Request.Method, rw.Request.URL.Path)
 	rw.response.Header().Set("Location", redirectURL)
 	rw.response.WriteHeader(http.StatusMovedPermanently)
 }
 
 // Redirect 302
 func (rw *Response) Redirect302(redirectURL string) {
+	rw.lg.Infof("%d:%s:%s", 302, rw.Request.Method, rw.Request.URL.Path)
 	rw.response.Header().Set("Location", redirectURL)
 	rw.response.WriteHeader(http.StatusFound)
 }

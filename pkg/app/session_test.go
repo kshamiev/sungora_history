@@ -6,7 +6,7 @@ import (
 )
 
 func TestSession(t *testing.T) {
-	storage := NewSessionBus(time.Second * 5)
+	storage := NewSession(time.Second * 5)
 	ses := storage.GetSession("storage")
 
 	// SET

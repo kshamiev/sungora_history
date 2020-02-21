@@ -9,10 +9,10 @@ import (
 )
 
 // Шина сессий
-type SessionBus map[string]interface{}
+type SessionBus map[string]*Session
 
-// NewSessionBus создание шины сессий по таймауту
-func NewSessionBus(sessionTimeout time.Duration) SessionBus {
+// NewSession создание шины сессий по таймауту
+func NewSession(sessionTimeout time.Duration) SessionBus {
 	var sessions = make(SessionBus)
 	go sessions.controlSessionBus(sessionTimeout)
 
@@ -25,30 +25,35 @@ func (bus SessionBus) controlSessionBus(sessionTimeout time.Duration) {
 		time.Sleep(time.Minute)
 
 		for key := range bus {
-			if s, ok := bus[key].(*Session); ok {
-				if sessionTimeout < time.Since(s.t) {
-					delete(bus, key)
-				}
+			if sessionTimeout < time.Since(bus[key].t) {
+				delete(bus, key)
 			}
 		}
 	}
 }
 
-// Set is a session setter
+// Set is a storage setter
 func (bus SessionBus) Set(key string, val interface{}) {
-	bus[key] = val
+	elm := new(Session)
+	elm.t = time.Now()
+	elm.data = map[string]interface{}{
+		key: val,
+	}
+	bus[key] = elm
 }
 
-// Get is a session getter
+// Get is a storage getter
 func (bus SessionBus) Get(key string) interface{} {
-	if _, ok := bus[key]; ok {
-		return bus[key]
+	if elm, ok := bus[key]; ok {
+		if _, ok := elm.data[key]; ok {
+			return elm.data[key]
+		}
 	}
 
 	return nil
 }
 
-// Del removes session
+// Del removes storage
 func (bus SessionBus) Del(key string) {
 	delete(bus, key)
 }
@@ -66,7 +71,7 @@ func (bus SessionBus) GetSessionCookie(rw *response.Response, cookieName string)
 
 // GetSession Получение сессии по токену
 func (bus SessionBus) GetSession(token string) *Session {
-	if elm, ok := bus[token].(*Session); ok {
+	if elm, ok := bus[token]; ok {
 		elm.t = time.Now()
 		return elm
 	}

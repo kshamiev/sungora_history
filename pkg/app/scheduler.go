@@ -10,68 +10,112 @@ import (
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
-type SchedulerTask interface {
+type Task interface {
 	// информация о задаче
-	Info() (name string, t time.Duration)
+	Name() string
 	// выполняемая задача
 	Action(ctx context.Context) (err error)
+	// время до следующего запуска
+	WaitFor() time.Duration
 }
 
 type Scheduler struct {
-	pull []SchedulerTask
-	lg   logger.Logger
-	wg   sync.WaitGroup // для контроля завершния работы
-	kill chan bool      // канал для убийства обработчиков
+	pullWork map[string]bool
+	pull     []Task
+	lg       logger.Logger
+	wg       sync.WaitGroup // для контроля завершния работы
+	kill     chan string    // канал для убийства обработчиков
 }
 
+// NewScheduler создание шины воркеров
 func NewScheduler(lg logger.Logger) *Scheduler {
 	return &Scheduler{
-		lg:   lg,
-		kill: make(chan bool, 1),
+		lg:       lg,
+		kill:     make(chan string, 100),
+		pullWork: make(map[string]bool),
 	}
 }
 
 // добавить задачу в Scheduler
-func (wf *Scheduler) Add(w SchedulerTask) {
+func (wf *Scheduler) Add(w Task) {
 	wf.pull = append(wf.pull, w)
 }
 
-// запустить все добавленные задачи
-func (wf *Scheduler) Run() {
-	for i := range wf.pull {
-		go wf.run(wf.pull[i])
+// Start запустить конкретную задачу
+func (wf *Scheduler) Start(name string) {
+	if _, ok := wf.pullWork[name]; ok {
+		return
 	}
-}
 
-// остановить все выполняющиеся задачи
-func (wf *Scheduler) Wait() {
-	wf.kill <- true
-	wf.wg.Wait()
-	close(wf.kill)
-}
+	for i := range wf.pull {
+		if wf.pull[i].Name() == name {
+			wf.pullWork[name] = true
 
-func (wf *Scheduler) run(task SchedulerTask) {
-	wf.wg.Add(1)
-	defer wf.wg.Done()
+			go wf.run(wf.pull[i])
 
-	_, t := task.Info()
-	ticker := time.NewTicker(t)
-
-	for {
-		select {
-		case <-ticker.C:
-			wf.action(task)
-		case <-wf.kill:
-			wf.kill <- true
 			return
 		}
 	}
 }
 
-func (wf *Scheduler) action(task SchedulerTask) {
-	workerName, _ := task.Info()
+// Stop остановить конкретную задачу
+func (wf *Scheduler) Stop(name string) {
+	if _, ok := wf.pullWork[name]; !ok {
+		return
+	}
 
-	lg := wf.lg.WithField("task", workerName)
+	delete(wf.pullWork, name)
+	wf.kill <- name
+}
+
+// Wait остановить все выполняющиеся задачи
+func (wf *Scheduler) Wait() {
+	wf.kill <- ""
+	wf.wg.Wait()
+	close(wf.kill)
+}
+
+// GetTask Получение всех задач
+func (wf *Scheduler) GetTask() map[string]Task {
+	res := make(map[string]Task)
+	for i := range wf.pull {
+		res[wf.pull[i].Name()] = wf.pull[i]
+	}
+
+	return res
+}
+
+// run менеджер выполенния задачи
+func (wf *Scheduler) run(task Task) {
+	wf.wg.Add(1)
+	defer wf.wg.Done()
+
+	for {
+		waitFor := task.WaitFor()
+		select {
+		case <-time.After(waitFor):
+			wf.action(task)
+		case name := <-wf.kill:
+			switch name {
+			case "": // завершаем все воркеры
+				wf.kill <- ""
+				return
+			case task.Name(): // завершаем текущий воркер
+				return
+			default: // ложное срабатывание, перенаправляем для заврешения целевого воркера
+				for i := range wf.pull {
+					if wf.pull[i].Name() == name {
+						wf.kill <- name
+					}
+				}
+			}
+		}
+	}
+}
+
+// action выполнение задачи
+func (wf *Scheduler) action(task Task) {
+	lg := wf.lg.WithField("task", task.Name())
 
 	ctx := context.Background()
 	ctx = boil.WithDebugWriter(ctx, lg.Writer())
@@ -79,11 +123,11 @@ func (wf *Scheduler) action(task SchedulerTask) {
 
 	defer func() {
 		if rvr := recover(); rvr != nil {
-			wf.lg.Errorf("task: %s %+v", workerName, rvr)
+			lg.Errorf("%+v", rvr)
 		}
 	}()
 
 	if err := task.Action(ctx); err != nil {
-		wf.lg.Errorf("task: %s %+v", workerName, err)
+		lg.Errorf("%+v", err)
 	}
 }

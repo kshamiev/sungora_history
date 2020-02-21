@@ -67,7 +67,31 @@ func main() {
 		lg.WithError(err).Fatal("couldn't connect to postgres")
 	}
 
+	// Workflow
+	wp = tasks(db, cfg, lg)
+	defer wp.Wait()
+
+	// Server Web & Handlers
+	h := handlers.NewMain(db, lg, cfg)
+	if server, err = app.NewServer(&cfg.ServHTTP, h, lg); err != nil {
+		lg.WithError(err).Fatal("new web server error")
+	}
+
+	defer server.Wait(lg)
+
+	// Server GRPC (sample)
+	// srv := grpc.NewServer()
+	// pb.RegisterNameServer(srv, grpcname.NewServer(db))
+	//
+	// if grpcServer, err = app.NewGRPC(&cfg.GRPCServer, srv, lg); err != nil {
+	// 	lg.WithError(err).Fatal("new grpc server error")
+	// }
+	//
+	// defer grpcServer.Wait(lg)
+
+	// general
 	var o models.GooseDBVersion
+
 	if err = queries.Raw(model.SQLAppVersion.String()).Bind(context.Background(), db, &o); err != nil {
 		lg.WithError(err).Fatal("couldn't get version DB")
 	}
@@ -78,25 +102,13 @@ func main() {
 		boil.DebugMode = true
 	}
 
-	// Workflow
-	wp = workers.Init(db, cfg, lg)
-	wp.Run()
-
-	defer wp.Wait()
-
-	// Server & Handlers
-	if server, err = app.NewServer(&cfg.ServHTTP, handlers.NewMain(db, lg, cfg)); err != nil {
-		lg.WithError(err).Fatal("new web server error")
-		return
-	}
-
-	if err = server.Run(); err != nil {
-		lg.WithError(err).Fatal("error web server start")
-		return
-	}
-
-	defer server.Wait()
-	lg.Info("start web server: ", server.Server.Addr)
-
 	app.Lock(make(chan os.Signal, 1))
+}
+
+func tasks(db *sql.DB, cfg *config.Config, lg logger.Logger) *app.Scheduler {
+	wp := app.NewScheduler(lg)
+	wp.Add(workers.NewUserOnlineOff(db, cfg))
+	wp.Start(workers.UserOnlineOffName)
+
+	return wp
 }

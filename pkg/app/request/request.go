@@ -1,15 +1,18 @@
 package request
 
 import (
-	"bytes"
 	"crypto/tls"
-	"encoding/json"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
-	"strings"
+)
+
+const (
+	headerTypeFormURLEncoded = "application/x-www-form-urlencoded"
+	headerTypeJSON           = "application/json"
+	headerTypeXML            = "text/xml"
 )
 
 // Структура для работы с исходящими запросами
@@ -17,6 +20,7 @@ type Request struct {
 	url          string
 	ResponseBody []byte
 	Header       http.Header
+	Transport    *http.Transport
 }
 
 // New Функционал по работе с исходящими запросами к внешним ресурсам
@@ -24,6 +28,47 @@ func New(link string) *Request {
 	return &Request{
 		url:    link,
 		Header: http.Header{},
+	}
+}
+
+// NewFormURLEncoded
+func NewFormURLEncoded(link string) *Request {
+	r := New(link)
+	r.Header.Add("Content-Type", headerTypeFormURLEncoded)
+
+	return r
+}
+
+// NewJSON
+func NewJSON(link string) *Request {
+	r := New(link)
+	r.Header.Add("Content-Type", headerTypeJSON)
+
+	return r
+}
+
+// NewXML
+func NewXML(link string) *Request {
+	r := New(link)
+	r.Header.Add("Content-Type", headerTypeXML)
+
+	return r
+}
+
+// AuthorizationBasic
+func (r *Request) AuthorizationBasic(login, passw string) {
+	r.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(login+":"+passw)))
+}
+
+// Transport
+func (r *Request) Transports(proxy string) {
+	r.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: false}, // ignore expired SSL certificates
+	}
+
+	if proxy != "" {
+		proxyURL, _ := url.Parse(proxy)
+		r.Transport.Proxy = http.ProxyURL(proxyURL)
 	}
 }
 
@@ -53,42 +98,31 @@ func (r *Request) OPTIONS(uri string, requestBody, responseBody interface{}) (*h
 }
 
 func (r *Request) request(method, uri string, requestBody, responseBody interface{}) (*http.Response, error) {
-	var (
-		query   = r.url + uri
-		request *http.Request
-		body    = new(bytes.Buffer)
-	)
-
-	const headerTypeJSON = "application/json"
-
-	// Данные исходящего запроса
-	if (method == http.MethodPost || method == http.MethodPut) && strings.Split(r.Header.Get("Content-Type"), ";")[0] == headerTypeJSON {
-		data, err := json.Marshal(requestBody)
-		if err != nil {
-			return nil, err
-		}
-
-		if _, err = body.Write(data); err != nil {
-			return nil, err
-		}
-	}
-
-	if p, ok := requestBody.(map[string]interface{}); ok {
-		query += "?" + uriParamsCompile(p)
+	// Данные запроса
+	query, body, err := r.requestSendData(method, r.url+uri, requestBody)
+	if err != nil {
+		return nil, err
 	}
 
 	// Запрос
-	request, err := http.NewRequest(method, query, body)
-	if err != nil {
+	var request *http.Request
+
+	if request, err = http.NewRequest(method, query, body); err != nil {
 		return nil, err
 	}
 
 	// Заголовки
 	request.Header = r.Header
-	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false}, // ignore expired SSL certificates
+
+	// Транспорт
+	if r.Transport == nil {
+		r.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: false}, // ignore expired SSL certificates
+		}
 	}
-	c := http.Client{Transport: transCfg}
+
+	//
+	c := http.Client{Transport: r.Transport}
 
 	response, err := c.Do(request)
 	if err != nil {
@@ -103,37 +137,12 @@ func (r *Request) request(method, uri string, requestBody, responseBody interfac
 		return nil, err
 	}
 
-	if responseBody != nil && strings.Split(response.Header.Get("Content-Type"), ";")[0] == headerTypeJSON {
-		_ = json.Unmarshal(r.ResponseBody, responseBody)
-	}
+	// Данные ответа
+	err = r.requestResiveData(response, responseBody)
 
-	if response.StatusCode != 200 {
+	if response.StatusCode > 399 {
 		err = fmt.Errorf("%s:[%d]:%s", method, response.StatusCode, query)
 	}
 
 	return response, err
-}
-
-// uriParamsCompile
-func uriParamsCompile(postData map[string]interface{}) string {
-	q := &url.Values{}
-
-	for k, v := range postData {
-		switch v1 := v.(type) {
-		case uint64:
-			q.Add(k, strconv.FormatUint(v1, 10))
-		case int64:
-			q.Add(k, strconv.FormatInt(v1, 10))
-		case int:
-			q.Add(k, strconv.Itoa(v1))
-		case float64:
-			q.Add(k, strconv.FormatFloat(v1, 'f', -1, 64))
-		case bool:
-			q.Add(k, strconv.FormatBool(v1))
-		case string:
-			q.Add(k, v1)
-		}
-	}
-
-	return q.Encode()
 }

@@ -1,22 +1,26 @@
 package app
 
 import (
-	"context"
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/go-chi/chi"
+
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 // компонент
 type Server struct {
 	Server    *http.Server  // сервер HTTP
 	chControl chan struct{} // управление ожиданием завершения работы сервера
+	lis       net.Listener
 }
 
 // NewServer создание компонента вебсервера
-func NewServer(cfg *ConfigServer, mux http.Handler) (com *Server, err error) {
-	return &Server{
+// Старт сервера HTTP(S)
+func NewServer(cfg *ConfigServer, mux http.Handler, lg logger.Logger) (comp *Server, err error) {
+	comp = &Server{
 		Server: &http.Server{
 			Addr:           fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 			Handler:        mux,
@@ -25,37 +29,36 @@ func NewServer(cfg *ConfigServer, mux http.Handler) (com *Server, err error) {
 			IdleTimeout:    cfg.IdleTimeout,
 			MaxHeaderBytes: cfg.MaxHeaderBytes,
 		},
-	}, nil
-}
+		chControl: make(chan struct{}),
+	}
 
-// Run запуск компонента в работу
-// Старт сервера HTTP(S)
-func (comp *Server) Run() (err error) {
-	comp.chControl = make(chan struct{})
-
-	go func() {
-		if err = comp.Server.ListenAndServe(); err != http.ErrServerClosed {
-			return
-		}
-
-		close(comp.chControl)
-	}()
-
-	return
-}
-
-// Stop завершение работы компонента
-// Остановка сервера HTTP(S)
-func (comp *Server) Wait() {
-	if comp.Server == nil {
+	if comp.lis, err = net.Listen("tcp", comp.Server.Addr); err != nil {
 		return
 	}
 
-	if err := comp.Server.Shutdown(context.Background()); err != nil {
+	go func() {
+		_ = comp.Server.Serve(comp.lis)
+		close(comp.chControl)
+	}()
+
+	lg.Info("start web server: ", comp.Server.Addr)
+
+	return comp, nil
+}
+
+// Wait завершение работы компонента
+// Остановка сервера HTTP(S)
+func (comp *Server) Wait(lg logger.Logger) {
+	if comp.lis == nil {
+		return
+	}
+
+	if err := comp.lis.Close(); err != nil {
 		return
 	}
 
 	<-comp.chControl
+	lg.Info("stop web server: ", comp.Server.Addr)
 }
 
 // GetRoute получение обработчика запросов

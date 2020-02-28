@@ -7,11 +7,11 @@ import (
 )
 
 type General struct {
-	*Main
+	*Handler
 }
 
 // NewGeneral общие запросы
-func NewGeneral(main *Main) *General { return &General{main} }
+func NewGeneral(h *Handler) *General { return &General{Handler: h} }
 
 // Ping ping
 // @Summary ping

@@ -4,7 +4,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"flag"
 	"os"
 	"strconv"
@@ -43,41 +42,27 @@ import (
 // @name Authorization
 func main() {
 	var (
-		err    error
-		cfg    *config.Config
-		db     *sql.DB
-		wp     *app.Scheduler
-		server *app.Server
+		err       error
+		server    *app.Server
+		component = &handlers.Component{}
 	)
 	// Logging
-	lg := logger.CreateLogger(nil)
+	component.Lg = logger.CreateLogger(nil)
 
 	flagConfigPath := flag.String("c", "config.yaml", "used for set path to config file")
 	flag.Parse()
 
 	// ConfigApp загрузка конфигурации
-	if cfg, err = config.Get(*flagConfigPath); err != nil {
-		lg.WithError(err).Fatal("couldn't get config")
+	if component.Cfg, err = config.Get(*flagConfigPath); err != nil {
+		component.Lg.WithError(err).Fatal("couldn't get config")
 	}
 
-	lg = logger.CreateLogger(&cfg.Lg)
+	component.Lg = logger.CreateLogger(&component.Cfg.Lg)
 
 	// ConnectDB SqlBoiler
-	if db, err = app.NewConnectPostgres(&cfg.Postgresql); err != nil {
-		lg.WithError(err).Fatal("couldn't connect to postgres")
+	if component.Db, err = app.NewPostgresBoiler(&component.Cfg.Postgresql); err != nil {
+		component.Lg.WithError(err).Fatal("couldn't connect to postgres")
 	}
-
-	// Workflow
-	wp = tasks(db, cfg, lg)
-	defer wp.Wait()
-
-	// Server Web & Handlers
-	h := handlers.NewMain(db, lg, cfg)
-	if server, err = app.NewServer(&cfg.ServHTTP, h, lg); err != nil {
-		lg.WithError(err).Fatal("new web server error")
-	}
-
-	defer server.Wait(lg)
 
 	// Server GRPC (sample)
 	// srv := grpc.NewServer()
@@ -89,26 +74,49 @@ func main() {
 	//
 	// defer grpcServer.Wait(lg)
 
+	// Server GRPC (sample)
+	// srv := grpc.NewServer()
+	// pb.RegisterNameServer(srv, namepkg.NewServer(component.Db))
+	//
+	// if grpcServer, err = app.NewGRPCServer(&component.Cfg.GRPCServer, srv, component.Lg); err != nil {
+	// 	component.Lg.WithError(err).Fatal("new grpc server error")
+	// }
+	// defer grpcServer.Wait(component.Lg)
+
+	// Client GRPC (sample)
+	// if grpcClientName, err = app.NewGRPCClient(&component.Cfg.GRPCClientName); err != nil {
+	// 	component.Lg.WithError(err).Fatal("new grpc client error")
+	// }
+	// defer grpcClientName.Wait()
+	// component.ClientName = pb.NewNameClient(grpcClientName.Conn)
+
+	// Workflow
+	if component.Wp, err = workers.New(component); err != nil {
+		component.Lg.WithError(err).Fatal("workers init")
+	}
+
+	defer component.Wp.Wait()
+
+	// Server Web & Handlers
+	h := handlers.New(component)
+	if server, err = app.NewServer(&component.Cfg.ServHTTP, h, component.Lg); err != nil {
+		component.Lg.WithError(err).Fatal("new web server error")
+	}
+
+	defer server.Wait(component.Lg)
+
 	// general
 	var o models.GooseDBVersion
 
-	if err = queries.Raw(model.SQLAppVersion.String()).Bind(context.Background(), db, &o); err != nil {
-		lg.WithError(err).Fatal("couldn't get version DB")
+	if err = queries.Raw(model.SQLAppVersion.String()).Bind(context.Background(), component.Db, &o); err != nil {
+		component.Lg.WithError(err).Fatal("couldn't get version DB")
 	}
 
-	cfg.App.Version = strconv.FormatInt(o.VersionID, 10) + time.Now().Format("-2006-01-02-15-04-05")
+	component.Cfg.App.Version = strconv.FormatInt(o.VersionID, 10) + time.Now().Format("-2006-01-02-15-04-05")
 
-	if cfg.Lg.Level > 4 {
+	if component.Cfg.Lg.Level > 4 {
 		boil.DebugMode = true
 	}
 
 	app.Lock(make(chan os.Signal, 1))
-}
-
-func tasks(db *sql.DB, cfg *config.Config, lg logger.Logger) *app.Scheduler {
-	wp := app.NewScheduler(lg)
-	wp.Add(workers.NewUserOnlineOff(db, cfg))
-	wp.Start(workers.UserOnlineOffName)
-
-	return wp
 }

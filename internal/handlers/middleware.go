@@ -7,29 +7,20 @@ import (
 
 	"github.com/go-chi/cors"
 	"github.com/google/uuid"
+	"github.com/volatiletech/sqlboiler/boil"
 
 	"github.com/kshamiev/sungora/pkg/app/response"
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 type Middleware struct {
-	*Main
+	*Handler
 }
 
 // NewMiddleware промежуточные обработчики запрсоов
-func NewMiddleware(main *Main) *Middleware { return &Middleware{main} }
+func NewMiddleware(h *Handler) *Middleware { return &Middleware{Handler: h} }
 
-// Logger формирование логера для запроса
-func (c *Middleware) Logger(lg logger.Logger) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r.WithContext(logger.WithLogger(r.Context(), lg.WithField("request", uuid.New().String()))))
-		})
-	}
-}
-
-// TimeoutContext
-// инициализация таймаута контекста для контроля времени выполениня запроса
+// TimeoutContext инициализация таймаута контекста для контроля времени выполениня запроса
 func (c *Middleware) TimeoutContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), c.cfg.ServHTTP.RequestTimeout-time.Millisecond)
@@ -38,7 +29,16 @@ func (c *Middleware) TimeoutContext(next http.Handler) http.Handler {
 	})
 }
 
-// ConfigCors добавление заголовка ConfigCors
+// Logger формирование логера для запроса
+func (c *Middleware) Logger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		lg := c.lg.WithField("requestID", uuid.New().String()).WithField("requestURL", r.URL.Path)
+		ctx := boil.WithDebugWriter(r.Context(), lg.Writer())
+		next.ServeHTTP(w, r.WithContext(logger.WithLogger(ctx, lg)))
+	})
+}
+
+// Cors добавление заголовка ConfigCors
 func (c *Middleware) Cors() *cors.Cors {
 	return cors.New(cors.Options{
 		AllowedOrigins:   c.cfg.Cors.AllowedOrigins,
@@ -51,11 +51,9 @@ func (c *Middleware) Cors() *cors.Cors {
 }
 
 // Static статика или отдача существующего файла по запросу
-func (c *Middleware) Static() http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rw := response.New(r, w)
-		rw.Static(c.cfg.App.DirStatic + r.URL.Path)
-	})
+func (c *Middleware) Static(w http.ResponseWriter, r *http.Request) {
+	rw := response.New(r, w)
+	rw.Static(c.cfg.App.DirWork + r.URL.Path)
 }
 
 // SampleOne пример middleware

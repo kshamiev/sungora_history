@@ -27,7 +27,7 @@ func GetEnvironment(t *testing.T) *ENV {
 		t.Fatal(err)
 	}
 	// ConnectDB SqlBoiler
-	if db, err = app.NewConnectPostgres(&cfg.Postgresql); err != nil {
+	if db, err = app.NewPostgresBoiler(&cfg.Postgresql); err != nil {
 		t.Fatal(err)
 	}
 

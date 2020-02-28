@@ -4,22 +4,20 @@ import (
 	"time"
 )
 
-const countReadWSError = 100
-
-// шина чатов
+// шина обработчиков вебсокетов по идентификаторам
 type WSBus map[string]*WSClient
 
-// NewWS создание шины чатов
-func NewWS() WSBus {
+// NewWSServer создание шины
+func NewWSServer() WSBus {
 	bus := make(WSBus)
-	go bus.controlBus()
+	go bus.clearBus()
 
 	return bus
 }
 
-// controlBus жизненный цикл шины чатов
-func (bus WSBus) controlBus() {
-	for range time.NewTicker(time.Minute).C {
+// clearBus удаление пустых обработчиков
+func (bus WSBus) clearBus() {
+	for range time.NewTicker(time.Hour).C {
 		for i := range bus {
 			if len(bus[i].clients) == 0 {
 				delete(bus, i)
@@ -28,7 +26,7 @@ func (bus WSBus) controlBus() {
 	}
 }
 
-// InitClient инициализация чата по условному идентификатору
+// InitClient инициализация обработчика вебсокета по условному идентификатору
 func (bus WSBus) InitClient(wsbusID string) *WSClient {
 	if b, ok := bus[wsbusID]; ok {
 		return b
@@ -45,16 +43,15 @@ func (bus WSBus) InitClient(wsbusID string) *WSClient {
 	return b
 }
 
-// чат
+// клиент обслуживающий вебсокет
 type WSClient struct {
-	broadcast chan interface{}   // канал рассылки сообщений клиентам
-	clients   map[WSHandler]bool // массив всех клиентов чата
-	cntError  int                // количество ошибочных чтений из вебсокета
+	broadcast chan interface{}   // канал передачи данных всем обработчикам вебсокета
+	clients   map[WSHandler]bool // массив всех обработчиков вебсокета
 }
 
-// start управление чатом
+// control основной жизненый цикл клиента
 func (b *WSClient) control() {
-	ticker := time.NewTicker(time.Second * 50)
+	ticker := time.NewTicker(time.Second * 55)
 
 	for {
 		select {
@@ -75,24 +72,19 @@ func (b *WSClient) control() {
 	}
 }
 
-// Start регистрация и старт работы нового клиента
+// Start регистрация и старт работы нового обработчика
 func (b *WSClient) Start(handler WSHandler) {
 	b.clients[handler] = true
+	defer delete(b.clients, handler)
 	handler.HookStartClient(len(b.clients))
 
 	for {
 		msg, err := handler.HookGetMessage(len(b.clients))
 		if err != nil {
-			b.cntError++
-
-			if b.cntError > countReadWSError {
-				delete(b.clients, handler)
-				return
-			}
+			return
 		}
-
 		if msg != nil {
-			b.broadcast <- msg // посылаем всем подключенным пользователям
+			b.broadcast <- msg // посылаем всем обработчикам (подключенным пользователям)
 		}
 	}
 }

@@ -19,7 +19,7 @@ type ConfigApp struct {
 	DirStatic      string        `yaml:"DirStatic"`      //
 	ServiceName    string        `yaml:"serviceName"`    //
 	ServiceID      string        `yaml:"serviceID"`      //
-	Version        string
+	Version        string        `json:"version"`        //
 }
 
 // конфигурация HTTP

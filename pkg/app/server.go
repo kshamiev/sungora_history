@@ -10,15 +10,14 @@ import (
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
-// компонент
+// сервер http(s)
 type Server struct {
 	Server    *http.Server  // сервер HTTP
 	chControl chan struct{} // управление ожиданием завершения работы сервера
 	lis       net.Listener
 }
 
-// NewServer создание компонента вебсервера
-// Старт сервера HTTP(S)
+// NewServer создание и старт вебсервера (HTTP(S))
 func NewServer(cfg *ConfigServer, mux http.Handler, lg logger.Logger) (comp *Server, err error) {
 	comp = &Server{
 		Server: &http.Server{
@@ -46,8 +45,7 @@ func NewServer(cfg *ConfigServer, mux http.Handler, lg logger.Logger) (comp *Ser
 	return comp, nil
 }
 
-// Wait завершение работы компонента
-// Остановка сервера HTTP(S)
+// Wait завершение работы сервера (HTTP(S))
 func (comp *Server) Wait(lg logger.Logger) {
 	if comp.lis == nil {
 		return

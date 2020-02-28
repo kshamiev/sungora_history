@@ -23,7 +23,6 @@ func NewSession(sessionTimeout time.Duration) SessionBus {
 func (bus SessionBus) controlSessionBus(sessionTimeout time.Duration) {
 	for {
 		time.Sleep(time.Minute)
-
 		for key := range bus {
 			if sessionTimeout < time.Since(bus[key].t) {
 				delete(bus, key)

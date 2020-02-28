@@ -8,8 +8,8 @@ import (
 	_ "github.com/volatiletech/sqlboiler/drivers/sqlboiler-psql/driver"
 )
 
-// NewConnectPostgres создание соединения с postgres
-func NewConnectPostgres(cfg *ConfigPostgres) (*sql.DB, error) {
+// NewPostgresBoiler создание соединения с postgres
+func NewPostgresBoiler(cfg *ConfigPostgres) (*sql.DB, error) {
 	strCon := fmt.Sprintf("dbname=%s host=%s port=%d user=%s password=%s sslmode=%s",
 		cfg.DbName,
 		cfg.Host,

@@ -11,12 +11,9 @@ import (
 )
 
 type Task interface {
-	// информация о задаче
-	Name() string
-	// выполняемая задача
-	Action(ctx context.Context) (err error)
-	// время до следующего запуска
-	WaitFor() time.Duration
+	Name() string                           // информация о задаче
+	Action(ctx context.Context) (err error) // выполняемая задача
+	WaitFor() time.Duration                 // время до следующего запуска
 }
 
 type Scheduler struct {
@@ -27,7 +24,7 @@ type Scheduler struct {
 	kill     chan string    // канал для убийства обработчиков
 }
 
-// NewScheduler создание шины воркеров
+// NewScheduler создание планировщика задач
 func NewScheduler(lg logger.Logger) *Scheduler {
 	return &Scheduler{
 		lg:       lg,
@@ -36,7 +33,13 @@ func NewScheduler(lg logger.Logger) *Scheduler {
 	}
 }
 
-// добавить задачу в Scheduler
+// AddStart see Add, Start
+func (wf *Scheduler) AddStart(w Task) {
+	wf.Add(w)
+	wf.Start(w.Name())
+}
+
+// Add добавить задачу в Scheduler
 func (wf *Scheduler) Add(w Task) {
 	wf.pull = append(wf.pull, w)
 }
@@ -75,8 +78,8 @@ func (wf *Scheduler) Wait() {
 	close(wf.kill)
 }
 
-// GetTask Получение всех задач
-func (wf *Scheduler) GetTask() map[string]Task {
+// GetTasks Получение всех задач
+func (wf *Scheduler) GetTasks() map[string]Task {
 	res := make(map[string]Task)
 	for i := range wf.pull {
 		res[wf.pull[i].Name()] = wf.pull[i]

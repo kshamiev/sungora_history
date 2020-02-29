@@ -32,9 +32,15 @@ func (c *Middleware) TimeoutContext(next http.Handler) http.Handler {
 // Logger формирование логера для запроса
 func (c *Middleware) Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		lg := c.lg.WithField("requestID", uuid.New().String()).WithField("requestURL", r.URL.Path)
-		ctx := boil.WithDebugWriter(r.Context(), lg.Writer())
-		next.ServeHTTP(w, r.WithContext(logger.WithLogger(ctx, lg)))
+		requestID := uuid.New().String()
+		lg := c.lg.WithField(response.LogUUID, requestID).WithField(response.LogAPI, r.URL.Path)
+
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, response.CtxUUID, requestID)
+		ctx = logger.WithLogger(ctx, lg)
+		ctx = boil.WithDebugWriter(ctx, lg.Writer())
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 

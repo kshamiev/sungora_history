@@ -13,11 +13,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kshamiev/sungora/pkg/errs"
 	"github.com/kshamiev/sungora/pkg/logger"
+
+	"github.com/kshamiev/sungora/pkg/errs"
 )
 
-const cookiePath = "/"
+type ContextKey string
+
+const (
+	LogAPI  = "api"
+	LogUUID = "uuid"
+
+	CtxUUID ContextKey = "uuid"
+
+	cookiePath = "/"
+)
 
 // Структура для работы с входящим запросом
 type Response struct {
@@ -110,6 +120,11 @@ type Error interface {
 	HTTPCode() int
 }
 
+type ErrorResponse struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
 // JsonError ответ с ошибкой в формате json
 func (rw *Response) JSONError(err error) {
 	if e, ok := err.(Error); ok {
@@ -119,7 +134,12 @@ func (rw *Response) JSONError(err error) {
 			rw.lg.Trace(t)
 		}
 
-		rw.JSON(e.Response(), e.HTTPCode())
+		response := ErrorResponse{
+			Code:    rw.Request.Context().Value(CtxUUID).(string),
+			Message: e.Response(),
+		}
+
+		rw.JSON(response, e.HTTPCode())
 	} else {
 		rw.lg.WithError(err).Error("Other (unexpected) error")
 		rw.JSON(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

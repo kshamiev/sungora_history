@@ -20,11 +20,11 @@ func (r *Request) requestSendData(method, query string, requestBody interface{})
 
 	if method == http.MethodPost || method == http.MethodPut {
 		switch strings.Split(r.Header.Get("Content-Type"), ";")[0] {
-		case headerTypeJSON:
+		case strings.Split(headerTypeJSON, ";")[0]:
 			data, err = json.Marshal(requestBody)
-		case headerTypeXML:
+		case strings.Split(headerTypeXML, ";")[0]:
 			data, err = xml.Marshal(requestBody)
-		case headerTypeFormURLEncoded:
+		case strings.Split(headerTypeFormURLEncoded, ";")[0]:
 			if p, ok := requestBody.(map[string]interface{}); ok {
 				data = []byte(uriParamsCompile(p))
 			}
@@ -50,9 +50,9 @@ func (r *Request) requestSendData(method, query string, requestBody interface{})
 func (r *Request) requestResiveData(response *http.Response, responseBody interface{}) (err error) {
 	if responseBody != nil {
 		switch strings.Split(response.Header.Get("Content-Type"), ";")[0] {
-		case headerTypeJSON:
+		case strings.Split(headerTypeJSON, ";")[0]:
 			err = json.Unmarshal(r.ResponseBody, responseBody)
-		case headerTypeXML:
+		case strings.Split(headerTypeXML, ";")[0]:
 			err = xml.Unmarshal(r.ResponseBody, responseBody)
 		}
 	}

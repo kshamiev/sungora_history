@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/gorilla/websocket"
+
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 

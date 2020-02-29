@@ -5,8 +5,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/boil"
 
+	"github.com/kshamiev/sungora/pkg/app/response"
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
@@ -118,11 +120,13 @@ func (wf *Scheduler) run(task Task) {
 
 // action выполнение задачи
 func (wf *Scheduler) action(task Task) {
-	lg := wf.lg.WithField("task", task.Name())
+	requestID := uuid.New().String()
+	lg := wf.lg.WithField(response.LogUUID, requestID).WithField(response.LogAPI, task.Name())
 
 	ctx := context.Background()
-	ctx = boil.WithDebugWriter(ctx, lg.Writer())
+	ctx = context.WithValue(ctx, response.CtxUUID, requestID)
 	ctx = logger.WithLogger(ctx, lg)
+	ctx = boil.WithDebugWriter(ctx, lg.Writer())
 
 	defer func() {
 		if rvr := recover(); rvr != nil {

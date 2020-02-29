@@ -23,6 +23,10 @@ http:
   maxHeaderBytes: 1048576 # Максимальный размер заголовка получаемого от браузера клиента в байтах
   header: X-Is-From
 
+grpcClientName:
+  host: "nameserver"
+  port: 9090
+
 grpcServer:
   host: "localhost"
   port: 9090

@@ -64,15 +64,12 @@ func main() {
 		component.Lg.WithError(err).Fatal("couldn't connect to postgres")
 	}
 
-	// Server GRPC (sample)
-	// srv := grpc.NewServer()
-	// pb.RegisterNameServer(srv, grpcname.NewServer(db))
-	//
-	// if grpcServer, err = app.NewGRPC(&cfg.GRPCServer, srv, lg); err != nil {
-	// 	lg.WithError(err).Fatal("new grpc server error")
+	// Client GRPC (sample)
+	// if grpcClientName, err = app.NewGRPCClient(&component.Cfg.GRPCClientName); err != nil {
+	// 	component.Lg.WithError(err).Fatal("new grpc client error")
 	// }
-	//
-	// defer grpcServer.Wait(lg)
+	// defer grpcClientName.Wait()
+	// component.ClientName = pb.NewNameClient(grpcClientName.Conn)
 
 	// Server GRPC (sample)
 	// srv := grpc.NewServer()
@@ -82,13 +79,6 @@ func main() {
 	// 	component.Lg.WithError(err).Fatal("new grpc server error")
 	// }
 	// defer grpcServer.Wait(component.Lg)
-
-	// Client GRPC (sample)
-	// if grpcClientName, err = app.NewGRPCClient(&component.Cfg.GRPCClientName); err != nil {
-	// 	component.Lg.WithError(err).Fatal("new grpc client error")
-	// }
-	// defer grpcClientName.Wait()
-	// component.ClientName = pb.NewNameClient(grpcClientName.Conn)
 
 	// Workflow
 	if component.Wp, err = workers.New(component); err != nil {

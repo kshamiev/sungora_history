@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	headerTypeFormURLEncoded = "application/x-www-form-urlencoded"
-	headerTypeJSON           = "application/json"
-	headerTypeXML            = "text/xml"
+	headerTypeFormURLEncoded = "application/x-www-form-urlencoded; charset=utf-8"
+	headerTypeJSON           = "application/json; charset=utf-8"
+	headerTypeXML            = "text/xml; charset=utf-8"
 )
 
 // Структура для работы с исходящими запросами

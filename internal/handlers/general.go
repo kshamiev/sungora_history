@@ -38,11 +38,16 @@ func (c *General) GetVersion(w http.ResponseWriter, r *http.Request) {
 	rw.JSON(c.cfg.App.Version)
 }
 
-// WebSocketSample пример работы с вебсокетом
-// @Summary пример работы с вебсокетом
+// WebSocketSample пример работы с вебсокетом (http://localhost:8080/websocket/index.html)
+// @Summary пример работы с вебсокетом (http://localhost:8080/websocket/index.html)
 // @Tags General
 // @Router /api/v1/general/websocket [get]
-// @Success 101 {string} string "Switching Protocols"
+// @Success 101 {string} string "Switching Protocols to websocket"
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 404 {string} string
+// @Security ApiKeyAuth
 func (c *General) WebSocketSample(ws *websocket.Conn) {
 	_, _ = io.Copy(ws, ws)
 }

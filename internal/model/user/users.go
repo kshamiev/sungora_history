@@ -1,4 +1,4 @@
-package model
+package user
 
 import "github.com/kshamiev/sungora/pkg/models"
 

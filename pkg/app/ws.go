@@ -4,6 +4,14 @@ import (
 	"time"
 )
 
+// интерфейс обработчика
+type WSHandler interface {
+	HookStartClient(cntClient int)
+	HookGetMessage(cntClient int) (interface{}, error)
+	HookSendMessage(msg interface{}, cntClient int)
+	Ping() error
+}
+
 // шина обработчиков вебсокетов по идентификаторам
 type WSBus map[string]*WSClient
 

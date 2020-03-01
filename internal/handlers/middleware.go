@@ -59,27 +59,5 @@ func (c *Middleware) Cors() *cors.Cors {
 // Static статика или отдача существующего файла по запросу
 func (c *Middleware) Static(w http.ResponseWriter, r *http.Request) {
 	rw := response.New(r, w)
-	rw.Static(c.cfg.App.DirWork + r.URL.Path)
-}
-
-// SampleOne пример middleware
-func (c *Middleware) SampleOne(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		lg := logger.GetLogger(r.Context())
-		lg.Info("Middleware SampleOne")
-		next.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
-}
-
-// SampleTwo пример middleware
-func (c *Middleware) SampleTwo(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		lg := logger.GetLogger(r.Context())
-		lg.Info("Middleware SampleTwo")
-		next.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
+	rw.Static(c.cfg.App.DirStatic + r.URL.Path)
 }

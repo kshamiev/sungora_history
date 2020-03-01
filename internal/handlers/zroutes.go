@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"golang.org/x/net/websocket"
 
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/internal/graphql"
@@ -70,6 +71,9 @@ func New(comp *Component) (router *chi.Mux) {
 	hand.General = NewGeneral(hand)
 	router.Get("/api/v1/general/ping", hand.General.Ping)
 	router.Get("/api/v1/general/version", hand.General.GetVersion)
+
+	// WEBSOCKET
+	router.Handle("/api/v1/general/websocket", websocket.Handler(hand.General.WebSocketSample))
 
 	return router
 }

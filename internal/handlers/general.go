@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"io"
 	"net/http"
+
+	"golang.org/x/net/websocket"
 
 	"github.com/kshamiev/sungora/pkg/app/response"
 )
@@ -33,4 +36,13 @@ func (c *General) Ping(w http.ResponseWriter, r *http.Request) {
 func (c *General) GetVersion(w http.ResponseWriter, r *http.Request) {
 	rw := response.New(r, w)
 	rw.JSON(c.cfg.App.Version)
+}
+
+// WebSocketSample пример работы с вебсокетом
+// @Summary пример работы с вебсокетом
+// @Tags General
+// @Router /api/v1/general/websocket [get]
+// @Success 101 {string} string "Switching Protocols"
+func (c *General) WebSocketSample(ws *websocket.Conn) {
+	_, _ = io.Copy(ws, ws)
 }

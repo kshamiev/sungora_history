@@ -16,7 +16,7 @@ type ConfigApp struct {
 	Domain         string        `yaml:"domain"`         //
 	Mode           string        `yaml:"mode"`           //
 	DirWork        string        `yaml:"dirWork"`        //
-	DirStatic      string        `yaml:"DirStatic"`      //
+	DirStatic      string        `yaml:"dirStatic"`      //
 	ServiceName    string        `yaml:"serviceName"`    //
 	ServiceID      string        `yaml:"serviceID"`      //
 	Version        string        `json:"version"`        //

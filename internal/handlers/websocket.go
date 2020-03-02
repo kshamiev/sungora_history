@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -14,17 +15,17 @@ import (
 )
 
 type Websocket struct {
-	chatBus app.WSBus
+	wsBus app.WSBus
 	*Handler
 }
 
 // NewWebsocket общие запросы
-func NewWebsocket(h *Handler) *Websocket { return &Websocket{Handler: h, chatBus: app.NewWSServer()} }
+func NewWebsocket(h *Handler) *Websocket { return &Websocket{Handler: h, wsBus: app.NewWSServer()} }
 
 // WebSocketSample пример работы с вебсокетом (http://localhost:8080/gorilla/index.html)
 // @Summary пример работы с вебсокетом (http://localhost:8080/gorilla/index.html)
 // @Tags General
-// @Router /api/v1/websocket/gorilla [get]
+// @Router /api/v1/websocket/gorilla/{id} [get]
 // @Success 101 {string} string "Switching Protocols to websocket"
 // @Failure 400 {string} string
 // @Failure 401 {string} string
@@ -40,55 +41,40 @@ func (c *Websocket) WebSocketSample(w http.ResponseWriter, r *http.Request) {
 		err        error
 	)
 
-	// headers response from websocket
-	upgrader := websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-
-	if ws, err = upgrader.Upgrade(w, r, wsResponse); err != nil {
+	if ws, err = c.wsBus.RequestUpgrade(w, r, wsResponse); err != nil {
 		rw.JSONError(errs.NewBadRequest(err, "не удалось переключить протокол на ws"))
 		return
 	}
-
-	defer func() {
-		if err = ws.Close(); err != nil {
-			lg.WithError(err).Error("WS close connect error")
-		} else {
-			lg.Info("WS close connect ok")
-		}
-	}()
+	defer c.wsBus.RequestClose(ws, lg)
 	//
 	client := &WSHandler{
 		Ws:  ws,
-		Log: lg,
+		Ctx: r.Context(),
 	}
-	bus := c.chatBus.InitClient(chi.URLParam(r, "id"))
-	bus.Start(client)
+	c.wsBus.StartClient(chi.URLParam(r, "id"), client)
 }
 
 // пример обработчика
 type WSHandler struct {
 	Ws  *websocket.Conn
-	Log logger.Logger
+	Ctx context.Context
 }
 
 // HookStartClient метод при подключении и старте нового пользователя
 func (h *WSHandler) HookStartClient(cntClient int) {
-	h.Log.Info("WS hook start client ", cntClient)
+	lg := logger.GetLogger(h.Ctx)
+	lg.Info("WS hook start client ", cntClient)
 }
 
 // HookGetMessage метод при получении данных из вебсокета пользователя
 func (h *WSHandler) HookGetMessage(cntClient int) (interface{}, error) {
+	lg := logger.GetLogger(h.Ctx)
 	msg := &wsocket.Message{}
 	if err := h.Ws.ReadJSON(msg); err != nil {
-		h.Log.Error("WS hook get message error: ", err.Error())
+		lg.Error("WS hook get message error: ", err.Error())
 		return nil, err
 	}
-	h.Log.Info("WS hook get message: ", msg)
+	lg.Info("WS hook get message: ", msg)
 	// it`s work
 	// ...
 	return msg, nil
@@ -96,16 +82,18 @@ func (h *WSHandler) HookGetMessage(cntClient int) (interface{}, error) {
 
 // HookSendMessage метод при отправке данных пользователю
 func (h *WSHandler) HookSendMessage(msg interface{}, cntClient int) {
+	lg := logger.GetLogger(h.Ctx)
 	if err := h.Ws.WriteJSON(msg); err != nil {
-		h.Log.Error("WS send message err: ", err.Error())
+		lg.Error("WS send message err: ", err.Error())
 		return
 	}
 
-	h.Log.Info("WS hook send message: ", msg)
+	lg.Info("WS hook send message: ", msg)
 }
 
 // Ping проверка соединения с пользователем
 func (h *WSHandler) Ping() error {
-	h.Log.Info("WS hook ping client")
+	lg := logger.GetLogger(h.Ctx)
+	lg.Info("WS hook ping client")
 	return h.Ws.WriteMessage(websocket.PingMessage, []byte{})
 }

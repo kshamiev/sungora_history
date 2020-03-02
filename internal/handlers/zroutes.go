@@ -77,7 +77,7 @@ func New(comp *Component) (router *chi.Mux) {
 	router.Handle("/api/v1/general/websocket", websocket.Handler(hand.General.WebSocketSample))
 
 	hand.Websocket = NewWebsocket(hand)
-	router.HandleFunc("/api/v1/websocket/gorilla", hand.Websocket.WebSocketSample)
+	router.HandleFunc("/api/v1/websocket/gorilla/{id}", hand.Websocket.WebSocketSample)
 
 	return router
 }

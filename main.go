@@ -104,7 +104,7 @@ func main() {
 
 	component.Cfg.App.Version = strconv.FormatInt(o.VersionID, 10) + time.Now().Format("-2006-01-02-15-04-05")
 
-	if component.Cfg.Lg.Level > 4 {
+	if component.Cfg.Postgresql.IsLog && component.Cfg.Lg.Level > 4 {
 		boil.DebugMode = true
 	}
 

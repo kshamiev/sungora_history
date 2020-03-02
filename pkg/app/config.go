@@ -62,6 +62,7 @@ type ConfigMysql struct {
 	Login    string `yaml:"login"`    // Логин к базе данных
 	Password string `yaml:"password"` // Пароль к базе данных
 	Charset  string `yaml:"charset"`  // Кодировка данных (utf-8 - по умолчанию)
+	IsLog    bool   `yaml:"is_log"`   // Признак логирования запросов к БД
 }
 
 type ConfigPostgres struct {
@@ -72,6 +73,7 @@ type ConfigPostgres struct {
 	Password string `yaml:"password"` // Пароль к базе данных
 	Charset  string `yaml:"charset"`  // Кодировка данных (utf-8 - по умолчанию)
 	Ssl      string `yaml:"ssl"`      // Ssl
+	IsLog    bool   `yaml:"is_log"`   // Признак логирования запросов к БД
 }
 
 // ConfigLoad загрузка конфигурации

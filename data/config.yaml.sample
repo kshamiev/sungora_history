@@ -47,3 +47,5 @@ postgresql:
   password: "postgres" # Change
   ssl: "disable"
   charset: "utf8"
+  is_log: true
+

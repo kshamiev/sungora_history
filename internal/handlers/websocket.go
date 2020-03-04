@@ -61,9 +61,9 @@ type WSHandler struct {
 }
 
 // HookStartClient метод при подключении и старте нового пользователя
-func (h *WSHandler) HookStartClient(cntClient int) {
-	lg := logger.GetLogger(h.Ctx)
-	lg.Info("WS hook start client ", cntClient)
+func (h *WSHandler) HookStartClient(cntClient int) error {
+	logger.GetLogger(h.Ctx).Info("WS hook start client ", cntClient)
+	return nil
 }
 
 // HookGetMessage метод при получении данных из вебсокета пользователя
@@ -93,7 +93,6 @@ func (h *WSHandler) HookSendMessage(msg interface{}, cntClient int) {
 
 // Ping проверка соединения с пользователем
 func (h *WSHandler) Ping() error {
-	lg := logger.GetLogger(h.Ctx)
-	lg.Info("WS hook ping client")
+	logger.GetLogger(h.Ctx).Info("WS hook ping client")
 	return h.Ws.WriteMessage(websocket.PingMessage, []byte{})
 }

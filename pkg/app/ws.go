@@ -9,14 +9,6 @@ import (
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
-// интерфейс обработчика
-type WSHandler interface {
-	HookStartClient(cntClient int)
-	HookGetMessage(cntClient int) (interface{}, error)
-	HookSendMessage(msg interface{}, cntClient int)
-	Ping() error
-}
-
 // шина обработчиков вебсокетов по идентификаторам
 type WSBus map[string]*wsHandler
 
@@ -60,7 +52,15 @@ func (bus WSBus) RequestClose(ws *websocket.Conn, lg logger.Logger) {
 	}
 }
 
-// клиент обслуживающий вебсокет
+// интерфейс обработчика вебсокета
+type WSHandler interface {
+	HookStartClient(cntClient int) error
+	HookGetMessage(cntClient int) (interface{}, error)
+	HookSendMessage(msg interface{}, cntClient int)
+	Ping() error
+}
+
+// управление обработчиками
 type wsHandler struct {
 	broadcast chan interface{}   // канал передачи данных всем обработчикам вебсокета
 	clients   map[WSHandler]bool // массив всех обработчиков вебсокета
@@ -68,7 +68,9 @@ type wsHandler struct {
 
 // StartClient инициализация обработчика вебсокета по условному идентификатору
 // регистрация и старт работы нового пользователя
+// управление обработчиком подлкюченного клиента
 func (bus WSBus) StartClient(wsbusID string, handler WSHandler) {
+	// инициализация обработчика в шине
 	b, ok := bus[wsbusID]
 	if !ok {
 		b = &wsHandler{
@@ -78,14 +80,23 @@ func (bus WSBus) StartClient(wsbusID string, handler WSHandler) {
 		bus[wsbusID] = b
 		go b.control()
 	}
+
 	// регистрация и старт работы нового пользователя
 	b.clients[handler] = true
 	defer delete(b.clients, handler)
-	handler.HookStartClient(len(b.clients))
 
+	if err := handler.HookStartClient(len(b.clients)); err != nil {
+		handler.HookSendMessage(err, len(b.clients))
+		return
+	}
+
+	// здесь мы лочимся и обрабатываем входящие сообщения до выхода
 	for {
 		msg, err := handler.HookGetMessage(len(b.clients))
 		if err != nil {
+			if _, ok := err.(*websocket.CloseError); !ok {
+				handler.HookSendMessage(err, len(b.clients))
+			}
 			return
 		}
 		if msg != nil {
@@ -94,9 +105,9 @@ func (bus WSBus) StartClient(wsbusID string, handler WSHandler) {
 	}
 }
 
-// control работа обработчика вебсокета
+// control здесь мы отправляем сообщения всем подключенным пользователям к вебсокету и пингуем
 func (b *wsHandler) control() {
-	ticker := time.NewTicker(time.Second * 55)
+	ticker := time.NewTicker(time.Minute)
 
 	for {
 		select {

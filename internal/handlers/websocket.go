@@ -81,14 +81,15 @@ func (h *WSHandler) HookGetMessage(cntClient int) (interface{}, error) {
 }
 
 // HookSendMessage метод при отправке данных пользователю
-func (h *WSHandler) HookSendMessage(msg interface{}, cntClient int) {
+func (h *WSHandler) HookSendMessage(msg interface{}, cntClient int) error {
 	lg := logger.GetLogger(h.Ctx)
 	if err := h.Ws.WriteJSON(msg); err != nil {
 		lg.Error("WS send message err: ", err.Error())
-		return
+		return err
 	}
 
 	lg.Info("WS hook send message: ", msg)
+	return nil
 }
 
 // Ping проверка соединения с пользователем

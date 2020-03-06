@@ -56,7 +56,7 @@ func (bus WSBus) RequestClose(ws *websocket.Conn, lg logger.Logger) {
 type WSHandler interface {
 	HookStartClient(cntClient int) error
 	HookGetMessage(cntClient int) (interface{}, error)
-	HookSendMessage(msg interface{}, cntClient int)
+	HookSendMessage(msg interface{}, cntClient int) error
 	Ping() error
 }
 
@@ -86,7 +86,7 @@ func (bus WSBus) StartClient(wsbusID string, handler WSHandler) {
 	defer delete(b.clients, handler)
 
 	if err := handler.HookStartClient(len(b.clients)); err != nil {
-		handler.HookSendMessage(err, len(b.clients))
+		_ = handler.HookSendMessage(err, len(b.clients))
 		return
 	}
 
@@ -95,7 +95,7 @@ func (bus WSBus) StartClient(wsbusID string, handler WSHandler) {
 		msg, err := handler.HookGetMessage(len(b.clients))
 		if err != nil {
 			if _, ok := err.(*websocket.CloseError); !ok {
-				handler.HookSendMessage(err, len(b.clients))
+				_ = handler.HookSendMessage(err, len(b.clients))
 			}
 			return
 		}
@@ -123,7 +123,7 @@ func (b *wsHandler) control() {
 		// каждому зарегистрированному клиенту шлем сообщение
 		case message := <-b.broadcast:
 			for handler := range b.clients {
-				handler.HookSendMessage(message, len(b.clients))
+				_ = handler.HookSendMessage(message, len(b.clients))
 			}
 		}
 	}

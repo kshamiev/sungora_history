@@ -13,9 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kshamiev/sungora/pkg/logger"
-
 	"github.com/kshamiev/sungora/pkg/errs"
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 type ContextKey string

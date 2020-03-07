@@ -128,16 +128,10 @@ type ErrorResponse struct {
 func (rw *Response) JSONError(err error) {
 	if e, ok := err.(Error); ok {
 		rw.lg.Error(e.Error())
-
-		for _, t := range e.Trace() {
-			rw.lg.Trace(t)
-		}
-
 		response := ErrorResponse{
 			Code:    rw.Request.Context().Value(CtxUUID).(string),
 			Message: e.Response(),
 		}
-
 		rw.JSON(response, e.HTTPCode())
 	} else {
 		rw.lg.WithError(err).Error("Other (unexpected) error")

@@ -9,21 +9,22 @@ import (
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/boil"
 
+	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/pkg/app/response"
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 type Middleware struct {
-	*Handler
+	*config.Component
 }
 
 // NewMiddleware промежуточные обработчики запрсоов
-func NewMiddleware(h *Handler) *Middleware { return &Middleware{Handler: h} }
+func NewMiddleware(c *config.Component) *Middleware { return &Middleware{Component: c} }
 
 // TimeoutContext инициализация таймаута контекста для контроля времени выполениня запроса
 func (c *Middleware) TimeoutContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), c.cfg.ServHTTP.RequestTimeout-time.Millisecond)
+		ctx, cancel := context.WithTimeout(r.Context(), c.Cfg.ServHTTP.RequestTimeout-time.Millisecond)
 		defer cancel()
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -33,7 +34,7 @@ func (c *Middleware) TimeoutContext(next http.Handler) http.Handler {
 func (c *Middleware) Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestID := uuid.New().String()
-		lg := c.lg.WithField(response.LogUUID, requestID).WithField(response.LogAPI, r.URL.Path)
+		lg := c.Lg.WithField(response.LogUUID, requestID).WithField(response.LogAPI, r.URL.Path)
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, response.CtxUUID, requestID)
@@ -47,17 +48,17 @@ func (c *Middleware) Logger(next http.Handler) http.Handler {
 // Cors добавление заголовка ConfigCors
 func (c *Middleware) Cors() *cors.Cors {
 	return cors.New(cors.Options{
-		AllowedOrigins:   c.cfg.Cors.AllowedOrigins,
-		AllowedMethods:   c.cfg.Cors.AllowedMethods,
-		AllowedHeaders:   c.cfg.Cors.AllowedHeaders,
-		ExposedHeaders:   c.cfg.Cors.ExposedHeaders,
-		AllowCredentials: c.cfg.Cors.AllowCredentials,
-		MaxAge:           c.cfg.Cors.MaxAge, // Maximum value not ignored by any of major browsers
+		AllowedOrigins:   c.Cfg.Cors.AllowedOrigins,
+		AllowedMethods:   c.Cfg.Cors.AllowedMethods,
+		AllowedHeaders:   c.Cfg.Cors.AllowedHeaders,
+		ExposedHeaders:   c.Cfg.Cors.ExposedHeaders,
+		AllowCredentials: c.Cfg.Cors.AllowCredentials,
+		MaxAge:           c.Cfg.Cors.MaxAge, // Maximum value not ignored by any of major browsers
 	})
 }
 
 // Static статика или отдача существующего файла по запросу
 func (c *Middleware) Static(w http.ResponseWriter, r *http.Request) {
 	rw := response.New(r, w)
-	rw.Static(c.cfg.App.DirStatic + r.URL.Path)
+	rw.Static(c.Cfg.App.DirStatic + r.URL.Path)
 }

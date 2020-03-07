@@ -6,15 +6,16 @@ import (
 
 	"golang.org/x/net/websocket"
 
+	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/pkg/app/response"
 )
 
 type General struct {
-	*Handler
+	*config.Component
 }
 
 // NewGeneral общие запросы
-func NewGeneral(h *Handler) *General { return &General{Handler: h} }
+func NewGeneral(c *config.Component) *General { return &General{Component: c} }
 
 // Ping ping
 // @Summary ping
@@ -35,7 +36,7 @@ func (c *General) Ping(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string
 func (c *General) GetVersion(w http.ResponseWriter, r *http.Request) {
 	rw := response.New(r, w)
-	rw.JSON(c.cfg.App.Version)
+	rw.JSON(c.Cfg.App.Version)
 }
 
 // WebSocketSample пример работы с вебсокетом (http://localhost:8080/websocket/index.html)

@@ -44,7 +44,7 @@ func main() {
 	var (
 		err       error
 		server    *app.Server
-		component = &handlers.Component{}
+		component = &config.Component{WsBus: app.NewWSServer()}
 	)
 	// Logging
 	component.Lg = logger.CreateLogger(nil)

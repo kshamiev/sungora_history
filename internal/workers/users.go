@@ -2,7 +2,6 @@ package workers
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/kshamiev/sungora/internal/config"
@@ -13,19 +12,11 @@ const UserOnlineOffName = "UserOnlineOff"
 
 // Обновление онлайн статуса ушедших пользователей
 type UserOnlineOff struct {
-	db  *sql.DB
-	cfg *config.Config
+	*config.Component
 }
 
 // NewUserOnlineOff
-func NewUserOnlineOff(db *sql.DB, cfg *config.Config) *UserOnlineOff {
-	w := &UserOnlineOff{
-		db:  db,
-		cfg: cfg,
-	}
-
-	return w
-}
+func NewUserOnlineOff(c *config.Component) *UserOnlineOff { return &UserOnlineOff{Component: c} }
 
 func (task *UserOnlineOff) Action(ctx context.Context) (err error) {
 	lg := logger.GetLogger(ctx)

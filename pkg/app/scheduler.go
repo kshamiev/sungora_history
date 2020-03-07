@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,19 +18,16 @@ type Task interface {
 }
 
 type Scheduler struct {
-	pullWork map[string]bool
-	pull     []Task
-	lg       logger.Logger
-	wg       sync.WaitGroup // для контроля завершния работы
-	kill     chan string    // канал для убийства обработчиков
+	pullWork map[string]chan bool // выполняемые в данный момент задачи
+	pull     []Task               // пулл всех задач в программе
+	lg       logger.Logger        // логер
 }
 
 // NewScheduler создание планировщика задач
 func NewScheduler(lg logger.Logger) *Scheduler {
 	return &Scheduler{
 		lg:       lg,
-		kill:     make(chan string, 100),
-		pullWork: make(map[string]bool),
+		pullWork: make(map[string]chan bool),
 	}
 }
 
@@ -51,13 +47,10 @@ func (wf *Scheduler) Start(name string) {
 	if _, ok := wf.pullWork[name]; ok {
 		return
 	}
-
 	for i := range wf.pull {
 		if wf.pull[i].Name() == name {
-			wf.pullWork[name] = true
-
-			go wf.run(wf.pull[i])
-
+			wf.pullWork[name] = make(chan bool)
+			go wf.run(wf.pull[i], wf.pullWork[name])
 			return
 		}
 	}
@@ -68,16 +61,20 @@ func (wf *Scheduler) Stop(name string) {
 	if _, ok := wf.pullWork[name]; !ok {
 		return
 	}
-
+	wf.pullWork[name] <- true
+	<-wf.pullWork[name]
 	delete(wf.pullWork, name)
-	wf.kill <- name
 }
 
 // Wait остановить все выполняющиеся задачи
 func (wf *Scheduler) Wait() {
-	wf.kill <- ""
-	wf.wg.Wait()
-	close(wf.kill)
+	for k := range wf.pullWork {
+		wf.pullWork[k] <- true
+	}
+	for k := range wf.pullWork {
+		<-wf.pullWork[k]
+		delete(wf.pullWork, k)
+	}
 }
 
 // GetTasks Получение всех задач
@@ -86,34 +83,19 @@ func (wf *Scheduler) GetTasks() map[string]Task {
 	for i := range wf.pull {
 		res[wf.pull[i].Name()] = wf.pull[i]
 	}
-
 	return res
 }
 
 // run менеджер выполенния задачи
-func (wf *Scheduler) run(task Task) {
-	wf.wg.Add(1)
-	defer wf.wg.Done()
-
+func (wf *Scheduler) run(task Task, ch chan bool) {
 	for {
 		waitFor := task.WaitFor()
 		select {
 		case <-time.After(waitFor):
 			wf.action(task)
-		case name := <-wf.kill:
-			switch name {
-			case "": // завершаем все воркеры
-				wf.kill <- ""
-				return
-			case task.Name(): // завершаем текущий воркер
-				return
-			default: // ложное срабатывание, перенаправляем для заврешения целевого воркера
-				for i := range wf.pull {
-					if wf.pull[i].Name() == name {
-						wf.kill <- name
-					}
-				}
-			}
+		case <-ch:
+			ch <- true
+			return
 		}
 	}
 }
@@ -130,7 +112,7 @@ func (wf *Scheduler) action(task Task) {
 
 	defer func() {
 		if rvr := recover(); rvr != nil {
-			lg.Errorf("%+v", rvr)
+			lg.Errorf("panic: %+v", rvr)
 		}
 	}()
 

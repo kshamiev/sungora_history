@@ -9,5 +9,6 @@ import (
 func New(comp *config.Component) (*app.Scheduler, error) {
 	wp := app.NewScheduler(comp.Lg)
 	wp.AddStart(NewUserOnlineOff(comp))
+	wp.AddStart(NewGrpcSample(comp))
 	return wp, nil
 }

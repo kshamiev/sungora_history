@@ -6,12 +6,13 @@ import (
 )
 
 type Config struct {
-	App        app.ConfigApp      `yaml:"app"`
-	Lg         logger.Config      `yaml:"lg"`
-	ServHTTP   app.ConfigServer   `yaml:"http"`
-	GRPCServer app.ConfigGRPC     `yaml:"grpcServer"`
-	Cors       app.ConfigCors     `yaml:"cors"`
-	Postgresql app.ConfigPostgres `yaml:"postgresql"`
+	App            app.ConfigApp      `yaml:"app"`
+	Lg             logger.Config      `yaml:"lg"`
+	ServHTTP       app.ConfigServer   `yaml:"http"`
+	GRPCClientName app.ConfigGRPC     `yaml:"grpcClientName"`
+	GRPCServer     app.ConfigGRPC     `yaml:"grpcServer"`
+	Cors           app.ConfigCors     `yaml:"cors"`
+	Postgresql     app.ConfigPostgres `yaml:"postgresql"`
 }
 
 // Get загрузка конфигурации приложения

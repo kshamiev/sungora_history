@@ -13,9 +13,9 @@
 //+@Success 200 {TYPE} string "com"                                 положительный ответ
 //+@Failure 400 {TYPE} request.Error "com"                          отрицательный ответ
 //+@Failure 401 {TYPE} request.Error "user unauthorized"            пользователь не авторизован
-// @Accept json                                                     тип принимаемых данных
-// @Produce json                                                    тип возвращаемых данных
-// @Security ApiKeyAuth                                             запрос авторизованный по ключу или токену
+//+@Accept json                                                     тип принимаемых данных
+//+@Produce json                                                    тип возвращаемых данных
+//+@Security ApiKeyAuth                                             запрос авторизованный по ключу или токену
 </pre>
 
 <pre>

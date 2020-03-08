@@ -86,6 +86,11 @@ models:
 	sqlboiler -c sqlboiler.yaml -p models -o pkg/models --no-auto-timestamps --no-tests --wipe psql
 .PHONY: models
 
+# Инженеринг protobuf files
+proto:
+	@cd $(DIR)/proto; protoc --go_out=plugins=grpc:. *.proto
+.PHONY: proto
+
 # Help
 h:
 	@echo "Usage: make [target]"
@@ -104,6 +109,7 @@ h:
 	@echo "    mig-up		- Миграция вверх до конца"
 	@echo "    dbinit		- Восстановление БД из дампа data/dump.sql"
 	@echo "    models		- Инженеринг моделей по существующей структуре БД"
+	@echo "    proto		- Инженеринг protobuf files"
 .PHONY: h
 help: h
 .PHONY: help

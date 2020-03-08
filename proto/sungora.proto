@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.helloworld";
+option java_outer_classname = "HelloWorldProto";
+
+package proto;
+
+// The service definition.
+service Sungora {
+    rpc HelloWorld (TestRequest) returns (TestReply) {
+    }
+}
+
+// The request message
+message TestRequest {
+    string name = 1;
+}
+
+// The response message
+message TestReply {
+    string message = 1;
+}

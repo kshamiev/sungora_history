@@ -24,10 +24,13 @@ func (task *GrpcSample) Action(ctx context.Context) error {
 	lg := logger.GetLogger(ctx)
 	lg.Info("grpc client request")
 
+	ctx = context.WithValue(ctx, "TEST", "TEST")
+
 	res, err := task.SungoraClient.HelloWorld(ctx, &proto.TestRequest{Name: "запрос от клиента"})
 	if err != nil {
 		return err
 	}
+
 	lg.Info("grpc client response: " + res.Message)
 	fmt.Println()
 

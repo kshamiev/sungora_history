@@ -19,7 +19,6 @@ func New(c *config.Component) proto.SungoraServer {
 func (s *Server) HelloWorld(ctx context.Context, req *proto.TestRequest) (*proto.TestReply, error) {
 	lg := logger.GetLogger(ctx)
 	lg.Info("grpc server ok (" + req.Name + ")")
-	lg.Info(ctx.Value("TEST").(string))
 
 	return &proto.TestReply{
 		Message: "важное сообщение от сервера",

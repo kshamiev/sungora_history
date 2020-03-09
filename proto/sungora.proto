@@ -20,4 +20,30 @@ message TestRequest {
 // The response message
 message TestReply {
     string message = 1;
+    int64 cnt1 = 2;
+    uint64 cnt2 = 3;
+    int32 cnt3 = 4;
+    uint32 cnt4 = 5;
+    bool flag = 6;
+    float price = 7;
+    double summa = 8;
+    bytes data = 9;
+}
+
+enum PhoneType {
+    MOBILE = 0;
+    HOME = 1;
+    WORK = 2;
+}
+
+message PhoneNumber {
+    string number = 1;
+    PhoneType type = 2;
+}
+
+message Person {
+    string name = 1;
+    int32 id = 2;
+    string email = 3;
+    repeated PhoneNumber phone = 4;
 }

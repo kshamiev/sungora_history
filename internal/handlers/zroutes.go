@@ -27,7 +27,6 @@ func New(comp *config.Component) (router *chi.Mux) {
 
 	router.Use(hand.Middleware.Cors().Handler)
 	router.Use(middleware.Recoverer)
-	router.Use(middleware.Timeout(comp.Cfg.ServHTTP.RequestTimeout))
 	router.Use(hand.Middleware.Logger)
 	router.NotFound(hand.Middleware.Static)
 	router.Get("/api/docs/*", httpSwagger.Handler()) // swagger

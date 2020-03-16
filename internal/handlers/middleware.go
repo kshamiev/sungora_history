@@ -38,6 +38,7 @@ func (c *Middleware) Logger(next http.Handler) http.Handler {
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, response.CtxUUID, requestID)
+		ctx = context.WithValue(ctx, response.CtxAPI, r.URL.Path)
 		ctx = logger.WithLogger(ctx, lg)
 		ctx = boil.WithDebugWriter(ctx, lg.Writer())
 

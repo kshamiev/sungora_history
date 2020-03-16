@@ -23,6 +23,7 @@ const (
 	LogAPI  = "api"
 	LogUUID = "uuid"
 
+	CtxAPI  ContextKey = "api"
 	CtxUUID ContextKey = "uuid"
 
 	cookiePath = "/"

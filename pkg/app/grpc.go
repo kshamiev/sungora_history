@@ -1,11 +1,15 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"net"
 
-	"github.com/kshamiev/sungora/pkg/logger"
 	"google.golang.org/grpc"
+	grpcMetadata "google.golang.org/grpc/metadata"
+
+	"github.com/kshamiev/sungora/pkg/app/response"
+	"github.com/kshamiev/sungora/pkg/logger"
 )
 
 // клиент GRPC
@@ -65,4 +69,32 @@ func (comp *GRPCServer) Wait(lg logger.Logger) {
 
 	<-comp.chControl
 	lg.Info("stop grpc server: ", comp.Addr)
+}
+
+type GRPCKit struct{}
+
+func (kit *GRPCKit) CtxOut(ctx context.Context, m map[string]string) context.Context {
+	if m == nil {
+		m = make(map[string]string)
+	}
+	m[string(response.CtxUUID)] = ctx.Value(response.CtxUUID).(string)
+	m[string(response.CtxAPI)] = ctx.Value(response.CtxAPI).(string)
+
+	return grpcMetadata.NewOutgoingContext(ctx, grpcMetadata.New(m))
+}
+
+func (kit *GRPCKit) CtxIn(ctx context.Context) grpcMetadata.MD {
+	if md, ok := grpcMetadata.FromIncomingContext(ctx); ok {
+		return md
+	} else {
+		return nil
+	}
+}
+
+func (kit *GRPCKit) Log(md grpcMetadata.MD, lg logger.Logger) logger.Logger {
+	if md.Get(response.LogUUID) != nil && md.Get(response.LogAPI) != nil {
+		lg = lg.WithField(response.LogUUID, md.Get(response.LogUUID)[0])
+		lg = lg.WithField(response.LogAPI, md.Get(response.LogAPI)[0])
+	}
+	return lg
 }

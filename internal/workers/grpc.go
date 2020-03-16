@@ -2,7 +2,6 @@ package workers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/kshamiev/sungora/internal/config"
@@ -22,15 +21,14 @@ func NewGrpcSample(c *config.Component) *GrpcSample { return &GrpcSample{Compone
 
 func (task *GrpcSample) Action(ctx context.Context) error {
 	lg := logger.GetLogger(ctx)
-	lg.Info("grpc client request")
+
+	ctx = task.GRPCKit.CtxOut(ctx, nil)
 
 	res, err := task.SungoraClient.HelloWorld(ctx, &proto.TestRequest{Name: "запрос от клиента"})
 	if err != nil {
 		return err
 	}
-
-	lg.Info("grpc client response: " + res.Message)
-	fmt.Println()
+	lg.Info("grpc client ok (" + res.Message + ")")
 
 	return nil
 }

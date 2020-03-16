@@ -107,6 +107,7 @@ func (wf *Scheduler) action(task Task) {
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, response.CtxUUID, requestID)
+	ctx = context.WithValue(ctx, response.CtxAPI, task.Name())
 	ctx = logger.WithLogger(ctx, lg)
 	ctx = boil.WithDebugWriter(ctx, lg.Writer())
 

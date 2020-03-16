@@ -17,7 +17,7 @@ import (
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/internal/handlers"
 	"github.com/kshamiev/sungora/internal/model"
-	"github.com/kshamiev/sungora/internal/rpcserver"
+	"github.com/kshamiev/sungora/internal/grpcserver"
 	"github.com/kshamiev/sungora/internal/workers"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/logger"
@@ -49,7 +49,7 @@ func main() {
 		server         *app.Server
 		grpcClientName *app.GRPCClient
 		grpcServer     *app.GRPCServer
-		component      = &config.Component{WsBus: app.NewWSServer()}
+		component      = &config.Component{WsBus: app.NewWSServer(), GRPCKit: &app.GRPCKit{}}
 	)
 	// Logging
 	component.Lg = logger.CreateLogger(nil)
@@ -78,7 +78,7 @@ func main() {
 
 	// Server GRPC (sample)
 	srv := grpc.NewServer()
-	proto.RegisterSungoraServer(srv, rpcserver.New(component))
+	proto.RegisterSungoraServer(srv, grpcserver.New(component))
 
 	if grpcServer, err = app.NewGRPCServer(&component.Cfg.GRPCServer, srv, component.Lg); err != nil {
 		component.Lg.WithError(err).Fatal("new grpc server error")

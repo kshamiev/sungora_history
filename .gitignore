@@ -10,8 +10,7 @@
 *.out
 
 # Folder
-/config
-/api
+api
 bin
 dev
 log

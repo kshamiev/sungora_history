@@ -2,9 +2,14 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/grpc"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
@@ -98,4 +103,27 @@ func (kit *GRPCKit) CtxIn(ctx context.Context) (grpcMetadata.MD, logger.Logger) 
 		lg = lg.WithField(response.LogAPI, md.Get(response.LogAPI)[0])
 	}
 	return md, lg
+}
+
+// TimeTo перевод в примитив grpc
+func (kit *GRPCKit) TimeTo(d time.Time) *timestamp.Timestamp {
+	dp, _ := ptypes.TimestampProto(d)
+	return dp
+}
+
+// TimeTo перевод из примитива grpc
+func (kit *GRPCKit) TimeFrom(d *timestamp.Timestamp) time.Time {
+	dp, _ := ptypes.Timestamp(d)
+	return dp
+}
+
+// AnyTo перевод в примитив grpc
+func (kit *GRPCKit) AnyTo(d interface{}) *any.Any {
+	v, _ := json.Marshal(d)
+	return &any.Any{Value: v}
+}
+
+// AnyFrom перевод из примитива grpc
+func (kit *GRPCKit) AnyFrom(d *any.Any, obj interface{}) {
+	_ = json.Unmarshal(d.Value, obj)
 }

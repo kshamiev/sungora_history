@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package proto;
 
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
 // The service definition.
 service Sungora {
     rpc HelloWorld (TestRequest) returns (TestReply) {
@@ -24,6 +27,18 @@ message TestReply {
     float price = 7;
     double summa = 8;
     bytes data = 9;
+    StatusOrders status = 10;
+    repeated PhoneNumber phone = 11;
+    google.protobuf.Timestamp additional_time = 12;
+    google.protobuf.Any any = 13;
+
+    enum StatusOrders {
+        DRAFT = 0;
+        NEW = 1;
+        WORK = 2;
+        CANCEL = 3;
+        CLOSE = 4;
+    }
 }
 
 enum PhoneType {

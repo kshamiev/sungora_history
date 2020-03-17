@@ -15,6 +15,7 @@ import (
 
 	"github.com/friendsofgo/errors"
 	"github.com/kshamiev/sungora/pkg/typ"
+	"github.com/shopspring/decimal"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -25,14 +26,17 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	ID        typ.UUID     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Login     string       `boil:"login" json:"login" toml:"login" yaml:"login"`
-	Email     string       `boil:"email" json:"email" toml:"email" yaml:"email"`
-	IsOnline  bool         `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
-	SampleJS  typ.SampleJs `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
-	CreatedAt time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time    `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt null.Time    `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	ID        typ.UUID        `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Login     string          `boil:"login" json:"login" toml:"login" yaml:"login"`
+	Email     string          `boil:"email" json:"email" toml:"email" yaml:"email"`
+	IsOnline  bool            `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
+	SampleJS  typ.SampleJs    `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
+	CreatedAt time.Time       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time       `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	Price     decimal.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
+	Summa     float64         `boil:"summa" json:"summa" toml:"summa" yaml:"summa"`
+	CNT       int64           `boil:"cnt" json:"cnt" toml:"cnt" yaml:"cnt"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,6 +51,9 @@ var UserColumns = struct {
 	CreatedAt string
 	UpdatedAt string
 	DeletedAt string
+	Price     string
+	Summa     string
+	CNT       string
 }{
 	ID:        "id",
 	Login:     "login",
@@ -56,30 +63,46 @@ var UserColumns = struct {
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 	DeletedAt: "deleted_at",
+	Price:     "price",
+	Summa:     "summa",
+	CNT:       "cnt",
 }
 
 // Generated where
 
-type whereHelpertyp_SampleJs struct{ field string }
+type whereHelperdecimal_Decimal struct{ field string }
 
-func (w whereHelpertyp_SampleJs) EQ(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+func (w whereHelperdecimal_Decimal) EQ(x decimal.Decimal) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
 }
-func (w whereHelpertyp_SampleJs) NEQ(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
+func (w whereHelperdecimal_Decimal) NEQ(x decimal.Decimal) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
-func (w whereHelpertyp_SampleJs) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpertyp_SampleJs) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpertyp_SampleJs) LT(x typ.SampleJs) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) LT(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpertyp_SampleJs) LTE(x typ.SampleJs) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) LTE(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpertyp_SampleJs) GT(x typ.SampleJs) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) GT(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpertyp_SampleJs) GTE(x typ.SampleJs) qm.QueryMod {
+func (w whereHelperdecimal_Decimal) GTE(x decimal.Decimal) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelperfloat64 struct{ field string }
+
+func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperfloat64) NEQ(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperfloat64) LT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperfloat64) LTE(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperfloat64) GT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
@@ -92,6 +115,9 @@ var UserWhere = struct {
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 	DeletedAt whereHelpernull_Time
+	Price     whereHelperdecimal_Decimal
+	Summa     whereHelperfloat64
+	CNT       whereHelperint64
 }{
 	ID:        whereHelpertyp_UUID{field: "\"users\".\"id\""},
 	Login:     whereHelperstring{field: "\"users\".\"login\""},
@@ -101,6 +127,9 @@ var UserWhere = struct {
 	CreatedAt: whereHelpertime_Time{field: "\"users\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"users\".\"updated_at\""},
 	DeletedAt: whereHelpernull_Time{field: "\"users\".\"deleted_at\""},
+	Price:     whereHelperdecimal_Decimal{field: "\"users\".\"price\""},
+	Summa:     whereHelperfloat64{field: "\"users\".\"summa\""},
+	CNT:       whereHelperint64{field: "\"users\".\"cnt\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -127,9 +156,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "created_at", "updated_at", "deleted_at"}
+	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "created_at", "updated_at", "deleted_at", "price", "summa", "cnt"}
 	userColumnsWithoutDefault = []string{"login", "email", "sample_js", "deleted_at"}
-	userColumnsWithDefault    = []string{"id", "is_online", "created_at", "updated_at"}
+	userColumnsWithDefault    = []string{"id", "is_online", "created_at", "updated_at", "price", "summa", "cnt"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -1179,11 +1208,11 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
 
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, cache.query)
-		fmt.Fprintln(boil.DebugWriter, vals)
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, cache.query)
+		fmt.Fprintln(writer, vals)
 	}
-
 	if len(cache.retMapping) != 0 {
 		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(returns...)
 		if err == sql.ErrNoRows {

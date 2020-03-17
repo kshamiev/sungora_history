@@ -71,7 +71,12 @@ func (comp *GRPCServer) Wait(lg logger.Logger) {
 	lg.Info("stop grpc server: ", comp.Addr)
 }
 
-type GRPCKit struct{}
+type GRPCKit struct {
+	lg logger.Logger
+}
+
+// NewGRPCKit инструментарий по работе с grpc
+func NewGRPCKit(lg logger.Logger) *GRPCKit { return &GRPCKit{lg: lg} }
 
 func (kit *GRPCKit) CtxOut(ctx context.Context, m map[string]string) context.Context {
 	if m == nil {
@@ -91,7 +96,8 @@ func (kit *GRPCKit) CtxIn(ctx context.Context) grpcMetadata.MD {
 	}
 }
 
-func (kit *GRPCKit) Log(md grpcMetadata.MD, lg logger.Logger) logger.Logger {
+func (kit *GRPCKit) GetLog(md grpcMetadata.MD) logger.Logger {
+	lg := kit.lg
 	if md.Get(response.LogUUID) != nil && md.Get(response.LogAPI) != nil {
 		lg = lg.WithField(response.LogUUID, md.Get(response.LogUUID)[0])
 		lg = lg.WithField(response.LogAPI, md.Get(response.LogAPI)[0])

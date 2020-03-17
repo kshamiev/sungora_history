@@ -158,9 +158,9 @@ func (rw *Response) JSON(object interface{}, status ...int) {
 	}
 
 	if status[0] < http.StatusBadRequest {
-		rw.lg.Infof("%d:%s:%s", status[0], rw.Request.Method, rw.Request.URL.Path)
+		rw.lg.Infof("%d:%s", status[0], rw.Request.Method)
 	} else {
-		rw.lg.Errorf("%d:%s:%s", status[0], rw.Request.Method, rw.Request.URL.Path)
+		rw.lg.Errorf("%d:%s", status[0], rw.Request.Method)
 	}
 	// Заголовки
 	rw.generalHeaderSet("application/json; charset=utf-8", int64(len(data)), status[0])
@@ -246,14 +246,14 @@ func (rw *Response) Bytes(data []byte, fileName, mimeType string, status int) {
 
 // Redirect 301
 func (rw *Response) Redirect301(redirectURL string) {
-	rw.lg.Infof("%d:%s:%s", 301, rw.Request.Method, rw.Request.URL.Path)
+	rw.lg.Infof("%d:%s", 301, rw.Request.Method)
 	rw.response.Header().Set("Location", redirectURL)
 	rw.response.WriteHeader(http.StatusMovedPermanently)
 }
 
 // Redirect 302
 func (rw *Response) Redirect302(redirectURL string) {
-	rw.lg.Infof("%d:%s:%s", 302, rw.Request.Method, rw.Request.URL.Path)
+	rw.lg.Infof("%d:%s", 302, rw.Request.Method)
 	rw.response.Header().Set("Location", redirectURL)
 	rw.response.WriteHeader(http.StatusFound)
 }

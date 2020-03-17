@@ -2,7 +2,6 @@ package errs
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -14,34 +13,27 @@ var (
 	ErrBadRequest     = errors.New(http.StatusText(http.StatusBadRequest))
 )
 
+// New401 new error type
+func New401(err error, msg ...string) *Errs {
+	return NewUnauthorized(err, msg...)
+}
+
 // NewUnauthorized new error type
 func NewUnauthorized(err error, msg ...string) *Errs {
 	if err == nil {
 		err = ErrUnauthorized
 	}
-
 	return &Errs{
 		codeHTTP: http.StatusUnauthorized,
 		err:      err,
 		kind:     trace(2),
-		trace:    Traces(err),
 		message:  msg,
 	}
 }
 
-// NewUnauthorizedCode new error type
-func NewUnauthorizedCode(err error, code int, msg ...interface{}) *Errs {
-	if err == nil {
-		err = ErrUnauthorized
-	}
-
-	return &Errs{
-		codeHTTP: http.StatusUnauthorized,
-		err:      err,
-		kind:     trace(2),
-		trace:    Traces(err),
-		message:  messageGet(code, msg...),
-	}
+// New404 new error type
+func New404(err error, msg ...string) *Errs {
+	return NewNotFound(err, msg...)
 }
 
 // NewNotFound new error type
@@ -49,29 +41,17 @@ func NewNotFound(err error, msg ...string) *Errs {
 	if err == nil {
 		err = ErrNotFound
 	}
-
 	return &Errs{
 		codeHTTP: http.StatusNotFound,
 		err:      err,
 		kind:     trace(2),
-		trace:    Traces(err),
 		message:  msg,
 	}
 }
 
-// NewNotFoundCode new error type
-func NewNotFoundCode(err error, code int, msg ...interface{}) *Errs {
-	if err == nil {
-		err = ErrNotFound
-	}
-
-	return &Errs{
-		codeHTTP: http.StatusNotFound,
-		err:      err,
-		kind:     trace(2),
-		trace:    Traces(err),
-		message:  messageGet(code, msg...),
-	}
+// New500 new error type
+func New500(err error, msg ...string) *Errs {
+	return NewInternalServer(err, msg...)
 }
 
 // NewInternalServer new error type
@@ -84,24 +64,13 @@ func NewInternalServer(err error, msg ...string) *Errs {
 		codeHTTP: http.StatusInternalServerError,
 		err:      err,
 		kind:     trace(2),
-		trace:    Traces(err),
 		message:  msg,
 	}
 }
 
-// NewInternalServerCode new error type
-func NewInternalServerCode(err error, code int, msg ...interface{}) *Errs {
-	if err == nil {
-		err = ErrInternalServer
-	}
-
-	return &Errs{
-		codeHTTP: http.StatusInternalServerError,
-		err:      err,
-		kind:     trace(2),
-		trace:    Traces(err),
-		message:  messageGet(code, msg...),
-	}
+// New403 new error type
+func New403(err error, msg ...string) *Errs {
+	return NewForbidden(err, msg...)
 }
 
 // NewForbidden new error type
@@ -114,24 +83,13 @@ func NewForbidden(err error, msg ...string) *Errs {
 		codeHTTP: http.StatusForbidden,
 		err:      err,
 		kind:     trace(2),
-		trace:    Traces(err),
 		message:  msg,
 	}
 }
 
-// NewForbiddenCode new error type
-func NewForbiddenCode(err error, code int, msg ...interface{}) *Errs {
-	if err == nil {
-		err = ErrForbidden
-	}
-
-	return &Errs{
-		codeHTTP: http.StatusForbidden,
-		err:      err,
-		kind:     trace(2),
-		trace:    Traces(err),
-		message:  messageGet(code, msg...),
-	}
+// New400 new error type
+func New400(err error, msg ...string) *Errs {
+	return NewBadRequest(err, msg...)
 }
 
 // NewBadRequest new error type
@@ -144,39 +102,14 @@ func NewBadRequest(err error, msg ...string) *Errs {
 		codeHTTP: http.StatusBadRequest,
 		err:      err,
 		kind:     trace(2),
-		trace:    Traces(err),
 		message:  msg,
 	}
-}
-
-// NewBadRequestCode new error type
-func NewBadRequestCode(err error, code int, msg ...interface{}) *Errs {
-	if err == nil {
-		err = ErrBadRequest
-	}
-
-	return &Errs{
-		codeHTTP: http.StatusBadRequest,
-		err:      err,
-		kind:     trace(2),
-		trace:    Traces(err),
-		message:  messageGet(code, msg...),
-	}
-}
-
-func messageGet(code int, msg ...interface{}) []string {
-	if _, ok := messageCode[code]; ok {
-		return []string{fmt.Sprintf(messageCode[code], msg...)}
-	}
-
-	return []string{fmt.Sprintf("message %d not implemented", code)}
 }
 
 type Errs struct {
 	codeHTTP int      // код http
 	err      error    // сама ошибка от внешнего сервиса или либы
 	kind     string   // где произошла ошибка
-	trace    []string // трассировка ошибки
 	message  []string // сообщение для пользователя
 }
 
@@ -187,11 +120,6 @@ func (e *Errs) Error() string {
 	}
 
 	return http.StatusText(e.codeHTTP) + "; " + e.kind
-}
-
-// Trace for logs
-func (e *Errs) Trace() []string {
-	return e.trace
 }
 
 // Response response message to user

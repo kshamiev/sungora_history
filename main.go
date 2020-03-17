@@ -15,9 +15,9 @@ import (
 
 	_ "github.com/kshamiev/sungora/api/docs"
 	"github.com/kshamiev/sungora/internal/config"
+	"github.com/kshamiev/sungora/internal/grpcserver"
 	"github.com/kshamiev/sungora/internal/handlers"
 	"github.com/kshamiev/sungora/internal/model"
-	"github.com/kshamiev/sungora/internal/grpcserver"
 	"github.com/kshamiev/sungora/internal/workers"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/logger"
@@ -49,20 +49,23 @@ func main() {
 		server         *app.Server
 		grpcClientName *app.GRPCClient
 		grpcServer     *app.GRPCServer
-		component      = &config.Component{WsBus: app.NewWSServer(), GRPCKit: &app.GRPCKit{}}
+		component      = &config.Component{}
 	)
-	// Logging
-	component.Lg = logger.CreateLogger(nil)
 
 	flagConfigPath := flag.String("c", "config.yaml", "used for set path to config file")
 	flag.Parse()
 
 	// ConfigApp загрузка конфигурации
+	component.Lg = logger.CreateLogger(nil)
 	if component.Cfg, err = config.Get(*flagConfigPath); err != nil {
 		component.Lg.WithError(err).Fatal("couldn't get config")
 	}
 
+	// Logging
 	component.Lg = logger.CreateLogger(&component.Cfg.Lg)
+
+	component.WsBus = app.NewWSServer()
+	component.GRPCKit = app.NewGRPCKit(component.Lg)
 
 	// ConnectDB SqlBoiler
 	if component.Db, err = app.NewPostgresBoiler(&component.Cfg.Postgresql); err != nil {

@@ -10,9 +10,6 @@ linters-settings:
   goconst:
     min-len: 2
     min-occurrences: 2
-  depguard:
-    list-type: blacklist
-    packages:
   misspell:
     locale: US
   lll:
@@ -33,22 +30,21 @@ linters:
     - interfacer
     - godox
     - funlen
+    - wsl
 
 run:
-  deadline: 6m
   skip-dirs:
     - api
-    - static
-    - data
+    - bin
+    - dev
     - docs
+    - data
+    - models
+    - proto
+    - static
+    - gql
     - migrations
     - vendor
-    - backups
-    - config
-    - dev
-    - gql
-  skip-files:
-    - generated.go
 
 issues:
   exclude-rules:
@@ -60,4 +56,4 @@ issues:
         - gosec
 
 # golangci.com configuration
-# https://github.com/golangci/golangci/wiki/Configunolintration
+# https://github.com/golangci/golangci/wiki/Configuration

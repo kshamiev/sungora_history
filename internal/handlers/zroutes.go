@@ -43,10 +43,10 @@ func New(comp *config.Component) (router *chi.Mux) {
 	router.Get("/api/v1/general/version", hand.General.GetVersion)
 
 	// WEBSOCKET
-	router.Handle("/api/v1/general/websocket", websocket.Handler(hand.General.WebSocketSample))
+	router.Handle("/api/v1/general/websocket", websocket.Handler(hand.General.GetWebSocketSample))
 
 	hand.Websocket = NewWebsocket(comp)
-	router.HandleFunc("/api/v1/websocket/gorilla/{id}", hand.Websocket.WebSocketSample)
+	router.HandleFunc("/api/v1/websocket/gorilla/{id}", hand.Websocket.GetWebSocketSample)
 
 	return router
 }

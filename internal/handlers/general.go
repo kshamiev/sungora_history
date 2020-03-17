@@ -39,7 +39,7 @@ func (c *General) GetVersion(w http.ResponseWriter, r *http.Request) {
 	rw.JSON(c.Cfg.App.Version)
 }
 
-// WebSocketSample пример работы с вебсокетом (http://localhost:8080/websocket/index.html)
+// GetWebSocketSample пример работы с вебсокетом (http://localhost:8080/websocket/index.html)
 // @Summary пример работы с вебсокетом (http://localhost:8080/websocket/index.html)
 // @Tags General
 // @Router /api/v1/general/websocket [get]
@@ -49,6 +49,6 @@ func (c *General) GetVersion(w http.ResponseWriter, r *http.Request) {
 // @Failure 403 {string} string
 // @Failure 404 {string} string
 // @Security ApiKeyAuth
-func (c *General) WebSocketSample(ws *websocket.Conn) {
+func (c *General) GetWebSocketSample(ws *websocket.Conn) {
 	_, _ = io.Copy(ws, ws)
 }

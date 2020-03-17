@@ -21,7 +21,7 @@ type Websocket struct {
 // NewWebsocket общие запросы
 func NewWebsocket(c *config.Component) *Websocket { return &Websocket{Component: c} }
 
-// WebSocketSample пример работы с вебсокетом (http://localhost:8080/gorilla/index.html)
+// GetWebSocketSample пример работы с вебсокетом (http://localhost:8080/gorilla/index.html)
 // @Summary пример работы с вебсокетом (http://localhost:8080/gorilla/index.html)
 // @Tags General
 // @Router /api/v1/websocket/gorilla/{id} [get]
@@ -31,7 +31,7 @@ func NewWebsocket(c *config.Component) *Websocket { return &Websocket{Component:
 // @Failure 403 {string} string
 // @Failure 404 {string} string
 // @Security ApiKeyAuth
-func (c *Websocket) WebSocketSample(w http.ResponseWriter, r *http.Request) {
+func (c *Websocket) GetWebSocketSample(w http.ResponseWriter, r *http.Request) {
 	var (
 		lg         = logger.GetLogger(r.Context())
 		ws         *websocket.Conn

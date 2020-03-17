@@ -48,4 +48,3 @@ postgresql:
   ssl: "disable"
   charset: "utf8"
   is_log: true
-

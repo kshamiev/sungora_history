@@ -18,11 +18,11 @@ type UserOnlineOff struct {
 // NewUserOnlineOff
 func NewUserOnlineOff(c *config.Component) *UserOnlineOff { return &UserOnlineOff{Component: c} }
 
-func (task *UserOnlineOff) Action(ctx context.Context) {
+func (task *UserOnlineOff) Action(ctx context.Context) error {
 	lg := logger.GetLogger(ctx)
 	lg.Infof("execute task: %s", UserOnlineOffName)
 
-	return
+	return nil
 }
 
 func (task *UserOnlineOff) WaitFor() time.Duration {

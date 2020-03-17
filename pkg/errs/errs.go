@@ -13,11 +13,6 @@ var (
 	ErrBadRequest     = errors.New(http.StatusText(http.StatusBadRequest))
 )
 
-// New401 new error type
-func New401(err error, msg ...string) *Errs {
-	return NewUnauthorized(err, msg...)
-}
-
 // NewUnauthorized new error type
 func NewUnauthorized(err error, msg ...string) *Errs {
 	if err == nil {
@@ -31,11 +26,6 @@ func NewUnauthorized(err error, msg ...string) *Errs {
 	}
 }
 
-// New404 new error type
-func New404(err error, msg ...string) *Errs {
-	return NewNotFound(err, msg...)
-}
-
 // NewNotFound new error type
 func NewNotFound(err error, msg ...string) *Errs {
 	if err == nil {
@@ -47,11 +37,6 @@ func NewNotFound(err error, msg ...string) *Errs {
 		kind:     trace(2),
 		message:  msg,
 	}
-}
-
-// New500 new error type
-func New500(err error, msg ...string) *Errs {
-	return NewInternalServer(err, msg...)
 }
 
 // NewInternalServer new error type
@@ -68,11 +53,6 @@ func NewInternalServer(err error, msg ...string) *Errs {
 	}
 }
 
-// New403 new error type
-func New403(err error, msg ...string) *Errs {
-	return NewForbidden(err, msg...)
-}
-
 // NewForbidden new error type
 func NewForbidden(err error, msg ...string) *Errs {
 	if err == nil {
@@ -85,11 +65,6 @@ func NewForbidden(err error, msg ...string) *Errs {
 		kind:     trace(2),
 		message:  msg,
 	}
-}
-
-// New400 new error type
-func New400(err error, msg ...string) *Errs {
-	return NewBadRequest(err, msg...)
 }
 
 // NewBadRequest new error type

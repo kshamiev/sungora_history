@@ -12,9 +12,9 @@ import (
 )
 
 type Task interface {
-	Name() string               // информация о задаче
-	Action(ctx context.Context) // выполняемая задача
-	WaitFor() time.Duration     // время до следующего запуска
+	Name() string                     // информация о задаче
+	Action(ctx context.Context) error // выполняемая задача
+	WaitFor() time.Duration           // время до следующего запуска
 }
 
 type Scheduler struct {
@@ -117,5 +117,8 @@ func (wf *Scheduler) action(task Task) {
 		}
 	}()
 
-	task.Action(ctx)
+	err := task.Action(ctx)
+	if e, ok := err.(response.Error); ok {
+		lg.WithError(err).Error(e.Response())
+	}
 }

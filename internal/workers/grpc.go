@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kshamiev/sungora/internal/config"
+	"github.com/kshamiev/sungora/pkg/errs"
 	"github.com/kshamiev/sungora/pkg/logger"
 	"github.com/kshamiev/sungora/proto"
 )
@@ -19,17 +20,17 @@ type GrpcSample struct {
 // NewGrpcSample
 func NewGrpcSample(c *config.Component) *GrpcSample { return &GrpcSample{Component: c} }
 
-func (task *GrpcSample) Action(ctx context.Context) {
+func (task *GrpcSample) Action(ctx context.Context) error {
 	lg := logger.GetLogger(ctx)
 
 	ctx = task.GRPCKit.CtxOut(ctx, nil)
 
 	res, err := task.SungoraClient.HelloWorld(ctx, &proto.TestRequest{Name: "запрос от клиента"})
 	if err != nil {
-		lg.WithError(err).Error("ошибка обращения к серверу")
-		return
+		return errs.NewBadRequest(err, "ошибка для пользователя")
 	}
 	lg.Info("grpc client ok (" + res.Message + ")")
+	return nil
 }
 
 func (task *GrpcSample) WaitFor() time.Duration {

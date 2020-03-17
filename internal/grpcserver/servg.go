@@ -16,8 +16,7 @@ func New(c *config.Component) proto.SungoraServer {
 }
 
 func (s *Server) HelloWorld(ctx context.Context, req *proto.TestRequest) (*proto.TestReply, error) {
-	md := s.GRPCKit.CtxIn(ctx)
-	lg := s.GRPCKit.GetLog(md)
+	_, lg := s.GRPCKit.CtxIn(ctx)
 
 	lg.Info("grpc server ok (" + req.Name + ")")
 

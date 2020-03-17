@@ -78,6 +78,7 @@ type GRPCKit struct {
 // NewGRPCKit инструментарий по работе с grpc
 func NewGRPCKit(lg logger.Logger) *GRPCKit { return &GRPCKit{lg: lg} }
 
+// CtxOut передача данных (метаданных) в контексте по grpc
 func (kit *GRPCKit) CtxOut(ctx context.Context, m map[string]string) context.Context {
 	if m == nil {
 		m = make(map[string]string)
@@ -88,19 +89,13 @@ func (kit *GRPCKit) CtxOut(ctx context.Context, m map[string]string) context.Con
 	return grpcMetadata.NewOutgoingContext(ctx, grpcMetadata.New(m))
 }
 
-func (kit *GRPCKit) CtxIn(ctx context.Context) grpcMetadata.MD {
-	if md, ok := grpcMetadata.FromIncomingContext(ctx); ok {
-		return md
-	} else {
-		return nil
-	}
-}
-
-func (kit *GRPCKit) GetLog(md grpcMetadata.MD) logger.Logger {
+// CtxIn получение данных (метаданных) и логера из контекста grpc
+func (kit *GRPCKit) CtxIn(ctx context.Context) (grpcMetadata.MD, logger.Logger) {
 	lg := kit.lg
-	if md.Get(response.LogUUID) != nil && md.Get(response.LogAPI) != nil {
+	md, ok := grpcMetadata.FromIncomingContext(ctx)
+	if ok && md.Get(response.LogUUID) != nil && md.Get(response.LogAPI) != nil {
 		lg = lg.WithField(response.LogUUID, md.Get(response.LogUUID)[0])
 		lg = lg.WithField(response.LogAPI, md.Get(response.LogAPI)[0])
 	}
-	return lg
+	return md, lg
 }

@@ -115,7 +115,6 @@ func (rw *Response) JSONBodyDecode(object interface{}) error {
 // interface for responses with an error
 type Error interface {
 	Error() string
-	Trace() []string
 	Response() string
 	HTTPCode() int
 }

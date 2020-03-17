@@ -115,7 +115,7 @@ type WSHandler struct {
 func (room *WSHandler) control() {
 	ticker := time.NewTicker(time.Minute)
 	for {
-		if room.isClose == true {
+		if room.isClose {
 			return
 		}
 		select {

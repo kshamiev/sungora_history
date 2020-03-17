@@ -216,6 +216,12 @@ gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 h1:YR8cESwS4TdDjEe65xsg0ogRM/Nc3DYOhEAlW+xobZo=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/webnice/debug.v1 v1.0.0 h1:vslbCq7qIWgCwW2Ryxfefb5NuM3dwY1zuRx2a220U2s=
+gopkg.in/webnice/debug.v1 v1.0.0/go.mod h1:YJnufE3IA7M5YQblj2k23QNBBYmtrw9o5XE48VS9CHU=
+gopkg.in/webnice/job.v1 v1.0.0-20191213115436-0cdda2a5ae20 h1:Y45HF1TG/GC5Kfm+3hSoUl1bL12IXltkBcRgPc9vTtQ=
+gopkg.in/webnice/job.v1 v1.0.0-20191213115436-0cdda2a5ae20/go.mod h1:WBU6zSHWDQa6mB2hkzmcc+acqRg30TjF7AtdQZA/upw=
+gopkg.in/webnice/log.v2 v2.0.0-20180614164658-0d0f83550387 h1:URVgyGDsgoxk3FlWQKgQXSKFn5bPvCp1SK7HWZ5MRpg=
+gopkg.in/webnice/log.v2 v2.0.0-20180614164658-0d0f83550387/go.mod h1:TI0RVz7HToFw3AOoOYKnLiwbpvDMbvZCpxVzUXmVst0=
 gopkg.in/yaml.v2 v2.2.1 h1:mUhvW9EsL+naU5Q3cakzfE91YhliOondGd6ZrsDBHQE=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=

@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/boil"
 
 	"github.com/kshamiev/sungora/pkg/models"
@@ -11,14 +12,15 @@ import (
 	"github.com/kshamiev/sungora/test"
 )
 
-func TestUsers(t *testing.T) {
+func TestUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	env := test.GetEnvironment(t)
 
-	var user = &models.User{
+	var us = &models.User{
 		Login: "qwerty",
+		Email: "test-test@test.ru",
 	}
 
 	js := typ.SampleJs{
@@ -35,19 +37,19 @@ func TestUsers(t *testing.T) {
 			},
 		},
 	}
-	user.SampleJS = js
+	us.SampleJS = js
 
-	if err = user.Insert(ctx, env.DB, boil.Infer()); err != nil {
+	if err = us.Insert(ctx, env.DB, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	user.Login = "test-test@test.ru"
+	us.Price = decimal.NewFromFloat(345.876)
 
-	if _, err = user.Update(ctx, env.DB, boil.Infer()); err != nil {
+	if _, err = us.Update(ctx, env.DB, boil.Whitelist(models.UserColumns.Price)); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err = user.Delete(ctx, env.DB); err != nil {
+	if _, err = us.Delete(ctx, env.DB); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -12,7 +12,7 @@ import (
 )
 
 type User struct {
-	User *models.User
+	*models.User
 }
 
 // NewUser пример создания безнес модели
@@ -49,18 +49,18 @@ func NewUserSet() *User {
 
 func (us *User) ProtoSampleOut() *proto.TestReply {
 	return &proto.TestReply{
-		Message:        us.User.Message.String,
-		AdditionalTime: proto.TimeOut(us.User.CreatedAt),
-		Any:            proto.AnyOut(&us.User.SampleJS),
+		Message:        us.Message.String,
+		AdditionalTime: proto.TimeOut(us.CreatedAt),
+		Any:            proto.AnyOut(&us.SampleJS),
 	}
 }
 
 func (us *User) ProtoSampleIn(in *proto.TestReply) {
-	us.User.CreatedAt = proto.TimeIn(in.AdditionalTime)
-	us.User.Message = proto.NullStringIn(in.Message)
-	proto.AnyIn(in.Any, &us.User.SampleJS)
+	us.CreatedAt = proto.TimeIn(in.AdditionalTime)
+	us.Message = proto.NullStringIn(in.Message)
+	proto.AnyIn(in.Any, &us.SampleJS)
 }
 
 func (us *User) Dump() {
-	app.Dumper(us.User.Message, us.User.CreatedAt.String(), us.User.SampleJS)
+	app.Dumper(us.Message, us.CreatedAt.String(), us.SampleJS)
 }

@@ -27,7 +27,7 @@ require (
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/onrik/logrus v0.4.1
-	github.com/shopspring/decimal v0.0.0-20190905144223-a36b5d85f337
+	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cast v1.3.0 // indirect
 	github.com/stretchr/testify v1.4.0 // indirect
@@ -42,9 +42,6 @@ require (
 	golang.org/x/tools v0.0.0-20191026034945-b2104f82a97d // indirect
 	google.golang.org/grpc v1.27.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/webnice/debug.v1 v1.0.0
-	gopkg.in/webnice/job.v1 v1.0.0-20191213115436-0cdda2a5ae20
-	gopkg.in/webnice/log.v2 v2.0.0-20180614164658-0d0f83550387
 	gopkg.in/yaml.v2 v2.2.4 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20190924164351-c8b7dadae555
 )

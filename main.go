@@ -65,7 +65,6 @@ func main() {
 	component.Lg = logger.CreateLogger(&component.Cfg.Lg)
 
 	component.WsBus = app.NewWSServer()
-	component.GRPCKit = app.NewGRPCKit(component.Lg)
 
 	// ConnectDB SqlBoiler
 	if component.Db, err = app.NewPostgresBoiler(&component.Cfg.Postgresql); err != nil {

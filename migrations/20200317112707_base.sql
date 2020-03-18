@@ -11,15 +11,23 @@ CREATE TYPE status_orders AS enum (
 
 CREATE TABLE public.users (
 	id uuid NOT NULL DEFAULT uuid_generate_v4(),
-	login VARCHAR NOT NULL,
-	email VARCHAR NOT NULL,
-	is_online bool NOT NULL DEFAULT FALSE,
+	login varchar NOT NULL,
+	email varchar NOT NULL,
+	is_online bool NOT NULL DEFAULT false,
 	sample_js jsonb NULL,
-	created_at TIMESTAMP NOT NULL DEFAULT now(),
-	updated_at TIMESTAMP NOT NULL DEFAULT now(),
-	deleted_at TIMESTAMP NULL,
+	created_at timestamp NOT NULL DEFAULT now(),
+	updated_at timestamp NOT NULL DEFAULT now(),
+	deleted_at timestamp NULL,
+	price numeric NOT NULL DEFAULT 0,
+	summa float8 NOT NULL DEFAULT 0,
+	cnt int8 NOT NULL DEFAULT 0,
+	message varchar NULL,
 	CONSTRAINT users_pk PRIMARY KEY (id)
 );
+CREATE TRIGGER users_updated_at
+	BEFORE UPDATE ON users
+	FOR EACH ROW
+	EXECUTE PROCEDURE moddatetime (updated_at);
 
 CREATE TABLE public.roles (
 	id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -36,10 +44,8 @@ CREATE TABLE public.users_roles (
 		role_id
 	)
 );
-
 ALTER TABLE public.users_roles ADD CONSTRAINT users_roles_fk FOREIGN KEY (user_id) REFERENCES users(id) ON
 UPDATE CASCADE ON DELETE CASCADE;
-
 ALTER TABLE public.users_roles ADD CONSTRAINT users_roles_fk_1 FOREIGN KEY (role_id) REFERENCES roles(id) ON
 UPDATE CASCADE ON DELETE CASCADE;
 
@@ -53,7 +59,10 @@ CREATE TABLE public.orders (
 	deleted_at TIMESTAMP NULL,
 	CONSTRAINT orders_pk PRIMARY KEY (id)
 );
-
+CREATE TRIGGER orders_updated_at
+	BEFORE UPDATE ON orders
+	FOR EACH ROW
+	EXECUTE PROCEDURE moddatetime (updated_at);
 ALTER TABLE public.orders ADD CONSTRAINT orders_fk FOREIGN KEY (user_id) REFERENCES users(id) ON
 UPDATE CASCADE ON DELETE RESTRICT;
 

@@ -439,7 +439,7 @@ func (roleL) LoadUsers(ctx context.Context, e boil.ContextExecutor, singular boo
 		one := new(User)
 		var localJoinCol typ.UUID
 
-		err = results.Scan(&one.ID, &one.Login, &one.Email, &one.IsOnline, &one.SampleJS, &one.CreatedAt, &one.UpdatedAt, &one.DeletedAt, &one.Price, &one.Summa, &one.CNT, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Login, &one.Email, &one.IsOnline, &one.SampleJS, &one.CreatedAt, &one.UpdatedAt, &one.DeletedAt, &one.Price, &one.Summa, &one.CNT, &one.Message, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for users")
 		}

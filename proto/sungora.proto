@@ -19,37 +19,21 @@ message TestRequest {
 // The response message
 message TestReply {
     string message = 1;
-    int64 cnt1 = 2;
-    uint64 cnt2 = 3;
-    int32 cnt3 = 4;
-    uint32 cnt4 = 5;
-    bool flag = 6;
-    float price = 7;
-    double summa = 8;
-    bytes data = 9;
-    StatusOrders status = 10;
-    repeated PhoneNumber phone = 11;
-    google.protobuf.Timestamp additional_time = 12;
-    google.protobuf.Any any = 13;
-
-    enum StatusOrders {
-        DRAFT = 0;
-        NEW = 1;
-        WORK = 2;
-        CANCEL = 3;
-        CLOSE = 4;
-    }
-}
-
-enum PhoneType {
-    MOBILE = 0;
-    HOME = 1;
-    WORK = 2;
+    int64 count1 = 2;
+    uint64 count2 = 3;
+    bool flag = 4;
+    float price = 5;
+    double summa = 6;
+    bytes data = 7;
+    google.protobuf.Timestamp additional_time = 8;
+    google.protobuf.Any any = 9;
+    repeated PhoneNumber phone = 10;
+    repeated string slice_string = 11;
+    repeated int64 slice_int = 12;
 }
 
 message PhoneNumber {
     string number = 1;
-    PhoneType type = 2;
 }
 
 message Person {

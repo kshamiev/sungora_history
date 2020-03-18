@@ -15,5 +15,4 @@ type Component struct {
 	Wp            *app.Scheduler
 	WsBus         app.WSBus
 	SungoraClient proto.SungoraClient
-	GRPCKit       *app.GRPCKit
 }

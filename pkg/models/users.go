@@ -37,6 +37,7 @@ type User struct {
 	Price     decimal.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
 	Summa     float64         `boil:"summa" json:"summa" toml:"summa" yaml:"summa"`
 	CNT       int64           `boil:"cnt" json:"cnt" toml:"cnt" yaml:"cnt"`
+	Message   null.String     `boil:"message" json:"message,omitempty" toml:"message" yaml:"message,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -54,6 +55,7 @@ var UserColumns = struct {
 	Price     string
 	Summa     string
 	CNT       string
+	Message   string
 }{
 	ID:        "id",
 	Login:     "login",
@@ -66,9 +68,33 @@ var UserColumns = struct {
 	Price:     "price",
 	Summa:     "summa",
 	CNT:       "cnt",
+	Message:   "message",
 }
 
 // Generated where
+
+type whereHelpertyp_SampleJs struct{ field string }
+
+func (w whereHelpertyp_SampleJs) EQ(x typ.SampleJs) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertyp_SampleJs) NEQ(x typ.SampleJs) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertyp_SampleJs) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertyp_SampleJs) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpertyp_SampleJs) LT(x typ.SampleJs) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertyp_SampleJs) LTE(x typ.SampleJs) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertyp_SampleJs) GT(x typ.SampleJs) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertyp_SampleJs) GTE(x typ.SampleJs) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 type whereHelperdecimal_Decimal struct{ field string }
 
@@ -106,6 +132,29 @@ func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var UserWhere = struct {
 	ID        whereHelpertyp_UUID
 	Login     whereHelperstring
@@ -118,6 +167,7 @@ var UserWhere = struct {
 	Price     whereHelperdecimal_Decimal
 	Summa     whereHelperfloat64
 	CNT       whereHelperint64
+	Message   whereHelpernull_String
 }{
 	ID:        whereHelpertyp_UUID{field: "\"users\".\"id\""},
 	Login:     whereHelperstring{field: "\"users\".\"login\""},
@@ -130,6 +180,7 @@ var UserWhere = struct {
 	Price:     whereHelperdecimal_Decimal{field: "\"users\".\"price\""},
 	Summa:     whereHelperfloat64{field: "\"users\".\"summa\""},
 	CNT:       whereHelperint64{field: "\"users\".\"cnt\""},
+	Message:   whereHelpernull_String{field: "\"users\".\"message\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -156,8 +207,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "created_at", "updated_at", "deleted_at", "price", "summa", "cnt"}
-	userColumnsWithoutDefault = []string{"login", "email", "sample_js", "deleted_at"}
+	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "created_at", "updated_at", "deleted_at", "price", "summa", "cnt", "message"}
+	userColumnsWithoutDefault = []string{"login", "email", "sample_js", "deleted_at", "message"}
 	userColumnsWithDefault    = []string{"id", "is_online", "created_at", "updated_at", "price", "summa", "cnt"}
 	userPrimaryKeyColumns     = []string{"id"}
 )

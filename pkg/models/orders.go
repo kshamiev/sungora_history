@@ -25,15 +25,13 @@ import (
 
 // Order is an object representing the database table.
 type Order struct {
-	ID        typ.UUID     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID    typ.UUID     `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	Number    int          `boil:"number" json:"number" toml:"number" yaml:"number"`
-	Status    string       `boil:"status" json:"status" toml:"status" yaml:"status"`
-	CreatedAt time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time    `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt null.Time    `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
-	SampleJS  typ.SampleJs `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
-	Message   null.String  `boil:"message" json:"message,omitempty" toml:"message" yaml:"message,omitempty"`
+	ID        typ.UUID  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID    typ.UUID  `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	Number    int       `boil:"number" json:"number" toml:"number" yaml:"number"`
+	Status    string    `boil:"status" json:"status" toml:"status" yaml:"status"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *orderR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L orderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,8 +45,6 @@ var OrderColumns = struct {
 	CreatedAt string
 	UpdatedAt string
 	DeletedAt string
-	SampleJS  string
-	Message   string
 }{
 	ID:        "id",
 	UserID:    "user_id",
@@ -57,8 +53,6 @@ var OrderColumns = struct {
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 	DeletedAt: "deleted_at",
-	SampleJS:  "sample_js",
-	Message:   "message",
 }
 
 // Generated where
@@ -121,52 +115,6 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelpertyp_SampleJs struct{ field string }
-
-func (w whereHelpertyp_SampleJs) EQ(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpertyp_SampleJs) NEQ(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpertyp_SampleJs) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpertyp_SampleJs) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpertyp_SampleJs) LT(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertyp_SampleJs) LTE(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertyp_SampleJs) GT(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertyp_SampleJs) GTE(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var OrderWhere = struct {
 	ID        whereHelpertyp_UUID
 	UserID    whereHelpertyp_UUID
@@ -175,8 +123,6 @@ var OrderWhere = struct {
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 	DeletedAt whereHelpernull_Time
-	SampleJS  whereHelpertyp_SampleJs
-	Message   whereHelpernull_String
 }{
 	ID:        whereHelpertyp_UUID{field: "\"orders\".\"id\""},
 	UserID:    whereHelpertyp_UUID{field: "\"orders\".\"user_id\""},
@@ -185,8 +131,6 @@ var OrderWhere = struct {
 	CreatedAt: whereHelpertime_Time{field: "\"orders\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"orders\".\"updated_at\""},
 	DeletedAt: whereHelpernull_Time{field: "\"orders\".\"deleted_at\""},
-	SampleJS:  whereHelpertyp_SampleJs{field: "\"orders\".\"sample_js\""},
-	Message:   whereHelpernull_String{field: "\"orders\".\"message\""},
 }
 
 // OrderRels is where relationship names are stored.
@@ -210,8 +154,8 @@ func (*orderR) NewStruct() *orderR {
 type orderL struct{}
 
 var (
-	orderAllColumns            = []string{"id", "user_id", "number", "status", "created_at", "updated_at", "deleted_at", "sample_js", "message"}
-	orderColumnsWithoutDefault = []string{"user_id", "deleted_at", "sample_js", "message"}
+	orderAllColumns            = []string{"id", "user_id", "number", "status", "created_at", "updated_at", "deleted_at"}
+	orderColumnsWithoutDefault = []string{"user_id", "deleted_at"}
 	orderColumnsWithDefault    = []string{"id", "number", "status", "created_at", "updated_at"}
 	orderPrimaryKeyColumns     = []string{"id"}
 )

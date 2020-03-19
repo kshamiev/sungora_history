@@ -64,6 +64,7 @@ func main() {
 	// Logging
 	component.Lg = logger.CreateLogger(&component.Cfg.Lg)
 
+	// шина обработчиков вебсокета
 	component.WsBus = app.NewWSServer()
 
 	// ConnectDB SqlBoiler

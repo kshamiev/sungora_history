@@ -53,7 +53,7 @@ CREATE TABLE public.orders (
 	id uuid NOT NULL DEFAULT uuid_generate_v4(),
 	user_id uuid NULL,
 	"number" int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
-	status varchar NOT NULL,
+	status int4 NOT NULL DEFAULT 0,
 	status_old status_orders NOT NULL DEFAULT 'NEW'::status_orders,
 	created_at TIMESTAMP NOT NULL DEFAULT now(),
 	updated_at TIMESTAMP NOT NULL DEFAULT now(),

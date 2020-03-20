@@ -27,7 +27,7 @@ import (
 // Order is an object representing the database table.
 type Order struct {
 	ID        typ.UUID       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID    typ.UUID       `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	UserID    typ.UUID       `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
 	Number    int            `boil:"number" json:"number" toml:"number" yaml:"number"`
 	Status    pb.StatusOrder `boil:"status" json:"status" toml:"status" yaml:"status"`
 	StatusOld string         `boil:"status_old" json:"status_old" toml:"status_old" yaml:"status_old"`
@@ -182,8 +182,8 @@ type orderL struct{}
 
 var (
 	orderAllColumns            = []string{"id", "user_id", "number", "status", "status_old", "created_at", "updated_at", "deleted_at"}
-	orderColumnsWithoutDefault = []string{"user_id", "status", "deleted_at"}
-	orderColumnsWithDefault    = []string{"id", "number", "status_old", "created_at", "updated_at"}
+	orderColumnsWithoutDefault = []string{"user_id", "deleted_at"}
+	orderColumnsWithDefault    = []string{"id", "number", "status", "status_old", "created_at", "updated_at"}
 	orderPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -625,6 +625,37 @@ func (o *Order) SetUser(ctx context.Context, exec boil.ContextExecutor, insert b
 		related.R.Orders = append(related.R.Orders, o)
 	}
 
+	return nil
+}
+
+// RemoveUser relationship.
+// Sets o.R.User to nil.
+// Removes o from all passed in related items' relationships struct (Optional).
+func (o *Order) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
+	var err error
+
+	queries.SetScanner(&o.UserID, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.R.User = nil
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.Orders {
+		if queries.Equal(o.UserID, ri.UserID) {
+			continue
+		}
+
+		ln := len(related.R.Orders)
+		if ln > 1 && i < ln-1 {
+			related.R.Orders[i] = related.R.Orders[ln-1]
+		}
+		related.R.Orders = related.R.Orders[:ln-1]
+		break
+	}
 	return nil
 }
 

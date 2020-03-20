@@ -55,7 +55,7 @@ func (q SQL) Replace(tag, value string) SQL {
 }
 
 // String возвращает очищенный конечный запрос
-// nolint: gocyclo
+// nolint: gocyclo, gocritic
 func (q SQL) String(p ...interface{}) string {
 	query := strings.ReplaceAll(strings.ReplaceAll(string(q), "\n", " "), "\t", "")
 

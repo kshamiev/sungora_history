@@ -3,9 +3,9 @@ package config
 import (
 	"database/sql"
 
+	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/logger"
-	"github.com/kshamiev/sungora/proto"
 )
 
 type Component struct {
@@ -14,5 +14,5 @@ type Component struct {
 	Cfg           *Config
 	Wp            *app.Scheduler
 	WsBus         app.WSBus
-	SungoraClient proto.SungoraClient
+	SungoraClient pb.SungoraClient
 }

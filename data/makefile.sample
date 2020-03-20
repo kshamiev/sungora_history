@@ -88,8 +88,10 @@ models:
 
 # Инженеринг protobuf files
 proto:
-	@cd $(DIR)/proto; protoc --go_out=plugins=grpc:. *.proto
+	@cd $(DIR)/pb; protoc --go_out=plugins=grpc:. *.proto
 .PHONY: proto
+pb: proto
+.PHONY: pb
 
 # Help
 h:

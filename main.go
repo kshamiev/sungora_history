@@ -19,10 +19,10 @@ import (
 	"github.com/kshamiev/sungora/internal/handlers"
 	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/internal/workers"
+	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/logger"
 	"github.com/kshamiev/sungora/pkg/models"
-	"github.com/kshamiev/sungora/proto"
 )
 
 // @title Sungora API
@@ -77,11 +77,11 @@ func main() {
 		component.Lg.WithError(err).Fatal("new grpc client error")
 	}
 	defer grpcClientName.Wait()
-	component.SungoraClient = proto.NewSungoraClient(grpcClientName.Conn)
+	component.SungoraClient = pb.NewSungoraClient(grpcClientName.Conn)
 
 	// Server GRPC (sample)
 	srv := grpc.NewServer()
-	proto.RegisterSungoraServer(srv, grpcserver.New(component))
+	pb.RegisterSungoraServer(srv, grpcserver.New(component))
 
 	if grpcServer, err = app.NewGRPCServer(&component.Cfg.GRPCServer, srv, component.Lg); err != nil {
 		component.Lg.WithError(err).Fatal("new grpc server error")

@@ -1,14 +1,15 @@
 package user
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/volatiletech/null"
 
+	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/models"
 	"github.com/kshamiev/sungora/pkg/typ"
-	"github.com/kshamiev/sungora/proto"
 )
 
 type User struct {
@@ -47,18 +48,19 @@ func NewUserSet() *User {
 	}
 }
 
-func (us *User) ProtoSampleOut() *proto.TestReply {
-	return &proto.TestReply{
+func (us *User) ProtoSampleOut() *pb.TestReply {
+	v, _ := json.Marshal(&us.SampleJS)
+	return &pb.TestReply{
 		Message:        us.Message.String,
-		AdditionalTime: proto.TimeOut(us.CreatedAt),
-		Any:            proto.AnyOut(&us.SampleJS),
+		AdditionalTime: pb.TimeOut(us.CreatedAt),
+		Data:           v,
 	}
 }
 
-func (us *User) ProtoSampleIn(in *proto.TestReply) {
-	us.CreatedAt = proto.TimeIn(in.AdditionalTime)
-	us.Message = proto.NullStringIn(in.Message)
-	proto.AnyIn(in.Any, &us.SampleJS)
+func (us *User) ProtoSampleIn(in *pb.TestReply) {
+	us.CreatedAt = pb.TimeIn(in.AdditionalTime)
+	us.Message = pb.NullStringIn(in.Message)
+	_ = json.Unmarshal(in.Data, &us.SampleJS)
 }
 
 func (us *User) Dump() {

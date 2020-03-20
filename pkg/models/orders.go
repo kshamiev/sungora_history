@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/typ"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -25,13 +26,14 @@ import (
 
 // Order is an object representing the database table.
 type Order struct {
-	ID        typ.UUID  `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID    typ.UUID  `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	Number    int       `boil:"number" json:"number" toml:"number" yaml:"number"`
-	Status    string    `boil:"status" json:"status" toml:"status" yaml:"status"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	ID        typ.UUID       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID    typ.UUID       `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	Number    int            `boil:"number" json:"number" toml:"number" yaml:"number"`
+	Status    pb.StatusOrder `boil:"status" json:"status" toml:"status" yaml:"status"`
+	StatusOld string         `boil:"status_old" json:"status_old" toml:"status_old" yaml:"status_old"`
+	CreatedAt time.Time      `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time      `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time      `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *orderR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L orderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,6 +44,7 @@ var OrderColumns = struct {
 	UserID    string
 	Number    string
 	Status    string
+	StatusOld string
 	CreatedAt string
 	UpdatedAt string
 	DeletedAt string
@@ -50,6 +53,7 @@ var OrderColumns = struct {
 	UserID:    "user_id",
 	Number:    "number",
 	Status:    "status",
+	StatusOld: "status_old",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 	DeletedAt: "deleted_at",
@@ -75,6 +79,27 @@ func (w whereHelpertyp_UUID) GT(x typ.UUID) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
 func (w whereHelpertyp_UUID) GTE(x typ.UUID) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelperpb_StatusOrder struct{ field string }
+
+func (w whereHelperpb_StatusOrder) EQ(x pb.StatusOrder) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperpb_StatusOrder) NEQ(x pb.StatusOrder) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperpb_StatusOrder) LT(x pb.StatusOrder) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperpb_StatusOrder) LTE(x pb.StatusOrder) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperpb_StatusOrder) GT(x pb.StatusOrder) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperpb_StatusOrder) GTE(x pb.StatusOrder) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
@@ -119,7 +144,8 @@ var OrderWhere = struct {
 	ID        whereHelpertyp_UUID
 	UserID    whereHelpertyp_UUID
 	Number    whereHelperint
-	Status    whereHelperstring
+	Status    whereHelperpb_StatusOrder
+	StatusOld whereHelperstring
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 	DeletedAt whereHelpernull_Time
@@ -127,7 +153,8 @@ var OrderWhere = struct {
 	ID:        whereHelpertyp_UUID{field: "\"orders\".\"id\""},
 	UserID:    whereHelpertyp_UUID{field: "\"orders\".\"user_id\""},
 	Number:    whereHelperint{field: "\"orders\".\"number\""},
-	Status:    whereHelperstring{field: "\"orders\".\"status\""},
+	Status:    whereHelperpb_StatusOrder{field: "\"orders\".\"status\""},
+	StatusOld: whereHelperstring{field: "\"orders\".\"status_old\""},
 	CreatedAt: whereHelpertime_Time{field: "\"orders\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"orders\".\"updated_at\""},
 	DeletedAt: whereHelpernull_Time{field: "\"orders\".\"deleted_at\""},
@@ -154,9 +181,9 @@ func (*orderR) NewStruct() *orderR {
 type orderL struct{}
 
 var (
-	orderAllColumns            = []string{"id", "user_id", "number", "status", "created_at", "updated_at", "deleted_at"}
-	orderColumnsWithoutDefault = []string{"user_id", "deleted_at"}
-	orderColumnsWithDefault    = []string{"id", "number", "status", "created_at", "updated_at"}
+	orderAllColumns            = []string{"id", "user_id", "number", "status", "status_old", "created_at", "updated_at", "deleted_at"}
+	orderColumnsWithoutDefault = []string{"user_id", "status", "deleted_at"}
+	orderColumnsWithDefault    = []string{"id", "number", "status_old", "created_at", "updated_at"}
 	orderPrimaryKeyColumns     = []string{"id"}
 )
 

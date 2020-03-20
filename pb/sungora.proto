@@ -11,6 +11,13 @@ service Sungora {
     }
 }
 
+enum StatusOrder {
+    DRAFT = 0;
+    AUCTION = 1;
+    FINISHED = 2;
+    CANCELED = 3;
+}
+
 // The request message
 message TestRequest {
     string name = 1;

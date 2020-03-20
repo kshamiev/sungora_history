@@ -51,9 +51,10 @@ UPDATE CASCADE ON DELETE CASCADE;
 
 CREATE TABLE public.orders (
 	id uuid NOT NULL DEFAULT uuid_generate_v4(),
-	user_id uuid NOT NULL,
+	user_id uuid NULL,
 	"number" int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
-	status status_orders NOT NULL DEFAULT 'NEW'::status_orders,
+	status varchar NOT NULL,
+	status_old status_orders NOT NULL DEFAULT 'NEW'::status_orders,
 	created_at TIMESTAMP NOT NULL DEFAULT now(),
 	updated_at TIMESTAMP NOT NULL DEFAULT now(),
 	deleted_at TIMESTAMP NULL,

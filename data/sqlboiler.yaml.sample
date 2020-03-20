@@ -8,6 +8,13 @@ psql:
 # UUID
 types:
   - match:
+      name: status
+    replace:
+      type: pb.StatusOrder
+    imports:
+      third_party:
+        - '"github.com/kshamiev/sungora/pb"'
+  - match:
       db_type: uuid
       nullable: true
     replace:

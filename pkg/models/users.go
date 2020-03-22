@@ -31,13 +31,13 @@ type User struct {
 	Email     string          `boil:"email" json:"email" toml:"email" yaml:"email"`
 	IsOnline  bool            `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
 	SampleJS  typ.SampleJs    `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
-	CreatedAt time.Time       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt null.Time       `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 	Price     decimal.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
 	Summa     float64         `boil:"summa" json:"summa" toml:"summa" yaml:"summa"`
 	CNT       int64           `boil:"cnt" json:"cnt" toml:"cnt" yaml:"cnt"`
 	Message   null.String     `boil:"message" json:"message,omitempty" toml:"message" yaml:"message,omitempty"`
+	CreatedAt time.Time       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time       `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -49,26 +49,26 @@ var UserColumns = struct {
 	Email     string
 	IsOnline  string
 	SampleJS  string
-	CreatedAt string
-	UpdatedAt string
-	DeletedAt string
 	Price     string
 	Summa     string
 	CNT       string
 	Message   string
+	CreatedAt string
+	UpdatedAt string
+	DeletedAt string
 }{
 	ID:        "id",
 	Login:     "login",
 	Email:     "email",
 	IsOnline:  "is_online",
 	SampleJS:  "sample_js",
-	CreatedAt: "created_at",
-	UpdatedAt: "updated_at",
-	DeletedAt: "deleted_at",
 	Price:     "price",
 	Summa:     "summa",
 	CNT:       "cnt",
 	Message:   "message",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
+	DeletedAt: "deleted_at",
 }
 
 // Generated where
@@ -161,26 +161,26 @@ var UserWhere = struct {
 	Email     whereHelperstring
 	IsOnline  whereHelperbool
 	SampleJS  whereHelpertyp_SampleJs
-	CreatedAt whereHelpertime_Time
-	UpdatedAt whereHelpertime_Time
-	DeletedAt whereHelpernull_Time
 	Price     whereHelperdecimal_Decimal
 	Summa     whereHelperfloat64
 	CNT       whereHelperint64
 	Message   whereHelpernull_String
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
+	DeletedAt whereHelpernull_Time
 }{
 	ID:        whereHelpertyp_UUID{field: "\"users\".\"id\""},
 	Login:     whereHelperstring{field: "\"users\".\"login\""},
 	Email:     whereHelperstring{field: "\"users\".\"email\""},
 	IsOnline:  whereHelperbool{field: "\"users\".\"is_online\""},
 	SampleJS:  whereHelpertyp_SampleJs{field: "\"users\".\"sample_js\""},
-	CreatedAt: whereHelpertime_Time{field: "\"users\".\"created_at\""},
-	UpdatedAt: whereHelpertime_Time{field: "\"users\".\"updated_at\""},
-	DeletedAt: whereHelpernull_Time{field: "\"users\".\"deleted_at\""},
 	Price:     whereHelperdecimal_Decimal{field: "\"users\".\"price\""},
 	Summa:     whereHelperfloat64{field: "\"users\".\"summa\""},
 	CNT:       whereHelperint64{field: "\"users\".\"cnt\""},
 	Message:   whereHelpernull_String{field: "\"users\".\"message\""},
+	CreatedAt: whereHelpertime_Time{field: "\"users\".\"created_at\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"users\".\"updated_at\""},
+	DeletedAt: whereHelpernull_Time{field: "\"users\".\"deleted_at\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -207,9 +207,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "created_at", "updated_at", "deleted_at", "price", "summa", "cnt", "message"}
-	userColumnsWithoutDefault = []string{"login", "email", "sample_js", "deleted_at", "message"}
-	userColumnsWithDefault    = []string{"id", "is_online", "created_at", "updated_at", "price", "summa", "cnt"}
+	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "price", "summa", "cnt", "message", "created_at", "updated_at", "deleted_at"}
+	userColumnsWithoutDefault = []string{"login", "email", "sample_js", "message", "deleted_at"}
+	userColumnsWithDefault    = []string{"id", "is_online", "price", "summa", "cnt", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 

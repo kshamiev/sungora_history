@@ -50,12 +50,3 @@ func makeCacheKey(cols boil.Columns, nzDefaults []string) string {
 	strmangle.PutBuffer(buf)
 	return str
 }
-
-// Enum values for status_orders
-const (
-	StatusOrdersDRAFT  = "DRAFT"
-	StatusOrdersNEW    = "NEW"
-	StatusOrdersWORK   = "WORK"
-	StatusOrdersCANCEL = "CANCEL"
-	StatusOrdersCLOSE  = "CLOSE"
-)

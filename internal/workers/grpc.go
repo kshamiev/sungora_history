@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kshamiev/sungora/internal/config"
-	"github.com/kshamiev/sungora/internal/model/user"
+	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/errs"
@@ -31,9 +31,10 @@ func (task *GrpcSample) Action(ctx context.Context) error {
 		return errs.NewBadRequest(err, "ошибка для пользователя")
 	}
 
-	us := user.NewUser()
-	us.ProtoSampleIn(res)
-	us.Dump()
+	us := model.NewUser(task.Component)
+	user, order := us.ProtoSampleIn(res)
+
+	app.Dumper(user.Price.String(), user.CreatedAt.String(), user.Message, user.SampleJS, order.Status)
 
 	lg.Info("grpc client ok")
 	return nil

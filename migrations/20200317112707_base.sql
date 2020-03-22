@@ -1,27 +1,19 @@
 -- +goose Up
 -- SQL in this section is executed when the migration is applied.
 
-CREATE TYPE status_orders AS enum (
-	'DRAFT',
-	'NEW',
-	'WORK',
-	'CANCEL',
-	'CLOSE'
-);
-
 CREATE TABLE public.users (
 	id uuid NOT NULL DEFAULT uuid_generate_v4(),
 	login varchar NOT NULL,
 	email varchar NOT NULL,
 	is_online bool NOT NULL DEFAULT false,
 	sample_js jsonb NULL,
-	created_at timestamp NOT NULL DEFAULT now(),
-	updated_at timestamp NOT NULL DEFAULT now(),
-	deleted_at timestamp NULL,
 	price numeric NOT NULL DEFAULT 0,
 	summa float8 NOT NULL DEFAULT 0,
 	cnt int8 NOT NULL DEFAULT 0,
 	message varchar NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now(),
+    deleted_at timestamp NULL,
 	CONSTRAINT users_pk PRIMARY KEY (id)
 );
 CREATE TRIGGER users_updated_at
@@ -53,8 +45,7 @@ CREATE TABLE public.orders (
 	id uuid NOT NULL DEFAULT uuid_generate_v4(),
 	user_id uuid NULL,
 	"number" int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
-	status int4 NOT NULL DEFAULT 0,
-	status_old status_orders NOT NULL DEFAULT 'NEW'::status_orders,
+	status text NOT NULL DEFAULT 'DRAFT',
 	created_at TIMESTAMP NOT NULL DEFAULT now(),
 	updated_at TIMESTAMP NOT NULL DEFAULT now(),
 	deleted_at TIMESTAMP NULL,
@@ -78,5 +69,3 @@ DROP TABLE public.users_roles;
 DROP TABLE public.users;
 
 DROP TABLE public.roles;
-
-DROP TYPE status_orders;

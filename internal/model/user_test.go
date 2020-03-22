@@ -1,4 +1,4 @@
-package user
+package model
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/boil"
 
-	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/models"
 	"github.com/kshamiev/sungora/pkg/typ"
 	"github.com/kshamiev/sungora/test"
@@ -57,20 +56,20 @@ func TestUser(t *testing.T) {
 
 	// ORDER
 	or := models.Order{
-		Status: pb.StatusOrder_AUCTION,
+		Status: typ.Status_WORK,
 	}
 
 	if err = or.Insert(ctx, env.DB, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	or.Status = pb.StatusOrder_CANCELED
+	or.Status = typ.Status_CLOSE
 
 	if err = or.Reload(ctx, env.DB); err != nil {
 		t.Fatal(err)
 	}
 
-	if or.Status != pb.StatusOrder_AUCTION {
-		t.Fatal(errors.New("INVALID STATUS" + or.Status.String()))
+	if or.Status != typ.Status_WORK {
+		t.Fatal(errors.New("INVALID STATUS " + string(or.Status)))
 	}
 }

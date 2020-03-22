@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagram version="1" name="all.erd">
+	<entities>
+		<data-source id="postgres-jdbc-16d550b69c4-14b9914adbe7363f">
+			<entity id="1" name="orders" fq-name="public.orders" order="0" x="40" y="420">
+				<path name="public"/>
+				<path name="sungora"/>
+			</entity>
+			<entity id="2" name="roles" fq-name="public.roles" order="1" x="520" y="40">
+				<path name="public"/>
+				<path name="sungora"/>
+			</entity>
+			<entity id="3" name="users" fq-name="public.users" order="2" x="40" y="40">
+				<path name="public"/>
+				<path name="sungora"/>
+			</entity>
+			<entity id="4" name="users_roles" fq-name="public.users_roles" order="3" color-bg="78,154,6" x="320" y="120">
+				<path name="public"/>
+				<path name="sungora"/>
+			</entity>
+			<entity id="5" name="goose_db_version" fq-name="public.goose_db_version" order="4" color-bg="239,41,41" x="800" y="40">
+				<path name="public"/>
+				<path name="sungora"/>
+			</entity>
+		</data-source>
+	</entities>
+	<relations>
+		<relation name="users_roles_fk_1" fq-name="public.users_roles.users_roles_fk_1" type="fk" pk-ref="2" fk-ref="4"/>
+		<relation name="orders_fk" fq-name="public.orders.orders_fk" type="fk" pk-ref="3" fk-ref="1"/>
+		<relation name="users_roles_fk" fq-name="public.users_roles.users_roles_fk" type="fk" pk-ref="3" fk-ref="4"/>
+	</relations>
+</diagram>

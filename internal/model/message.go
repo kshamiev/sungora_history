@@ -1,4 +1,4 @@
-package wsocket
+package model
 
 import "github.com/volatiletech/null"
 

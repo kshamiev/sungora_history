@@ -3,19 +3,21 @@ package handlers
 import (
 	"github.com/99designs/gqlgen/handler"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	middlewareChi "github.com/go-chi/chi/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"golang.org/x/net/websocket"
+	websocketGo "golang.org/x/net/websocket"
 
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/internal/graphql"
+	"github.com/kshamiev/sungora/internal/middleware"
+	"github.com/kshamiev/sungora/internal/websocket"
 	"github.com/kshamiev/sungora/pkg/gql"
 )
 
 type handlers struct {
-	Middleware *Middleware
+	Middleware *middleware.Middleware
 	General    *General
-	Websocket  *Websocket
+	Websocket  *websocket.Websocket
 }
 
 // New инициализация обработчиков запросов (хендлеров)
@@ -23,10 +25,10 @@ func New(comp *config.Component) (router *chi.Mux) {
 	hand := &handlers{}
 	router = chi.NewRouter()
 
-	hand.Middleware = NewMiddleware(comp)
+	hand.Middleware = middleware.NewMiddleware(comp)
 
 	router.Use(hand.Middleware.Cors().Handler)
-	router.Use(middleware.Recoverer)
+	router.Use(middlewareChi.Recoverer)
 	router.Use(hand.Middleware.Logger)
 	router.NotFound(hand.Middleware.Static)
 	router.Get("/api/docs/*", httpSwagger.Handler()) // swagger
@@ -43,9 +45,9 @@ func New(comp *config.Component) (router *chi.Mux) {
 	router.Get("/api/v1/general/version", hand.General.GetVersion)
 
 	// WEBSOCKET
-	router.Handle("/api/v1/general/websocket", websocket.Handler(hand.General.GetWebSocketSample))
+	router.Handle("/api/v1/general/websocket", websocketGo.Handler(hand.General.GetWebSocketSample))
 
-	hand.Websocket = NewWebsocket(comp)
+	hand.Websocket = websocket.NewWebsocket(comp)
 	router.HandleFunc("/api/v1/websocket/gorilla/{id}", hand.Websocket.GetWebSocketSample)
 
 	return router

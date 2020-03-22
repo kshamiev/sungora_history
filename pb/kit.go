@@ -20,13 +20,19 @@ func NullStringIn(s string) null.String {
 
 // TimeOut перевод в примитив grpc
 func TimeOut(d time.Time) *timestamp.Timestamp {
-	dp, _ := ptypes.TimestampProto(d)
+	dp, err := ptypes.TimestampProto(d)
+	if err != nil {
+		dp, _ = ptypes.TimestampProto(time.Time{})
+	}
 	return dp
 }
 
 // TimeIn перевод из примитива grpc
 func TimeIn(d *timestamp.Timestamp) time.Time {
-	dp, _ := ptypes.Timestamp(d)
+	dp, err := ptypes.Timestamp(d)
+	if err != nil {
+		dp = time.Time{}
+	}
 	return dp
 }
 

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/kshamiev/sungora/internal/config"
-	"github.com/kshamiev/sungora/internal/model/user"
+	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/app"
 )
@@ -21,6 +21,7 @@ func (serv *Server) HelloWorld(ctx context.Context, req *pb.TestRequest) (*pb.Te
 	_, lg := app.GRPCCtxIn(ctx, serv.Lg)
 	lg.Info("grpc server ok (" + req.Name + ")")
 
-	us := user.NewUserSet()
-	return us.ProtoSampleOut(), nil
+	us := model.NewUser(serv.Component)
+
+	return us.ProtoSampleOut(us.GetUser()), nil
 }

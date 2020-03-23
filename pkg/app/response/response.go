@@ -39,13 +39,11 @@ type Response struct {
 // New Функционал по работе с входящим запросом для формирования ответа
 func New(r *http.Request, w http.ResponseWriter) *Response {
 	_ = r.ParseForm()
-
 	var rw = &Response{
 		response: w,
 		lg:       logger.GetLogger(r.Context()),
 		Request:  r,
 	}
-
 	return rw
 }
 
@@ -55,10 +53,7 @@ func (rw *Response) CookieGet(name string) (c string, err error) {
 	if err != nil {
 		return "", err
 	}
-
-	lg := logger.GetLogger(rw.Request.Context())
-	lg.WithField("COOKIE", "GET").Infof("%s = %s", name, sessionID.Value)
-
+	rw.lg.Infof("COOKIE GET: %s", name)
 	return sessionID.Value, nil
 }
 
@@ -74,9 +69,7 @@ func (rw *Response) CookieSet(name, value string, t ...time.Time) {
 	if len(t) > 0 {
 		cookie.Expires = t[0]
 	}
-
-	lg := logger.GetLogger(rw.Request.Context())
-	lg.WithField("COOKIE", "SET").Infof("%s = %s", name, value)
+	rw.lg.Infof("COOKIE SET: %s", name)
 	http.SetCookie(rw.response, cookie)
 }
 
@@ -88,8 +81,7 @@ func (rw *Response) CookieRem(name string) {
 	cookie.Domain = strings.Split(rw.Request.Host, ":")[0]
 	cookie.Path = cookiePath
 	cookie.Expires = time.Now()
-	lg := logger.GetLogger(rw.Request.Context())
-	lg.WithField("COOKIE", "REM").Infof("%s", name)
+	rw.lg.Infof("COOKIE REM: %s", name)
 	http.SetCookie(rw.response, cookie)
 }
 
@@ -127,7 +119,7 @@ type ErrorResponse struct {
 // JsonError ответ с ошибкой в формате json
 func (rw *Response) JSONError(err error) {
 	if e, ok := err.(Error); ok {
-		rw.lg.Error(e.Error())
+		rw.lg.WithError(e).Error(e.Response())
 		response := ErrorResponse{
 			Code:    rw.Request.Context().Value(CtxUUID).(string),
 			Message: e.Response(),
@@ -143,7 +135,7 @@ func (rw *Response) JSONError(err error) {
 func (rw *Response) JSON(object interface{}, status ...int) {
 	data, err := json.Marshal(object)
 	if err != nil {
-		rw.lg.WithField("app", "response").Error(err.Error())
+		rw.lg.WithError(err).Error("JSON")
 		// Заголовки
 		rw.generalHeaderSet("application/json; charset=utf-8", int64(len(data)), status[0])
 		// Тело документа

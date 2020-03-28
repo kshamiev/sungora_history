@@ -3,6 +3,8 @@ package errs
 import (
 	"errors"
 	"net/http"
+
+	"google.golang.org/grpc/codes"
 )
 
 var (
@@ -82,19 +84,23 @@ func NewBadRequest(err error, msg ...string) *Errs {
 }
 
 type Errs struct {
-	codeHTTP int      // код http
-	err      error    // сама ошибка от внешнего сервиса или либы
-	kind     string   // где произошла ошибка
-	message  []string // сообщение для пользователя
+	codeHTTP int        // код http
+	codeGRPC codes.Code // код GRPC
+	err      error      // сама ошибка от внешнего сервиса или либы
+	kind     string     // где произошла ошибка
+	message  []string   // сообщение для пользователя
 }
 
 // Error for logs
 func (e *Errs) Error() string {
-	if e.err != nil {
-		return e.err.Error() + "; " + e.kind
+	var k string
+	if e.kind != "" {
+		k = "; " + e.kind
 	}
-
-	return http.StatusText(e.codeHTTP) + "; " + e.kind
+	if e.err != nil {
+		return e.err.Error() + k
+	}
+	return http.StatusText(e.codeHTTP) + k
 }
 
 // Response response message to user

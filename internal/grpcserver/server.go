@@ -2,11 +2,15 @@ package grpcserver
 
 import (
 	"context"
+	"errors"
+
+	"google.golang.org/grpc/codes"
 
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/app"
+	"github.com/kshamiev/sungora/pkg/errs"
 )
 
 type Server struct {
@@ -23,5 +27,10 @@ func (serv *Server) HelloWorld(ctx context.Context, req *pb.TestRequest) (*pb.Te
 
 	us := model.NewUser(serv.Component)
 
-	return us.ProtoSampleOut(us.GetUser()), nil
+	// sample OK
+	// return us.ProtoSampleOut(us.GetUser()), nil
+
+	// sample error
+	err := errs.GRPC(codes.InvalidArgument, errors.New("library error"), "ошибка для пользователя")
+	return us.ProtoSampleOut(us.GetUser()), err
 }

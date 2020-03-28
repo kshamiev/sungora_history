@@ -28,7 +28,7 @@ func (task *GrpcSample) Action(ctx context.Context) error {
 
 	res, err := task.SungoraClient.HelloWorld(ctx, &pb.TestRequest{Name: "запрос от клиента"})
 	if err != nil {
-		return errs.NewBadRequest(err, "ошибка для пользователя")
+		return errs.NewGRPC(err)
 	}
 
 	us := model.NewUser(task.Component)

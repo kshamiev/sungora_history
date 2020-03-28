@@ -119,6 +119,6 @@ func (wf *Scheduler) action(task Task) {
 
 	err := task.Action(ctx)
 	if e, ok := err.(response.Error); ok {
-		lg.WithError(err).Error(e.Response())
+		lg.WithError(e).Error(e.Response())
 	}
 }

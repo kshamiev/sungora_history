@@ -36,3 +36,11 @@ func (u UUID) Value() (driver.Value, error) {
 
 	return u.String(), nil
 }
+
+func (u UUID) Bytes() []byte {
+	return u.UUID[:]
+}
+
+func (u UUID) IsNull() bool {
+	return u == UUID{}
+}

@@ -10,11 +10,13 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/null"
+	"github.com/volatiletech/sqlboiler/types"
 )
+
+// UUID
 
 func (u *UUID) UnmarshalGQL(v interface{}) error {
 	const errWrongUUID = "wrong uuid"
-
 	switch data := v.(type) {
 	case UUID:
 		*u = data
@@ -28,7 +30,6 @@ func (u *UUID) UnmarshalGQL(v interface{}) error {
 	default:
 		return fmt.Errorf("wrong uuid")
 	}
-
 	return nil
 }
 
@@ -37,7 +38,6 @@ func (u UUID) MarshalGQL(w io.Writer) {
 		_, _ = io.WriteString(w, strconv.Quote(u.String()))
 		return
 	}
-
 	_, _ = io.WriteString(w, `""`)
 }
 
@@ -91,15 +91,32 @@ func UnmarshalNullTime(v interface{}) (null.Time, error) {
 	case string:
 		t, err := time.Parse(time.RFC3339, val)
 		if err != nil {
+			if val == "" {
+				return null.Time{}, nil
+			}
 			return null.Time{}, fmt.Errorf("%T is not a null.Time", val)
 		}
-
 		return null.TimeFrom(t), nil
 	case null.Time:
 		return val, nil
 	default:
 		return null.Time{}, fmt.Errorf("%T is not a null.Time", v)
 	}
+}
+
+// JSONAny
+
+func MarshalJSONAny(js types.JSON) graphql.Marshaler {
+	return graphql.WriterFunc(func(w io.Writer) {
+		_, _ = io.WriteString(w, js.String())
+	})
+}
+
+func UnmarshalJSONAny(v interface{}) (types.JSON, error) {
+	a := types.JSON{}
+	err := a.Marshal(v)
+
+	return a, err
 }
 
 // NullString

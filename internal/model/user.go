@@ -52,7 +52,7 @@ func (ml *User) ProtoSampleOut(us *models.User) *pb.TestReply {
 	v, _ := json.Marshal(&us.SampleJS)
 	price := decimal.NewFromFloat(468.435).String()
 	return &pb.TestReply{
-		CreatedAt: pb.TimeOut(us.CreatedAt),          // дата и время
+		CreatedAt: typ.PbFromTime(us.CreatedAt),      // дата и время
 		Message:   us.Message.String,                 // строка
 		Price:     price,                             // дробные числа
 		Data:      v,                                 // бинарные данные, JSON
@@ -63,8 +63,8 @@ func (ml *User) ProtoSampleOut(us *models.User) *pb.TestReply {
 // ProtoSampleIn конвертируем обратно из GRPC
 func (ml *User) ProtoSampleIn(in *pb.TestReply) (*models.User, *models.Order) {
 	us := &models.User{
-		CreatedAt: pb.TimeIn(in.CreatedAt),
-		Message:   pb.NullStringIn(in.Message),
+		CreatedAt: typ.PbToTime(in.CreatedAt),
+		Message:   typ.PbToNullString(in.Message),
 		Price:     decimal.RequireFromString(in.Price),
 	}
 	_ = json.Unmarshal(in.Data, &us.SampleJS)

@@ -2,12 +2,17 @@ package request
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"google.golang.org/grpc/metadata"
+
+	"github.com/kshamiev/sungora/pkg/app/response"
 )
 
 // Подготовка данных для отправки запроса
@@ -47,9 +52,9 @@ func (r *Request) requestSendData(method, query string, requestBody interface{})
 }
 
 // Разбор данных ответа на запрос
-func (r *Request) requestResiveData(response *http.Response, responseBody interface{}) (err error) {
+func (r *Request) requestResiveData(resp *http.Response, responseBody interface{}) (err error) {
 	if responseBody != nil {
-		switch strings.Split(response.Header.Get("Content-Type"), ";")[0] {
+		switch strings.Split(resp.Header.Get("Content-Type"), ";")[0] {
 		case strings.Split(headerTypeJSON, ";")[0]:
 			err = json.Unmarshal(r.ResponseBody, responseBody)
 		case strings.Split(headerTypeXML, ";")[0]:
@@ -82,4 +87,15 @@ func uriParamsCompile(postData map[string]interface{}) string {
 	}
 
 	return q.Encode()
+}
+
+// ContextGRPC передача данных (метаданных) в контексте по grpc
+func ContextGRPC(ctx context.Context, m map[string]string) context.Context {
+	if m == nil {
+		m = make(map[string]string)
+	}
+	m[string(response.CtxUUID)] = ctx.Value(response.CtxUUID).(string)
+	m[string(response.CtxAPI)] = ctx.Value(response.CtxAPI).(string)
+
+	return metadata.NewOutgoingContext(ctx, metadata.New(m))
 }

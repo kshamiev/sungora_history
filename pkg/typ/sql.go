@@ -1,4 +1,4 @@
-package app
+package typ
 
 import (
 	"fmt"
@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-
-	"github.com/kshamiev/sungora/pkg/typ"
 )
 
 type SQL string
@@ -34,12 +32,12 @@ func (q SQL) IN(tag string, params interface{}) SQL {
 		for i, d := range data {
 			s[i] = d.String()
 		}
-	case []typ.UUID:
+	case []UUID:
 		s = make([]string, len(data))
 		for i, uid := range data {
 			s[i] = uid.String()
 		}
-	case typ.UUIDS:
+	case UUIDS:
 		s = make([]string, len(data))
 		for i, uid := range data {
 			s[i] = uid.String()
@@ -75,7 +73,7 @@ func (q SQL) String(p ...interface{}) string {
 			query = strings.Replace(query, tag, fmt.Sprintf("%d", data), -1)
 		case decimal.Decimal:
 			query = strings.Replace(query, tag, data.String(), -1)
-		case typ.UUID:
+		case UUID:
 			query = strings.Replace(query, tag, "'"+data.String()+"'", -1)
 		case []time.Time:
 			s := make([]string, len(data))
@@ -101,14 +99,14 @@ func (q SQL) String(p ...interface{}) string {
 			}
 
 			query = strings.Replace(query, tag, "'"+strings.Join(s, "','")+"'", -1)
-		case []typ.UUID:
+		case []UUID:
 			s := make([]string, len(data))
 			for i, uid := range data {
 				s[i] = uid.String()
 			}
 
 			query = strings.Replace(query, tag, "'"+strings.Join(s, "','")+"'", -1)
-		case typ.UUIDS:
+		case UUIDS:
 			s := make([]string, len(data))
 			for i, uid := range data {
 				s[i] = uid.String()

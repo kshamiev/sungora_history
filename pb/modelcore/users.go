@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -22,10 +21,13 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"github.com/volatiletech/sqlboiler/queries/qmhelper"
 	"github.com/volatiletech/sqlboiler/strmangle"
+
+	"github.com/kshamiev/sungora/pb/typ"
 )
 
 // User is an object representing the database table.
 type User struct {
+	Asdf      []string
 	ID        typ.UUID        `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Login     string          `boil:"login" json:"login" toml:"login" yaml:"login"`
 	Email     string          `boil:"email" json:"email" toml:"email" yaml:"email"`

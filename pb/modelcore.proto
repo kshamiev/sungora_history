@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package pb;
 
-//import "google/protobuf/timestamp.proto";
-//import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 
 // The service definition.
@@ -15,20 +15,40 @@ service Qwerty {
 message Test {
     string m_e_s_s_a_ge = 1;
     string me_ss_ige = 2;
+    float ddd = 3;
+    double fsdf = 4;
+    int64 fsdfdsfdf = 5;
 }
 
 // Code generated. DO NOT EDIT
 
 message User {
-	string login = 2;
-	string email = 3;
+    string id = 2;
+    string login = 3;
+    string email = 4;
+    bool is_online = 5;
+    google.protobuf.Any sample_js = 6;
+    string price = 7;
+    double summa = 8;
+    int64 cnt = 9;
+    string message = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
+    google.protobuf.Timestamp deleted_at = 13;
 }
 
 message Order {
-	string status = 4;
+    string id = 1;
+    string user_id = 2;
+    int64 number = 3;
+    string status = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+    google.protobuf.Timestamp deleted_at = 7;
 }
 
 message Role {
-	string code = 2;
-	string description = 3;
+    string id = 1;
+    string code = 2;
+    string description = 3;
 }

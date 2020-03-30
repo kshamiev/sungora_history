@@ -14,12 +14,13 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/kshamiev/sungora/pkg/models"
-	"github.com/kshamiev/sungora/pkg/typ"
 	"github.com/shopspring/decimal"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/volatiletech/null"
+
+	"github.com/kshamiev/sungora/pb/typ"
+	"github.com/kshamiev/sungora/pkg/models"
 )
 
 // region    ************************** generated!.gotpl **************************

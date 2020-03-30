@@ -9,8 +9,8 @@ import (
 
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/pb"
+	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/kshamiev/sungora/pkg/models"
-	"github.com/kshamiev/sungora/pkg/typ"
 )
 
 type User struct {

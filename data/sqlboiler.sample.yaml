@@ -10,10 +10,10 @@ types:
   - match:
       name: status
     replace:
-      type: pb.StatusOrder
+      type: typ.Status
     imports:
       third_party:
-        - '"github.com/kshamiev/sungora/pb"'
+        - '"github.com/kshamiev/sungora/pb/typ"'
   - match:
       db_type: uuid
       nullable: true
@@ -21,7 +21,7 @@ types:
       type: typ.UUID
     imports:
       third_party:
-        - '"github.com/kshamiev/sungora/pkg/typ"'
+        - '"github.com/kshamiev/sungora/pb/typ"'
   - match:
       db_type: uuid
       nullable: false
@@ -29,7 +29,7 @@ types:
       type: typ.UUID
     imports:
       third_party:
-        - '"github.com/kshamiev/sungora/pkg/typ"'
+        - '"github.com/kshamiev/sungora/pb/typ"'
   - match:
       db_type: numeric
       nullable: true
@@ -51,10 +51,10 @@ types:
       db_type: jsonb
       nullable: true
     replace:
-      type: jsonb.Sample
+      type: typ.SampleJs
     imports:
       third_party:
-        - '"github.com/kshamiev/sungora/pkg/typ"'
+        - '"github.com/kshamiev/sungora/pb/typ"'
 
 #type Column struct {
 #	Name      string `json:"name" toml:"name"`

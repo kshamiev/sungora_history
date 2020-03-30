@@ -8,10 +8,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kshamiev/sungora/pkg/models"
-	"github.com/kshamiev/sungora/pkg/typ"
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/null"
+
+	"github.com/kshamiev/sungora/pb/typ"
+	"github.com/kshamiev/sungora/pkg/models"
 )
 
 type Characters interface {

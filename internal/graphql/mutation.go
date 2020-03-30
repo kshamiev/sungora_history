@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/gql"
-	"github.com/kshamiev/sungora/pkg/typ"
 )
 
 type mutationResolver struct{ *Resolver }

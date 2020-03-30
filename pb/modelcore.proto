@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package pb;
+
+//import "google/protobuf/timestamp.proto";
+//import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+// The service definition.
+service Qwerty {
+    rpc HelloWorld (google.protobuf.Empty) returns (google.protobuf.Empty) {
+    }
+}
+
+message Test {
+    string m_e_s_s_a_ge = 1;
+    string me_ss_ige = 2;
+}
+
+// Code generated. DO NOT EDIT
+
+message User {
+	string login = 2;
+	string email = 3;
+}
+
+message Order {
+	string status = 4;
+}
+
+message Role {
+	string code = 2;
+	string description = 3;
+}

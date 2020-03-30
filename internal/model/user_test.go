@@ -8,8 +8,8 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/boil"
 
+	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/kshamiev/sungora/pkg/models"
-	"github.com/kshamiev/sungora/pkg/typ"
 	"github.com/kshamiev/sungora/test"
 )
 

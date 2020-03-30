@@ -41,3 +41,5 @@ message Person {
     string email = 3;
     repeated PhoneNumber phone = 4;
 }
+
+// Code generated DO NOT EDIT.

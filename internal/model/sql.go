@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/kshamiev/sungora/pkg/typ"
+	"github.com/kshamiev/sungora/pb/typ"
 )
 
 // Хранилище нативных запросов к БД

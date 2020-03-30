@@ -83,14 +83,15 @@ mig-up:
 
 # Инженеринг моделей по существующей структуре БД
 models:
-	sqlboiler -c sqlboiler.yaml -p models -o pkg/models --no-auto-timestamps --no-tests --wipe psql
+	sqlboiler -c sqlboiler.yaml -p modelcore -o pb/modelcore --no-auto-timestamps --no-tests --wipe psql
 .PHONY: models
 
 # Инженеринг protobuf files
 proto:
 	@cd $(DIR)/pb; protoc --go_out=plugins=grpc:. *.proto
 .PHONY: proto
-pb: proto
+pb:
+	go run pb/generate/main.go
 .PHONY: pb
 
 # Help
@@ -112,6 +113,7 @@ h:
 	@echo "    dbinit		- Восстановление БД из дампа data/dump.sql"
 	@echo "    models		- Инженеринг моделей по существующей структуре БД"
 	@echo "    proto		- Инженеринг protobuf files"
+	@echo "    pb			- Инженеринг сопоставления типов для grpc"
 .PHONY: h
 help: h
 .PHONY: help

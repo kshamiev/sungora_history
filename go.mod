@@ -10,6 +10,7 @@ require (
 	github.com/bshuster-repo/logrus-logstash-hook v0.4.1
 	github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40 // indirect
 	github.com/dgryski/trifles v0.0.0-20190809233526-a06f71cd0619 // indirect
+	github.com/ericlagergren/decimal v0.0.0-20191206042408-88212e6cfca9 // indirect
 	github.com/evalphobia/logrus_sentry v0.8.2
 	github.com/friendsofgo/errors v0.9.2
 	github.com/getsentry/raven-go v0.2.0

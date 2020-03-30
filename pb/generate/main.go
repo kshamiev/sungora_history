@@ -1,3 +1,4 @@
+// Генерация описаний прототипов и методов конвертации типа в обе стороны
 package main
 
 import (
@@ -13,13 +14,13 @@ import (
 )
 
 const (
-	tplDoNotEdit  = "DO NOT EDIT"
-	tplProtoExt   = ".proto"
-	tplProtoBlank = "pb/generate/tpl.proto"
+	tplPkg       = "pb"
+	tplProtoExt  = ".proto"
+	tplDoNotEdit = "DO NOT EDIT"
 )
 
 var source = map[string][]interface{}{
-	"pb/modelcore": {
+	"modelcore": {
 		&modelcore.User{},
 		&modelcore.Order{},
 		&modelcore.Role{},
@@ -29,29 +30,37 @@ var source = map[string][]interface{}{
 func main() {
 	var err error
 	var data []byte
-	var proto, tplFull, tpl string
+	var proto, tplPFull, tplMFull, tplP, tplM string
 
 	for pkg := range source {
 		// анализируем типы и формируем proto
-		tplFull = "\n"
+		tplPFull = "\n"
+		tplMFull = "\n"
 		for _, t := range source[pkg] {
-			tpl, err = ParseType(t)
-			tplFull += tpl
+			if tplP, tplM, err = ParseType(t); err != nil {
+				log.Fatal(err)
+			}
+			tplPFull += tplP
+			tplMFull += tplM
 		}
 
 		// формируем proto файлы
-		if data, err = ioutil.ReadFile(pkg + tplProtoExt); err != nil {
-			if data, err = ioutil.ReadFile(tplProtoBlank); err != nil {
+		if data, err = ioutil.ReadFile(tplPkg + "/" + pkg + tplProtoExt); err == nil {
+			proto = string(data)
+		} else {
+			if data, err = ioutil.ReadFile(tplPkg + "/generate/tpl.proto"); err != nil {
 				log.Fatal(err)
 			}
+			proto = string(data)
+			proto = strings.ReplaceAll(proto, "TPLpackage", tplPkg)
+			proto = strings.ReplaceAll(proto, "TPLservice", strings.Title(pkg))
 		}
-		proto = string(data)
 
 		list := strings.Split(proto, tplDoNotEdit)
-		list[1] = tplFull
+		list[1] = tplPFull
 		proto = strings.Join(list, tplDoNotEdit)
 
-		if err = ioutil.WriteFile(pkg+tplProtoExt, []byte(proto), 0666); err != nil {
+		if err = ioutil.WriteFile(tplPkg+"/"+pkg+tplProtoExt, []byte(proto), 0666); err != nil {
 			log.Fatal(err)
 		}
 
@@ -59,20 +68,22 @@ func main() {
 	}
 }
 
-// ParseType Анализируем тип и формируем proto для него (Object = *TypeName)
-func ParseType(Object interface{}) (tpl string, err error) {
+// ParseType Анализируем тип и формируем его описание (Object = *TypeName)
+func ParseType(Object interface{}) (tplP, tplM string, err error) {
 	// разбираем тип
 	var objValue = reflect.ValueOf(Object)
 	if objValue.Kind() != reflect.Ptr {
-		return tpl, errors.New("not ptr")
+		return tplP, tplM, errors.New("not ptr")
 	}
 	if objValue.IsNil() == true {
-		return tpl, errors.New("is null")
+		return tplP, tplM, errors.New("is null")
 	}
 	objValue = objValue.Elem()
 
 	list := strings.Split(objValue.Type().String(), ".")
-	tpl = "\nmessage " + list[1] + " {\n"
+	tplP = "\nmessage " + list[1] + " {\n"
+	tplM = "\nfunc New" + list[1] + "GRPC(proto *" + tplPkg + "." + list[1] + ") *" + list[1] + " {\n"
+	tplM += "\n\treturn &" + list[1] + "{\n"
 
 	// разбираем свойства типа
 	for i := 0; i < objValue.NumField(); i++ {
@@ -81,23 +92,26 @@ func ParseType(Object interface{}) (tpl string, err error) {
 		if false == field.IsValid() || false == field.CanSet() {
 			continue
 		}
-		tpl += ParseField(objValue, i)
+		tplP_, tplM_ := ParseField(objValue, i)
+		tplP += tplP_
+		tplM += tplM_
 	}
-	tpl += "}\n"
+	tplP += "}\n"
+	tplM += "\t}\n}\n"
 
-	return tpl, nil
+	return tplP, tplM, nil
 }
 
-// ParseField Анализируем свойство типа и формируем proto для него
-func ParseField(objValue reflect.Value, i int) (tpl string) {
+// ParseField Анализируем свойство типа и формируем его описание
+func ParseField(objValue reflect.Value, i int) (tplP, tplM string) {
 	field := objValue.Type().Field(i).Name
-	fieldTagJSON := objValue.Type().Field(i).Tag.Get(`json`)
+	fieldJSON := objValue.Type().Field(i).Tag.Get(`json`)
 
 	// пропускаем исключенные и не обозначенные свойства
-	if fieldTagJSON == `-` || fieldTagJSON == "" {
-		return tpl
+	if fieldJSON == `-` || fieldJSON == "" {
+		return tplP, tplM
 	}
-	fieldTagJSON = strings.Split(fieldTagJSON, ",")[0]
+	fieldJSON = strings.Split(fieldJSON, ",")[0]
 
 	// формируем согласно типу
 	prop := objValue.FieldByName(field)
@@ -108,48 +122,68 @@ func ParseField(objValue reflect.Value, i int) (tpl string) {
 
 	switch propKind {
 	case reflect.String:
-		tpl += "\tstring " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Bool:
-		tpl += "\tbool " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tbool " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Float32:
-		tpl += "\tfloat " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tfloat " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Float64:
-		tpl += "\tdouble " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tdouble " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Int, reflect.Int64:
-		tpl += "\tint64 " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tint64 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Int8, reflect.Int16, reflect.Int32:
-		tpl += "\tint32 " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Uint, reflect.Uint64:
-		tpl += "\tuint64 " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tuint64 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32:
-		tpl += "\tuint32 " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tuint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Slice:
 		if "[]string" == propType {
-			tpl += "\trepeated string " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP += "\trepeated string " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		} else if "[]uint8" == propType {
-			tpl += "\tbytes " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		} else {
 			// google.protobuf.Any
-			tpl += "\tbytes " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 			fmt.Println(subjErr)
 		}
 	// custom type
 	case reflect.Struct:
 		if "typ.UUID" == propType || "decimal.Decimal" == propType {
-			tpl += "\tstring " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP, tplM = GenerateFieldUUID(i, field, fieldJSON)
+
 		} else if "time.Time" == propType || "null.Time" == propType {
-			tpl += "\tgoogle.protobuf.Timestamp " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP += "\tgoogle.protobuf.Timestamp " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		} else if "null.String" == propType {
-			tpl += "\tstring " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		} else {
 			// google.protobuf.Any
-			tpl += "\tbytes " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 			fmt.Println(subjErr)
 		}
 	default:
 		// google.protobuf.Any
-		tpl += "\tbytes " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		fmt.Println(subjErr)
 	}
-	return tpl
+	return tplP, tplM
+}
+
+// GenerateFieldUUID
+func GenerateFieldUUID(i int, field, fieldJSON string) (tplP, tplM string) {
+	tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplM = fmt.Sprintf("\t\t%s: typ.UUIDMustParse(proto.%s),", field, ValidNameField(fieldJSON))
+	return tplP, tplM
+}
+
+// ValidNameField сопоставление названий свойств с grpc типами
+func ValidNameField(field string) string {
+	if field == "id" {
+		return "Id"
+	}
+	list := strings.Split(field, "_")
+	for i := range list {
+		list[i] = strings.Title(list[i])
+	}
+	return strings.Join(list, "")
 }

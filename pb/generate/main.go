@@ -10,65 +10,49 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kshamiev/sungora/pb/modelcore"
+	"github.com/kshamiev/sungora/pb/modelsun"
 )
 
 const (
-	tplPkg       = "pb"
-	tplProtoExt  = ".proto"
-	tplDoNotEdit = "DO NOT EDIT"
+	pathImport      = "github.com/kshamiev/sungora"
+	tplProtoPkgName = "pb"
 )
 
 var source = map[string][]interface{}{
-	"modelcore": {
-		&modelcore.User{},
-		&modelcore.Order{},
-		&modelcore.Role{},
+	"modelsun": {
+		&modelsun.User{},
+		&modelsun.Order{},
+		&modelsun.Role{},
 	},
 }
 
 func main() {
 	var err error
-	var data []byte
-	var proto, tplPFull, tplMFull, tplP, tplM string
+	var tplPFull, tplMFull, tplP, tplM string
 
-	for pkg := range source {
-		// анализируем типы и формируем proto
-		tplPFull = "\n"
-		tplMFull = "\n"
-		for _, t := range source[pkg] {
+	for pkgName := range source {
+		// анализируем типы и формируем сопряжение
+		tplPFull = CreateProtoFile(pkgName)
+		tplMFull = CreateTypeFile(pkgName)
+		for _, t := range source[pkgName] {
 			if tplP, tplM, err = ParseType(t); err != nil {
 				log.Fatal(err)
 			}
 			tplPFull += tplP
 			tplMFull += tplM
 		}
-
-		// формируем proto файлы
-		if data, err = ioutil.ReadFile(tplPkg + "/" + pkg + tplProtoExt); err == nil {
-			proto = string(data)
-		} else {
-			if data, err = ioutil.ReadFile(tplPkg + "/generate/tpl.proto"); err != nil {
-				log.Fatal(err)
-			}
-			proto = string(data)
-			proto = strings.ReplaceAll(proto, "TPLpackage", tplPkg)
-			proto = strings.ReplaceAll(proto, "TPLservice", strings.Title(pkg))
-		}
-
-		list := strings.Split(proto, tplDoNotEdit)
-		list[1] = tplPFull
-		proto = strings.Join(list, tplDoNotEdit)
-
-		if err = ioutil.WriteFile(tplPkg+"/"+pkg+tplProtoExt, []byte(proto), 0666); err != nil {
+		// описание прототипов
+		if err = ioutil.WriteFile(pkgName+".proto", []byte(tplPFull), 0666); err != nil {
 			log.Fatal(err)
 		}
-
-		//
+		// тметоды конвертации
+		if err = ioutil.WriteFile(pkgName+"/grpc.go", []byte(tplMFull), 0666); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
-// ParseType Анализируем тип и формируем его описание (Object = *TypeName)
+// ParseType Анализируем тип и формируем его сопряжение с grpc (Object = *TypeName)
 func ParseType(Object interface{}) (tplP, tplM string, err error) {
 	// разбираем тип
 	var objValue = reflect.ValueOf(Object)
@@ -82,7 +66,7 @@ func ParseType(Object interface{}) (tplP, tplM string, err error) {
 
 	list := strings.Split(objValue.Type().String(), ".")
 	tplP = "\nmessage " + list[1] + " {\n"
-	tplM = "\nfunc New" + list[1] + "GRPC(proto *" + tplPkg + "." + list[1] + ") *" + list[1] + " {\n"
+	tplM = "\nfunc New" + list[1] + "GRPC(proto *" + tplProtoPkgName + "." + list[1] + ") *" + list[1] + " {\n"
 	tplM += "\n\treturn &" + list[1] + "{\n"
 
 	// разбираем свойства типа
@@ -102,7 +86,7 @@ func ParseType(Object interface{}) (tplP, tplM string, err error) {
 	return tplP, tplM, nil
 }
 
-// ParseField Анализируем свойство типа и формируем его описание
+// ParseField Анализируем свойство типа и формируем его конвертацию
 func ParseField(objValue reflect.Value, i int) (tplP, tplM string) {
 	field := objValue.Type().Field(i).Name
 	fieldJSON := objValue.Type().Field(i).Tag.Get(`json`)
@@ -149,9 +133,10 @@ func ParseField(objValue reflect.Value, i int) (tplP, tplM string) {
 		}
 	// custom type
 	case reflect.Struct:
-		if "typ.UUID" == propType || "decimal.Decimal" == propType {
+		if "typ.UUID" == propType {
 			tplP, tplM = GenerateFieldUUID(i, field, fieldJSON)
-
+		} else if "decimal.Decimal" == propType {
+			tplP, tplM = GenerateFieldDecimal(i, field, fieldJSON)
 		} else if "time.Time" == propType || "null.Time" == propType {
 			tplP += "\tgoogle.protobuf.Timestamp " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		} else if "null.String" == propType {
@@ -169,14 +154,21 @@ func ParseField(objValue reflect.Value, i int) (tplP, tplM string) {
 	return tplP, tplM
 }
 
-// GenerateFieldUUID
-func GenerateFieldUUID(i int, field, fieldJSON string) (tplP, tplM string) {
+// GenerateFieldDecimal конвертация туда и обратно
+func GenerateFieldDecimal(i int, field, fieldJSON string) (tplP, tplM string) {
 	tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	tplM = fmt.Sprintf("\t\t%s: typ.UUIDMustParse(proto.%s),", field, ValidNameField(fieldJSON))
+	tplM = fmt.Sprintf("\t\t%s: decimal.RequireFromString(proto.%s),\n", field, ValidNameField(fieldJSON))
 	return tplP, tplM
 }
 
-// ValidNameField сопоставление названий свойств с grpc типами
+// GenerateFieldUUID конвертация туда и обратно
+func GenerateFieldUUID(i int, field, fieldJSON string) (tplP, tplM string) {
+	tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplM = fmt.Sprintf("\t\t%s: typ.UUIDMustParse(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplM
+}
+
+// ValidNameField сопоставление свойств исходного типа с grpc прототипами через тег
 func ValidNameField(field string) string {
 	if field == "id" {
 		return "Id"
@@ -187,3 +179,40 @@ func ValidNameField(field string) string {
 	}
 	return strings.Join(list, "")
 }
+
+// CreateTypeFile инициализация файла с методами конвертации типа
+func CreateTypeFile(pkgName string) string {
+	return `
+package ` + pkgName + `
+
+import (
+	"github.com/shopspring/decimal"
+
+	"` + pathImport + `/` + tplProtoPkgName + `"
+	"` + pathImport + `/` + tplProtoPkgName + `/typ"
+)
+`
+}
+
+// CreateProtoFile инициализация файла с описанием прототипов
+func CreateProtoFile(pkgName string) (proto string) {
+	if data, err := ioutil.ReadFile(pkgName + ".proto"); err == nil {
+		proto = string(data)
+		list := strings.Split(proto, "DO NOT EDIT")
+		proto = list[0] + "DO NOT EDIT" + "\n"
+	} else {
+		if data, err = ioutil.ReadFile("generate/template.proto"); err != nil {
+			log.Fatal(err)
+		}
+		proto = string(data)
+		proto = strings.ReplaceAll(proto, "TPLpackage", tplProtoPkgName)
+		proto = strings.ReplaceAll(proto, "TPLservice", strings.Title(pkgName))
+	}
+	return proto
+}
+
+// func NewUserGRPC(proto *pb.User) *User {
+// 	return &User{
+// 		ID: typ.UUIDMustParse(proto.Id),
+// 	}
+// }

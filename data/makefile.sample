@@ -83,7 +83,7 @@ mig-up:
 
 # Инженеринг моделей по существующей структуре БД
 models:
-	sqlboiler -c sqlboiler.yaml -p modelcore -o pb/modelcore --no-auto-timestamps --no-tests --wipe psql
+	sqlboiler -c sqlboiler.yaml -p modelsun -o pb/modelsun --no-auto-timestamps --no-tests --wipe psql
 .PHONY: models
 
 # Инженеринг protobuf files
@@ -91,7 +91,9 @@ proto:
 	@cd $(DIR)/pb; protoc --go_out=plugins=grpc:. *.proto
 .PHONY: proto
 pb:
-	go run pb/generate/main.go
+    @cd $(DIR)/pb;
+    go run generate/main.go
+    protoc --go_out=plugins=grpc:. *.proto;
 .PHONY: pb
 
 # Help

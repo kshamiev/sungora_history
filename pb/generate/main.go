@@ -12,6 +12,12 @@ import (
 	"github.com/kshamiev/sungora/pb/modelcore"
 )
 
+const (
+	tplDoNotEdit  = "DO NOT EDIT"
+	tplProtoExt   = ".proto"
+	tplProtoBlank = "pb/generate/tpl.proto"
+)
+
 var source = map[string][]interface{}{
 	"pb/modelcore": {
 		&modelcore.User{},
@@ -19,11 +25,6 @@ var source = map[string][]interface{}{
 		&modelcore.Role{},
 	},
 }
-
-const (
-	doNotEdit = "DO NOT EDIT"
-	protoExt  = ".proto"
-)
 
 func main() {
 	var err error
@@ -39,16 +40,18 @@ func main() {
 		}
 
 		// формируем proto файлы
-		if data, err = ioutil.ReadFile(pkg + protoExt); err != nil {
-			log.Fatal(err)
+		if data, err = ioutil.ReadFile(pkg + tplProtoExt); err != nil {
+			if data, err = ioutil.ReadFile(tplProtoBlank); err != nil {
+				log.Fatal(err)
+			}
 		}
 		proto = string(data)
 
-		list := strings.Split(proto, doNotEdit)
+		list := strings.Split(proto, tplDoNotEdit)
 		list[1] = tplFull
-		proto = strings.Join(list, doNotEdit)
+		proto = strings.Join(list, tplDoNotEdit)
 
-		if err = ioutil.WriteFile(pkg+protoExt, []byte(proto), 0666); err != nil {
+		if err = ioutil.WriteFile(pkg+tplProtoExt, []byte(proto), 0666); err != nil {
 			log.Fatal(err)
 		}
 
@@ -87,17 +90,23 @@ func ParseType(Object interface{}) (tpl string, err error) {
 
 // ParseField Анализируем свойство типа и формируем proto для него
 func ParseField(objValue reflect.Value, i int) (tpl string) {
-	fieldName := objValue.Type().Field(i).Name
+	field := objValue.Type().Field(i).Name
 	fieldTagJSON := objValue.Type().Field(i).Tag.Get(`json`)
+
 	// пропускаем исключенные и не обозначенные свойства
 	if fieldTagJSON == `-` || fieldTagJSON == "" {
 		return tpl
 	}
 	fieldTagJSON = strings.Split(fieldTagJSON, ",")[0]
+
 	// формируем согласно типу
-	prop := objValue.FieldByName(fieldName)
-	subjErr := "not implemented: " + fieldName + " [" + prop.Type().Kind().String() + "] " + prop.Type().String()
-	switch prop.Type().Kind() {
+	prop := objValue.FieldByName(field)
+	propType := prop.Type().String()
+	propKind := prop.Type().Kind()
+	subjErr := "implemented bytes: %s->%s [%s] %s"
+	subjErr = fmt.Sprintf(subjErr, objValue.Type().String(), field, propKind.String(), propType)
+
+	switch propKind {
 	case reflect.String:
 		tpl += "\tstring " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Bool:
@@ -115,25 +124,31 @@ func ParseField(objValue reflect.Value, i int) (tpl string) {
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32:
 		tpl += "\tuint32 " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Slice:
-		if "[]string" == prop.Type().String() {
+		if "[]string" == propType {
 			tpl += "\trepeated string " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		} else if "[]uint8" == propType {
+			tpl += "\tbytes " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		} else {
-			tpl += "\tgoogle.protobuf.Any " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			// google.protobuf.Any
+			tpl += "\tbytes " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
 			fmt.Println(subjErr)
 		}
+	// custom type
 	case reflect.Struct:
-		if "typ.UUID" == prop.Type().String() || "decimal.Decimal" == prop.Type().String() {
+		if "typ.UUID" == propType || "decimal.Decimal" == propType {
 			tpl += "\tstring " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
-		} else if "time.Time" == prop.Type().String() || "null.Time" == prop.Type().String() {
+		} else if "time.Time" == propType || "null.Time" == propType {
 			tpl += "\tgoogle.protobuf.Timestamp " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
-		} else if "null.String" == prop.Type().String() {
+		} else if "null.String" == propType {
 			tpl += "\tstring " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		} else {
-			tpl += "\tgoogle.protobuf.Any " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			// google.protobuf.Any
+			tpl += "\tbytes " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
 			fmt.Println(subjErr)
 		}
 	default:
-		tpl += "\tgoogle.protobuf.Any " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		// google.protobuf.Any
+		tpl += "\tbytes " + fieldTagJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		fmt.Println(subjErr)
 	}
 	return tpl

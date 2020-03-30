@@ -27,19 +27,21 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	Asdf      []string
-	ID        typ.UUID        `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Login     string          `boil:"login" json:"login" toml:"login" yaml:"login"`
-	Email     string          `boil:"email" json:"email" toml:"email" yaml:"email"`
-	IsOnline  bool            `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
-	SampleJS  typ.SampleJs    `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
-	Price     decimal.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
-	Summa     float64         `boil:"summa" json:"summa" toml:"summa" yaml:"summa"`
-	CNT       int64           `boil:"cnt" json:"cnt" toml:"cnt" yaml:"cnt"`
-	Message   null.String     `boil:"message" json:"message,omitempty" toml:"message" yaml:"message,omitempty"`
-	CreatedAt time.Time       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt null.Time       `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	ID          typ.UUID        `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Login       string          `boil:"login" json:"login" toml:"login" yaml:"login"`
+	Email       string          `boil:"email" json:"email" toml:"email" yaml:"email"`
+	IsOnline    bool            `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
+	SampleJS    typ.SampleJs    `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
+	Price       decimal.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
+	Summa       float64         `boil:"summa" json:"summa" toml:"summa" yaml:"summa"`
+	CNT         int64           `boil:"cnt" json:"cnt" toml:"cnt" yaml:"cnt"`
+	Message     null.String     `boil:"message" json:"message,omitempty" toml:"message" yaml:"message,omitempty"`
+	NullJson    null.JSON       `json:"null_json"`
+	Butes       []byte          `json:"butes"`
+	SliceString []string        `json:"slice_string"`
+	CreatedAt   time.Time       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt   time.Time       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt   null.Time       `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`

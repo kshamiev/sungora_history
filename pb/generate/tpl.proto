@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package TPLpackage;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// The service definition.
+service TPLservice {
+    rpc Ping (google.protobuf.Empty) returns (Ping) {
+    }
+
+}
+
+message Ping {
+    string text = 1;
+    google.protobuf.Timestamp created_at = 2;
+}
+
+// Code generated. DO NOT EDIT

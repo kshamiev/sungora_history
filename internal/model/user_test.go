@@ -8,8 +8,8 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/boil"
 
+	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pb/typ"
-	"github.com/kshamiev/sungora/pkg/models"
 	"github.com/kshamiev/sungora/test"
 )
 
@@ -19,15 +19,15 @@ func TestUser(t *testing.T) {
 	ctx := context.Background()
 	env := test.GetEnvironment(t)
 
-	var us = &models.User{
+	var us = &modelsun.User{
 		Login: "qwerty",
 		Email: "test-test@test.ru",
 	}
 
-	js := typ.SampleJs{
+	js := SampleJs{
 		ID:   54687,
 		Name: "Popcorn",
-		Items: []typ.Item{
+		Items: []Item{
 			{
 				Price:    56.87,
 				Quantity: 23,
@@ -38,7 +38,7 @@ func TestUser(t *testing.T) {
 			},
 		},
 	}
-	us.SampleJS = js
+	_ = us.Metrika.Marshal(&js)
 
 	if err = us.Insert(ctx, env.DB, boil.Infer()); err != nil {
 		t.Fatal(err)
@@ -46,7 +46,7 @@ func TestUser(t *testing.T) {
 
 	us.Price = decimal.NewFromFloat(345.876)
 
-	if _, err = us.Update(ctx, env.DB, boil.Whitelist(models.UserColumns.Price)); err != nil {
+	if _, err = us.Update(ctx, env.DB, boil.Whitelist(modelsun.UserColumns.Price)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -55,7 +55,7 @@ func TestUser(t *testing.T) {
 	}
 
 	// ORDER
-	or := models.Order{
+	or := modelsun.Order{
 		Status: typ.Status_WORK,
 	}
 

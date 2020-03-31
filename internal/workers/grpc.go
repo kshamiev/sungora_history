@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/kshamiev/sungora/internal/config"
-	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/pb"
+	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/app/request"
 	"github.com/kshamiev/sungora/pkg/errs"
@@ -27,15 +27,14 @@ func (task *GrpcSample) Action(ctx context.Context) error {
 	lg := logger.GetLogger(ctx)
 	ctx = request.ContextGRPC(ctx, nil)
 
-	res, err := task.SungoraClient.HelloWorld(ctx, &pb.TestRequest{Name: "запрос от клиента"})
+	res, err := task.SungoraClient.GetUser(ctx, &pb.Test{Text: "serviceName"})
 	if err != nil {
 		return errs.NewGRPC(err)
 	}
 
-	us := model.NewUser(task.Component)
-	user, order := us.ProtoSampleIn(res)
+	us := modelsun.NewUserProto(res)
 
-	app.Dumper(user.Price.String(), user.CreatedAt.String(), user.Message, user.SampleJS, order.Status)
+	app.Dumper(us.Price.String(), us.CreatedAt.String(), us.Login, us.Metrika, us.ID.String())
 
 	lg.Info("grpc client ok")
 	return nil

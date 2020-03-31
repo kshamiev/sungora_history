@@ -8,11 +8,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kshamiev/sungora/pb/modelsun"
+	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/null"
-
-	"github.com/kshamiev/sungora/pb/typ"
-	"github.com/kshamiev/sungora/pkg/models"
 )
 
 type Characters interface {
@@ -96,9 +95,9 @@ type Todo struct {
 	// пример массива элементов
 	Items []*Item `json:"items"`
 	// поле с параметрами
-	Users []*models.User `json:"users"`
+	Users []*modelsun.User `json:"users"`
 	// поле с параметрами
-	Roles []*models.Role `json:"roles"`
+	Roles []*modelsun.Role `json:"roles"`
 }
 
 type Access string

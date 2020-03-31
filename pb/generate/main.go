@@ -1,3 +1,4 @@
+// nolint
 // Генерация описаний прототипов и методов конвертации типа в обе стороны
 package main
 
@@ -15,7 +16,7 @@ import (
 
 // Конфигурация типов которые нужно обрабатывать
 var source = map[string][]interface{}{
-	"modelsun": {
+	"Sungora": { // имя grpc сервиса (ниже типы с которыми он должен уметь работать)
 		&modelsun.User{},
 		&modelsun.Order{},
 		&modelsun.Role{},
@@ -26,16 +27,16 @@ func main() {
 	var err error
 	var tplPFull, tplMFull, tplP, tplM string
 
-	for index := range source {
-		if 0 == len(source[index]) {
+	for serviceName := range source {
+		if 0 == len(source[serviceName]) {
 			continue
 		}
 		// анализируем типы и формируем сопряжение
-		pathImport, pkgProto, pkgType := packageDetected(source[index][0])
+		pathImport, pkgProto, pkgType := packageDetected(source[serviceName][0])
 
-		tplPFull = CreateProtoFile(pathImport, pkgProto, pkgType)
-		tplMFull = CreateTypeFile(pathImport, pkgProto, pkgType)
-		for _, t := range source[index] {
+		tplPFull = CreateProtoFile(serviceName, pkgProto, pkgType)
+		tplMFull = CreateTypeFile(pathImport, pkgType)
+		for _, t := range source[serviceName] {
 			if tplP, tplM, err = ParseType(t, pkgProto); err != nil {
 				log.Fatal(err)
 			}
@@ -55,7 +56,7 @@ func main() {
 }
 
 // CreateTypeFile инициализация файла с методами конвертации типа
-func CreateTypeFile(pathImport, pkgProto, pkgType string) string {
+func CreateTypeFile(pathImport, pkgType string) string {
 	return `// Code generated. DO NOT EDIT
 // Методы сопоставления типов с протофайлами GRPC
 package ` + pkgType + `
@@ -71,7 +72,7 @@ import (
 }
 
 // CreateProtoFile инициализация файла с описанием прототипов
-func CreateProtoFile(pathImport, pkgProto, pkgType string) (proto string) {
+func CreateProtoFile(serviceName, pkgProto, pkgType string) (proto string) {
 	if data, err := ioutil.ReadFile(pkgType + ".proto"); err == nil {
 		proto = string(data)
 		list := strings.Split(proto, "DO NOT EDIT")
@@ -82,7 +83,7 @@ func CreateProtoFile(pathImport, pkgProto, pkgType string) (proto string) {
 		}
 		proto = string(data)
 		proto = strings.ReplaceAll(proto, "TPLpackage", pkgProto)
-		proto = strings.ReplaceAll(proto, "TPLservice", strings.Title(pkgType))
+		proto = strings.ReplaceAll(proto, "TPLservice", serviceName)
 	}
 	return proto
 }

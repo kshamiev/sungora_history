@@ -7,9 +7,9 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/null"
 
+	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/kshamiev/sungora/pkg/gql"
-	"github.com/kshamiev/sungora/pkg/models"
 )
 
 type queryResolver struct{ *Resolver }
@@ -58,10 +58,10 @@ func (r *queryResolver) Todos(ctx context.Context, limit, offset *int) ([]*gql.T
 	return data, nil
 }
 
-func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
+func (r *queryResolver) Users(ctx context.Context) ([]*modelsun.User, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Roles(ctx context.Context) ([]*models.Role, error) {
+func (r *queryResolver) Roles(ctx context.Context) ([]*modelsun.Role, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) Interfaces(ctx context.Context) ([]gql.Characters, error) {

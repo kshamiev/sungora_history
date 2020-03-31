@@ -8,9 +8,8 @@ import (
 	"github.com/volatiletech/null"
 
 	"github.com/kshamiev/sungora/internal/config"
-	"github.com/kshamiev/sungora/pb"
+	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pb/typ"
-	"github.com/kshamiev/sungora/pkg/models"
 )
 
 type User struct {
@@ -25,11 +24,11 @@ func NewUser(comp *config.Component) *User {
 }
 
 // GetUser получение определенного пользователя
-func (ml *User) GetUser() *models.User {
-	js := typ.SampleJs{
+func (ml *User) GetUser() *modelsun.User {
+	js := SampleJs{
 		ID:   54687,
 		Name: "Popcorn",
-		Items: []typ.Item{
+		Items: []Item{
 			{
 				Price:    56.87,
 				Quantity: 23,
@@ -40,37 +39,12 @@ func (ml *User) GetUser() *models.User {
 			},
 		},
 	}
-	return &models.User{
+	b, _ := json.Marshal(&js)
+	return &modelsun.User{
+		ID:        typ.UUIDNew(),
 		CreatedAt: time.Now(),
-		Message:   null.StringFrom("важное сообщение от сервера"),
-		SampleJS:  js,
+		Login:     "pupkin",
+		Price:     decimal.NewFromFloat(748.567),
+		Metrika:   null.JSONFrom(b),
 	}
-}
-
-// ProtoSampleOut конвертируем для передачи по GRPC
-func (ml *User) ProtoSampleOut(us *models.User) *pb.TestReply {
-	v, _ := json.Marshal(&us.SampleJS)
-	price := decimal.NewFromFloat(468.435).String()
-	return &pb.TestReply{
-		CreatedAt: typ.PbFromTime(us.CreatedAt),      // дата и время
-		Message:   us.Message.String,                 // строка
-		Price:     price,                             // дробные числа
-		Data:      v,                                 // бинарные данные, JSON
-		Status:    typ.StatusValue[typ.Status_CLOSE], // ENUM
-	}
-}
-
-// ProtoSampleIn конвертируем обратно из GRPC
-func (ml *User) ProtoSampleIn(in *pb.TestReply) (*models.User, *models.Order) {
-	us := &models.User{
-		CreatedAt: typ.PbToTime(in.CreatedAt),
-		Message:   typ.PbToNullString(in.Message),
-		Price:     decimal.RequireFromString(in.Price),
-	}
-	_ = json.Unmarshal(in.Data, &us.SampleJS)
-
-	or := &models.Order{
-		Status: typ.StatusName[in.Status],
-	}
-	return us, or
 }

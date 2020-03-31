@@ -20,9 +20,9 @@ import (
 	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/internal/workers"
 	"github.com/kshamiev/sungora/pb"
+	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/logger"
-	"github.com/kshamiev/sungora/pkg/models"
 )
 
 // @title Sungora API
@@ -104,7 +104,7 @@ func main() {
 	defer server.Wait(component.Lg)
 
 	// general
-	var o models.GooseDBVersion
+	var o modelsun.GooseDBVersion
 
 	if err = queries.Raw(model.SQLAppVersion.String()).Bind(context.Background(), component.Db, &o); err != nil {
 		component.Lg.WithError(err).Fatal("couldn't get version DB")

@@ -2,16 +2,15 @@ package grpcserver
 
 import (
 	"context"
-	"errors"
 
-	"google.golang.org/grpc/codes"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/pb"
 	"github.com/kshamiev/sungora/pkg/app/response"
-	"github.com/kshamiev/sungora/pkg/errs"
 	"github.com/kshamiev/sungora/pkg/logger"
 )
 
@@ -23,18 +22,25 @@ func New(c *config.Component) pb.SungoraServer {
 	return &Server{Component: c}
 }
 
-func (ser *Server) HelloWorld(ctx context.Context, req *pb.TestRequest) (*pb.TestReply, error) {
-	_, lg := ser.getContextData(ctx)
-	lg.Info("grpc server ok (" + req.Name + ")")
+func (ser *Server) Ping(context.Context, *empty.Empty) (*pb.Test, error) {
+	return &pb.Test{
+		Text:      "Pong",
+		CreatedAt: ptypes.TimestampNow(),
+	}, nil
+}
 
-	us := model.NewUser(ser.Component)
+func (ser *Server) GetUser(ctx context.Context, req *pb.Test) (*pb.User, error) {
+	_, lg := ser.getContextData(ctx)
+	lg.Info("grpc server ok (" + req.Text + ")")
+
+	us := model.NewUser(ser.Component).GetUser()
 
 	// sample OK
-	// return us.ProtoSampleOut(us.GetUser()), nil
+	return us.Proto(), nil
 
 	// sample error
-	err := errs.GRPC(codes.InvalidArgument, errors.New("library error"), "ошибка для пользователя")
-	return us.ProtoSampleOut(us.GetUser()), err
+	// err := errs.GRPC(codes.InvalidArgument, errors.New("library error"), "ошибка для пользователя")
+	// return us.Proto(), err
 }
 
 // getContextData получение данных (метаданных) и логера из контекста grpc

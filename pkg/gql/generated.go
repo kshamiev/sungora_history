@@ -14,13 +14,12 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/kshamiev/sungora/pb/modelsun"
+	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/shopspring/decimal"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/volatiletech/null"
-
-	"github.com/kshamiev/sungora/pb/typ"
-	"github.com/kshamiev/sungora/pkg/models"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -132,20 +131,20 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Todos(ctx context.Context, limit *int, offset *int) ([]*Todo, error)
-	Users(ctx context.Context) ([]*models.User, error)
-	Roles(ctx context.Context) ([]*models.Role, error)
+	Users(ctx context.Context) ([]*modelsun.User, error)
+	Roles(ctx context.Context) ([]*modelsun.Role, error)
 	Interfaces(ctx context.Context) ([]Characters, error)
 	Union(ctx context.Context) ([]SearchResult, error)
 }
 type RoleResolver interface {
-	Users(ctx context.Context, obj *models.Role, limit *int, offset *int) ([]*models.User, error)
+	Users(ctx context.Context, obj *modelsun.Role, limit *int, offset *int) ([]*modelsun.User, error)
 }
 type TodoResolver interface {
-	Users(ctx context.Context, obj *Todo, limit *int, offset *int) ([]*models.User, error)
-	Roles(ctx context.Context, obj *Todo, limit *int, offset *int) ([]*models.Role, error)
+	Users(ctx context.Context, obj *Todo, limit *int, offset *int) ([]*modelsun.User, error)
+	Roles(ctx context.Context, obj *Todo, limit *int, offset *int) ([]*modelsun.Role, error)
 }
 type UserResolver interface {
-	Roles(ctx context.Context, obj *models.User, limit *int, offset *int) ([]*models.Role, error)
+	Roles(ctx context.Context, obj *modelsun.User, limit *int, offset *int) ([]*modelsun.Role, error)
 }
 
 type executableSchema struct {
@@ -1402,7 +1401,7 @@ func (ec *executionContext) _Item_id(ctx context.Context, field graphql.Collecte
 	res := resTmp.(typ.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋtypᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Item_code(ctx context.Context, field graphql.CollectedField, obj *Item) (ret graphql.Marshaler) {
@@ -1598,10 +1597,10 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*models.User)
+	res := resTmp.([]*modelsun.User)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1635,10 +1634,10 @@ func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*models.Role)
+	res := resTmp.([]*modelsun.Role)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx, field.Selections, res)
+	return ec.marshalNRole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_interfaces(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1784,7 +1783,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Role_id(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_id(ctx context.Context, field graphql.CollectedField, obj *modelsun.Role) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1818,10 +1817,10 @@ func (ec *executionContext) _Role_id(ctx context.Context, field graphql.Collecte
 	res := resTmp.(typ.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋtypᚐUUID(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Role_users(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_users(ctx context.Context, field graphql.CollectedField, obj *modelsun.Role) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1856,10 +1855,10 @@ func (ec *executionContext) _Role_users(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*models.User)
+	res := resTmp.([]*modelsun.User)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Starship_id(ctx context.Context, field graphql.CollectedField, obj *Starship) (ret graphql.Marshaler) {
@@ -2011,7 +2010,7 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 	res := resTmp.(typ.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋtypᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Todo_number(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
@@ -2381,7 +2380,7 @@ func (ec *executionContext) _Todo_link_id(ctx context.Context, field graphql.Col
 	res := resTmp.(typ.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋtypᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Todo_item(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
@@ -2490,10 +2489,10 @@ func (ec *executionContext) _Todo_users(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*models.User)
+	res := resTmp.([]*modelsun.User)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Todo_roles(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
@@ -2531,13 +2530,13 @@ func (ec *executionContext) _Todo_roles(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*models.Role)
+	res := resTmp.([]*modelsun.Role)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx, field.Selections, res)
+	return ec.marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *modelsun.User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2571,10 +2570,10 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	res := resTmp.(typ.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋtypᚐUUID(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_roles(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_roles(ctx context.Context, field graphql.CollectedField, obj *modelsun.User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2609,10 +2608,10 @@ func (ec *executionContext) _User_roles(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*models.Role)
+	res := resTmp.([]*modelsun.Role)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx, field.Selections, res)
+	return ec.marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -4116,7 +4115,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var roleImplementors = []string{"Role"}
 
-func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj *models.Role) graphql.Marshaler {
+func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj *modelsun.Role) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, roleImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -4294,7 +4293,7 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 
 var userImplementors = []string{"User"}
 
-func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *models.User) graphql.Marshaler {
+func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *modelsun.User) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, userImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -4823,11 +4822,11 @@ func (ec *executionContext) marshalNNullTime2githubᚗcomᚋvolatiletechᚋnull�
 	return res
 }
 
-func (ec *executionContext) marshalNRole2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v models.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx context.Context, sel ast.SelectionSet, v modelsun.Role) graphql.Marshaler {
 	return ec._Role(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v []*models.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx context.Context, sel ast.SelectionSet, v []*modelsun.Role) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4851,7 +4850,7 @@ func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋkshamievᚋsungora
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNRole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx, sel, v[i])
+			ret[i] = ec.marshalNRole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4864,7 +4863,7 @@ func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋkshamievᚋsungora
 	return ret
 }
 
-func (ec *executionContext) marshalNRole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v *models.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx context.Context, sel ast.SelectionSet, v *modelsun.Role) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4953,20 +4952,20 @@ func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋ
 	return ec._Todo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx context.Context, v interface{}) (typ.UUID, error) {
+func (ec *executionContext) unmarshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋtypᚐUUID(ctx context.Context, v interface{}) (typ.UUID, error) {
 	var res typ.UUID
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋtypᚐUUID(ctx context.Context, sel ast.SelectionSet, v typ.UUID) graphql.Marshaler {
+func (ec *executionContext) marshalNUUID2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋtypᚐUUID(ctx context.Context, sel ast.SelectionSet, v typ.UUID) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx context.Context, sel ast.SelectionSet, v modelsun.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx context.Context, sel ast.SelectionSet, v []*modelsun.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4990,7 +4989,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungora
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5003,7 +5002,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungora
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx context.Context, sel ast.SelectionSet, v *modelsun.User) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -5505,11 +5504,11 @@ func (ec *executionContext) marshalOLengthUnit2ᚖgithubᚗcomᚋkshamievᚋsung
 	return v
 }
 
-func (ec *executionContext) marshalORole2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v models.Role) graphql.Marshaler {
+func (ec *executionContext) marshalORole2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx context.Context, sel ast.SelectionSet, v modelsun.Role) graphql.Marshaler {
 	return ec._Role(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v []*models.Role) graphql.Marshaler {
+func (ec *executionContext) marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx context.Context, sel ast.SelectionSet, v []*modelsun.Role) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5536,7 +5535,7 @@ func (ec *executionContext) marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungora
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalORole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx, sel, v[i])
+			ret[i] = ec.marshalORole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5549,7 +5548,7 @@ func (ec *executionContext) marshalORole2ᚕᚖgithubᚗcomᚋkshamievᚋsungora
 	return ret
 }
 
-func (ec *executionContext) marshalORole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v *models.Role) graphql.Marshaler {
+func (ec *executionContext) marshalORole2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐRole(ctx context.Context, sel ast.SelectionSet, v *modelsun.Role) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5677,11 +5676,11 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return ec.marshalOString2string(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOUser2githubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2githubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx context.Context, sel ast.SelectionSet, v modelsun.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx context.Context, sel ast.SelectionSet, v []*modelsun.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5708,7 +5707,7 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungora
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUser2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalOUser2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5721,7 +5720,7 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋkshamievᚋsungora
 	return ret
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpkgᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋkshamievᚋsungoraᚋpbᚋmodelsunᚐUser(ctx context.Context, sel ast.SelectionSet, v *modelsun.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

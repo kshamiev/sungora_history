@@ -22,17 +22,19 @@ message User {
 	string id = 1;
 	string login = 2;
 	string email = 3;
-	bool is_online = 4;
-	string price = 6;
-	double summa = 7;
-	int64 cnt = 8;
-	string message = 9;
-	bytes metrika = 10;
+	string price = 4;
+	float summa_one = 5;
+	double summa_two = 6;
+	int32 cnt2 = 7;
+	int64 cnt4 = 8;
+	int64 cnt8 = 9;
+	bool is_online = 10;
 	repeated string alias = 11;
-	bytes data = 12;
-	google.protobuf.Timestamp created_at = 13;
-	google.protobuf.Timestamp updated_at = 14;
-	google.protobuf.Timestamp deleted_at = 15;
+	bytes data_byte = 12;
+	bytes metrika = 13;
+	google.protobuf.Timestamp created_at = 14;
+	google.protobuf.Timestamp updated_at = 15;
+	google.protobuf.Timestamp deleted_at = 16;
 }
 
 message Order {

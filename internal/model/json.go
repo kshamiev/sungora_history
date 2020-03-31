@@ -1,4 +1,4 @@
-package typ
+package model
 
 import (
 	"database/sql/driver"

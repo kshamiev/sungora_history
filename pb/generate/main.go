@@ -13,11 +13,7 @@ import (
 	"github.com/kshamiev/sungora/pb/modelsun"
 )
 
-const (
-	pathImport      = "github.com/kshamiev/sungora"
-	tplProtoPkgName = "pb"
-)
-
+// Конфигурация типов которые нужно обрабатывать
 var source = map[string][]interface{}{
 	"modelsun": {
 		&modelsun.User{},
@@ -30,31 +26,69 @@ func main() {
 	var err error
 	var tplPFull, tplMFull, tplP, tplM string
 
-	for pkgName := range source {
+	for index := range source {
+		if 0 == len(source[index]) {
+			continue
+		}
 		// анализируем типы и формируем сопряжение
-		tplPFull = CreateProtoFile(pkgName)
-		tplMFull = CreateTypeFile(pkgName)
-		for _, t := range source[pkgName] {
-			if tplP, tplM, err = ParseType(t); err != nil {
+		pathImport, pkgProto, pkgType := packageDetected(source[index][0])
+
+		tplPFull = CreateProtoFile(pathImport, pkgProto, pkgType)
+		tplMFull = CreateTypeFile(pathImport, pkgProto, pkgType)
+		for _, t := range source[index] {
+			if tplP, tplM, err = ParseType(t, pkgProto); err != nil {
 				log.Fatal(err)
 			}
 			tplPFull += tplP
 			tplMFull += tplM
 		}
 		// описание прототипов
-		if err = ioutil.WriteFile(pkgName+".proto", []byte(tplPFull), 0666); err != nil {
+		if err = ioutil.WriteFile(pkgType+".proto", []byte(tplPFull), 0666); err != nil {
 			log.Fatal(err)
 		}
 		// тметоды конвертации
-		if err = ioutil.WriteFile(pkgName+"/grpc.go", []byte(tplMFull), 0666); err != nil {
+		if err = ioutil.WriteFile(pkgType+"/grpc.go", []byte(tplMFull), 0666); err != nil {
 			log.Fatal(err)
 		}
 	}
 	fmt.Println("OK")
 }
 
+// CreateTypeFile инициализация файла с методами конвертации типа
+func CreateTypeFile(pathImport, pkgProto, pkgType string) string {
+	return `// Code generated. DO NOT EDIT
+// Методы сопоставления типов с протофайлами GRPC
+package ` + pkgType + `
+
+import (
+	"github.com/shopspring/decimal"
+	"github.com/volatiletech/null"
+
+	"` + pathImport + `"
+	"` + pathImport + `/typ"
+)
+`
+}
+
+// CreateProtoFile инициализация файла с описанием прототипов
+func CreateProtoFile(pathImport, pkgProto, pkgType string) (proto string) {
+	if data, err := ioutil.ReadFile(pkgType + ".proto"); err == nil {
+		proto = string(data)
+		list := strings.Split(proto, "DO NOT EDIT")
+		proto = list[0] + "DO NOT EDIT" + "\n"
+	} else {
+		if data, err = ioutil.ReadFile("generate/template.proto"); err != nil {
+			log.Fatal(err)
+		}
+		proto = string(data)
+		proto = strings.ReplaceAll(proto, "TPLpackage", pkgProto)
+		proto = strings.ReplaceAll(proto, "TPLservice", strings.Title(pkgType))
+	}
+	return proto
+}
+
 // ParseType Анализируем тип и формируем его сопряжение с grpc (Object = *TypeName)
-func ParseType(Object interface{}) (tplP, tplM string, err error) {
+func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err error) {
 	// разбираем тип
 	var objValue = reflect.ValueOf(Object)
 	if objValue.Kind() != reflect.Ptr {
@@ -68,11 +102,11 @@ func ParseType(Object interface{}) (tplP, tplM string, err error) {
 	list := strings.Split(objValue.Type().String(), ".")
 	tplP = "\nmessage " + list[1] + " {\n"
 
-	tplMFrom := "\nfunc New" + list[1] + "Proto(proto *" + tplProtoPkgName + "." + list[1] + ") *" + list[1] + " {\n"
+	tplMFrom := "\nfunc New" + list[1] + "Proto(proto *" + pkgProto + "." + list[1] + ") *" + list[1] + " {\n"
 	tplMFrom += "\treturn &" + list[1] + "{\n"
 
-	tplMTo := "\nfunc (o *" + list[1] + ") Proto() *" + tplProtoPkgName + "." + list[1] + " {\n"
-	tplMTo += "\treturn &" + tplProtoPkgName + "." + list[1] + "{\n"
+	tplMTo := "\nfunc (o *" + list[1] + ") Proto() *" + pkgProto + "." + list[1] + " {\n"
+	tplMTo += "\treturn &" + pkgProto + "." + list[1] + "{\n"
 
 	// разбираем свойства типа
 	for i := 0; i < objValue.NumField(); i++ {
@@ -88,8 +122,25 @@ func ParseType(Object interface{}) (tplP, tplM string, err error) {
 	}
 	tplP += "}\n"
 
-	tplMFrom += "\t}\n}\n"
-	tplMTo += "\t}\n}\n"
+	tplMFrom += "\t}\n}\n\n"
+	tplMFrom += `func New` + list[1] + `ProtoS(protos []*pb.` + list[1] + `) []*` + list[1] + ` {
+	res := make([]*` + list[1] + `, len(protos))
+	for i := range protos {
+		res[i] = New` + list[1] + `Proto(protos[i])
+	}
+	return res
+}
+`
+
+	tplMTo += "\t}\n}\n\n"
+	tplMTo += `func (o ` + list[1] + `Slice) ProtoS() []*pb.` + list[1] + ` {
+	res := make([]*pb.` + list[1] + `, len(o))
+	for i := range o {
+		res[i] = o[i].Proto()
+	}
+	return res
+}
+`
 
 	return tplP, tplMTo + tplMFrom, nil
 }
@@ -355,39 +406,12 @@ func ValidNameField(field string) string {
 	return strings.Join(list, "")
 }
 
-// CreateTypeFile инициализация файла с методами конвертации типа
-func CreateTypeFile(pkgName string) string {
-	return `package ` + pkgName + `
-
-import (
-	"github.com/shopspring/decimal"
-	"github.com/volatiletech/null"
-
-	"` + pathImport + `/` + tplProtoPkgName + `"
-	"` + pathImport + `/` + tplProtoPkgName + `/typ"
-)
-`
-}
-
-// CreateProtoFile инициализация файла с описанием прототипов
-func CreateProtoFile(pkgName string) (proto string) {
-	if data, err := ioutil.ReadFile(pkgName + ".proto"); err == nil {
-		proto = string(data)
-		list := strings.Split(proto, "DO NOT EDIT")
-		proto = list[0] + "DO NOT EDIT" + "\n"
-	} else {
-		if data, err = ioutil.ReadFile("generate/template.proto"); err != nil {
-			log.Fatal(err)
-		}
-		proto = string(data)
-		proto = strings.ReplaceAll(proto, "TPLpackage", tplProtoPkgName)
-		proto = strings.ReplaceAll(proto, "TPLservice", strings.Title(pkgName))
+// Получение информация оп пакекте
+func packageDetected(obj interface{}) (pathImport, pkgProto, pkgType string) {
+	var rt = reflect.TypeOf(obj)
+	if rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
 	}
-	return proto
+	list := strings.Split(rt.PkgPath(), "/")
+	return strings.Join(list[:len(list)-1], "/"), list[len(list)-2], list[len(list)-1]
 }
-
-// func NewUserGRPC(proto *pb.User) *User {
-// 	return &User{
-// 		ID: typ.UUIDMustParse(proto.Id),
-// 	}
-// }

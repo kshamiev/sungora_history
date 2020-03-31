@@ -30,15 +30,16 @@ type User struct {
 	ID        typ.UUID          `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Login     string            `boil:"login" json:"login" toml:"login" yaml:"login"`
 	Email     string            `boil:"email" json:"email" toml:"email" yaml:"email"`
-	IsOnline  bool              `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
-	SampleJS  typ.SampleJs      `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
 	Price     decimal.Decimal   `boil:"price" json:"price" toml:"price" yaml:"price"`
-	Summa     float64           `boil:"summa" json:"summa" toml:"summa" yaml:"summa"`
-	CNT       int64             `boil:"cnt" json:"cnt" toml:"cnt" yaml:"cnt"`
-	Message   null.String       `boil:"message" json:"message,omitempty" toml:"message" yaml:"message,omitempty"`
-	Metrika   null.JSON         `boil:"metrika" json:"metrika,omitempty" toml:"metrika" yaml:"metrika,omitempty"`
+	SummaOne  float32           `boil:"summa_one" json:"summa_one" toml:"summa_one" yaml:"summa_one"`
+	SummaTwo  float64           `boil:"summa_two" json:"summa_two" toml:"summa_two" yaml:"summa_two"`
+	CNT2      int16             `boil:"cnt2" json:"cnt2" toml:"cnt2" yaml:"cnt2"`
+	CNT4      int               `boil:"cnt4" json:"cnt4" toml:"cnt4" yaml:"cnt4"`
+	CNT8      int64             `boil:"cnt8" json:"cnt8" toml:"cnt8" yaml:"cnt8"`
+	IsOnline  bool              `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
 	Alias     types.StringArray `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
-	Data      null.Bytes        `boil:"data" json:"data,omitempty" toml:"data" yaml:"data,omitempty"`
+	DataByte  null.Bytes        `boil:"data_byte" json:"data_byte,omitempty" toml:"data_byte" yaml:"data_byte,omitempty"`
+	Metrika   null.JSON         `boil:"metrika" json:"metrika,omitempty" toml:"metrika" yaml:"metrika,omitempty"`
 	CreatedAt time.Time         `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time         `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	DeletedAt null.Time         `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
@@ -51,15 +52,16 @@ var UserColumns = struct {
 	ID        string
 	Login     string
 	Email     string
-	IsOnline  string
-	SampleJS  string
 	Price     string
-	Summa     string
-	CNT       string
-	Message   string
-	Metrika   string
+	SummaOne  string
+	SummaTwo  string
+	CNT2      string
+	CNT4      string
+	CNT8      string
+	IsOnline  string
 	Alias     string
-	Data      string
+	DataByte  string
+	Metrika   string
 	CreatedAt string
 	UpdatedAt string
 	DeletedAt string
@@ -67,44 +69,22 @@ var UserColumns = struct {
 	ID:        "id",
 	Login:     "login",
 	Email:     "email",
-	IsOnline:  "is_online",
-	SampleJS:  "sample_js",
 	Price:     "price",
-	Summa:     "summa",
-	CNT:       "cnt",
-	Message:   "message",
-	Metrika:   "metrika",
+	SummaOne:  "summa_one",
+	SummaTwo:  "summa_two",
+	CNT2:      "cnt2",
+	CNT4:      "cnt4",
+	CNT8:      "cnt8",
+	IsOnline:  "is_online",
 	Alias:     "alias",
-	Data:      "data",
+	DataByte:  "data_byte",
+	Metrika:   "metrika",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 	DeletedAt: "deleted_at",
 }
 
 // Generated where
-
-type whereHelpertyp_SampleJs struct{ field string }
-
-func (w whereHelpertyp_SampleJs) EQ(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpertyp_SampleJs) NEQ(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpertyp_SampleJs) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpertyp_SampleJs) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpertyp_SampleJs) LT(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertyp_SampleJs) LTE(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertyp_SampleJs) GT(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertyp_SampleJs) GTE(x typ.SampleJs) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
 
 type whereHelperdecimal_Decimal struct{ field string }
 
@@ -127,6 +107,21 @@ func (w whereHelperdecimal_Decimal) GTE(x decimal.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelperfloat32 struct{ field string }
+
+func (w whereHelperfloat32) EQ(x float32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperfloat32) NEQ(x float32) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperfloat32) LT(x float32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperfloat32) LTE(x float32) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperfloat32) GT(x float32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperfloat32) GTE(x float32) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 type whereHelperfloat64 struct{ field string }
 
 func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -142,51 +137,14 @@ func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelpernull_String struct{ field string }
+type whereHelperint16 struct{ field string }
 
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-type whereHelpernull_JSON struct{ field string }
-
-func (w whereHelpernull_JSON) EQ(x null.JSON) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_JSON) NEQ(x null.JSON) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_JSON) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_JSON) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_JSON) LT(x null.JSON) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_JSON) LTE(x null.JSON) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_JSON) GT(x null.JSON) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_JSON) GTE(x null.JSON) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
+func (w whereHelperint16) EQ(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint16) NEQ(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint16) LT(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint16) LTE(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint16) GT(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint16) GTE(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 type whereHelpertypes_StringArray struct{ field string }
 
@@ -234,19 +192,43 @@ func (w whereHelpernull_Bytes) GTE(x null.Bytes) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_JSON struct{ field string }
+
+func (w whereHelpernull_JSON) EQ(x null.JSON) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_JSON) NEQ(x null.JSON) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_JSON) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_JSON) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_JSON) LT(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_JSON) LTE(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_JSON) GT(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_JSON) GTE(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var UserWhere = struct {
 	ID        whereHelpertyp_UUID
 	Login     whereHelperstring
 	Email     whereHelperstring
-	IsOnline  whereHelperbool
-	SampleJS  whereHelpertyp_SampleJs
 	Price     whereHelperdecimal_Decimal
-	Summa     whereHelperfloat64
-	CNT       whereHelperint64
-	Message   whereHelpernull_String
-	Metrika   whereHelpernull_JSON
+	SummaOne  whereHelperfloat32
+	SummaTwo  whereHelperfloat64
+	CNT2      whereHelperint16
+	CNT4      whereHelperint
+	CNT8      whereHelperint64
+	IsOnline  whereHelperbool
 	Alias     whereHelpertypes_StringArray
-	Data      whereHelpernull_Bytes
+	DataByte  whereHelpernull_Bytes
+	Metrika   whereHelpernull_JSON
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 	DeletedAt whereHelpernull_Time
@@ -254,15 +236,16 @@ var UserWhere = struct {
 	ID:        whereHelpertyp_UUID{field: "\"users\".\"id\""},
 	Login:     whereHelperstring{field: "\"users\".\"login\""},
 	Email:     whereHelperstring{field: "\"users\".\"email\""},
-	IsOnline:  whereHelperbool{field: "\"users\".\"is_online\""},
-	SampleJS:  whereHelpertyp_SampleJs{field: "\"users\".\"sample_js\""},
 	Price:     whereHelperdecimal_Decimal{field: "\"users\".\"price\""},
-	Summa:     whereHelperfloat64{field: "\"users\".\"summa\""},
-	CNT:       whereHelperint64{field: "\"users\".\"cnt\""},
-	Message:   whereHelpernull_String{field: "\"users\".\"message\""},
-	Metrika:   whereHelpernull_JSON{field: "\"users\".\"metrika\""},
+	SummaOne:  whereHelperfloat32{field: "\"users\".\"summa_one\""},
+	SummaTwo:  whereHelperfloat64{field: "\"users\".\"summa_two\""},
+	CNT2:      whereHelperint16{field: "\"users\".\"cnt2\""},
+	CNT4:      whereHelperint{field: "\"users\".\"cnt4\""},
+	CNT8:      whereHelperint64{field: "\"users\".\"cnt8\""},
+	IsOnline:  whereHelperbool{field: "\"users\".\"is_online\""},
 	Alias:     whereHelpertypes_StringArray{field: "\"users\".\"alias\""},
-	Data:      whereHelpernull_Bytes{field: "\"users\".\"data\""},
+	DataByte:  whereHelpernull_Bytes{field: "\"users\".\"data_byte\""},
+	Metrika:   whereHelpernull_JSON{field: "\"users\".\"metrika\""},
 	CreatedAt: whereHelpertime_Time{field: "\"users\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"users\".\"updated_at\""},
 	DeletedAt: whereHelpernull_Time{field: "\"users\".\"deleted_at\""},
@@ -292,9 +275,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "price", "summa", "cnt", "message", "metrika", "alias", "data", "created_at", "updated_at", "deleted_at"}
-	userColumnsWithoutDefault = []string{"login", "email", "sample_js", "message", "metrika", "alias", "data", "deleted_at"}
-	userColumnsWithDefault    = []string{"id", "is_online", "price", "summa", "cnt", "created_at", "updated_at"}
+	userAllColumns            = []string{"id", "login", "email", "price", "summa_one", "summa_two", "cnt2", "cnt4", "cnt8", "is_online", "alias", "data_byte", "metrika", "created_at", "updated_at", "deleted_at"}
+	userColumnsWithoutDefault = []string{"login", "email", "alias", "data_byte", "metrika", "deleted_at"}
+	userColumnsWithDefault    = []string{"id", "price", "summa_one", "summa_two", "cnt2", "cnt4", "cnt8", "is_online", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 

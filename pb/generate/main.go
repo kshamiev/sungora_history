@@ -1,10 +1,13 @@
-// Генерация описаний прототипов и методов конвертации типа в обе стороны
-// через пакет "typ" можно добавлять свои типы для автоматизации работы с ними через GRPC
-// как это сделать можно увидеть на примере typ.UUID
-// в дальнейшем будет доработано механизм удобного добавления и расширения новых типов
+// Инструмент по автоматизации взаимодействия типов через GRPC
+//
+// Генерация описаний прототипов, самих прототипов и методов конвертации типа в обе стороны.
+// Через пакет "typ" можно добавлять (маштабирование) свои типы для автоматизации работы с ними через GRPC.
+// Как это сделать можно увидеть на примере typ.UUID.
+// В дальнейшем будет доработан механизм удобного добавления и расширения новых типов.
+// Обрабатываются только публичные и помеченные тегом json поля.
 //
 // Обрабатывает базовые типы golang (string, bool, int..., uint..., float..., []byte, []string)
-// + typ.UUID - реалазия работы с полями UUID
+// + typ.UUID - реализация работы с полями UUID
 // + time.Time - дата и время
 // + decimal.Decimal - работа с дробными числами
 // + имеет спецификацию работы с типами библиотеки boiler
@@ -28,7 +31,7 @@ import (
 // Срез сервиса содержит его рабочие типы (они должны быть из одного пакета)
 // сервис = пакет
 var config = map[string][]interface{}{
-	"Sungora": {
+	"Carriers": {
 		&modelsun.User{},
 		&modelsun.Order{},
 		&modelsun.Role{},
@@ -137,7 +140,7 @@ func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err erro
 	tplP += "}\n"
 
 	tplMFrom += "\t}\n}\n\n"
-	tplMFrom += `func New` + list[1] + `ProtoS(protos []*pb.` + list[1] + `) []*` + list[1] + ` {
+	tplMFrom += `func New` + list[1] + `ProtoS(protos []*` + pkgProto + `.` + list[1] + `) []*` + list[1] + ` {
 	res := make([]*` + list[1] + `, len(protos))
 	for i := range protos {
 		res[i] = New` + list[1] + `Proto(protos[i])
@@ -147,8 +150,8 @@ func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err erro
 `
 
 	tplMTo += "\t}\n}\n\n"
-	tplMTo += `func (o ` + list[1] + `Slice) ProtoS() []*pb.` + list[1] + ` {
-	res := make([]*pb.` + list[1] + `, len(o))
+	tplMTo += `func (o ` + list[1] + `Slice) ProtoS() []*` + pkgProto + `.` + list[1] + ` {
+	res := make([]*` + pkgProto + `.` + list[1] + `, len(o))
 	for i := range o {
 		res[i] = o[i].Proto()
 	}

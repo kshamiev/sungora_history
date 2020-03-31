@@ -8,7 +8,6 @@ import "google/protobuf/empty.proto";
 service TPLservice {
     rpc Ping (google.protobuf.Empty) returns (Test) {
     }
-
 }
 
 message Test {

@@ -50,6 +50,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+	fmt.Println("OK")
 }
 
 // ParseType Анализируем тип и формируем его сопряжение с grpc (Object = *TypeName)
@@ -108,7 +109,7 @@ func ParseField(objValue reflect.Value, i int) (tplP, tplMFrom, tplMTo string) {
 	prop := objValue.FieldByName(field)
 	propType := prop.Type().String()
 	propKind := prop.Type().Kind()
-	subjErr := "not implemented bytes: %s->%s [%s] %s"
+	subjErr := "not implemented undefined property: %s->%s [%s] %s"
 	subjErr = fmt.Sprintf(subjErr, objValue.Type().String(), field, propKind.String(), propType)
 
 	switch propKind {
@@ -118,29 +119,54 @@ func ParseField(objValue reflect.Value, i int) (tplP, tplMFrom, tplMTo string) {
 		} else {
 			tplP, tplMFrom, tplMTo = GenerateFieldString(i, field, fieldJSON)
 		}
+
 	case reflect.Bool:
-		tplP += "\tbool " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplP, tplMFrom, tplMTo = GenerateFieldBool(i, field, fieldJSON)
+
 	case reflect.Float32:
 		tplP += "\tfloat " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplMFrom, tplMTo = GenerateFieldScalar(i, field, fieldJSON)
 	case reflect.Float64:
 		tplP += "\tdouble " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	case reflect.Int, reflect.Int64:
-		tplP += "\tint64 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	case reflect.Int8, reflect.Int16, reflect.Int32:
+		tplMFrom, tplMTo = GenerateFieldScalar(i, field, fieldJSON)
+
+	case reflect.Int:
+		tplP, tplMFrom, tplMTo = GenerateFieldInt(i, field, fieldJSON)
+	case reflect.Int8:
+		tplP, tplMFrom, tplMTo = GenerateFieldInt8(i, field, fieldJSON)
+	case reflect.Int16:
+		tplP, tplMFrom, tplMTo = GenerateFieldInt16(i, field, fieldJSON)
+	case reflect.Int32:
 		tplP += "\tint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	case reflect.Uint, reflect.Uint64:
-		tplP += "\tuint64 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	case reflect.Uint8, reflect.Uint16, reflect.Uint32:
+		tplMFrom, tplMTo = GenerateFieldScalar(i, field, fieldJSON)
+	case reflect.Int64:
+		tplP += "\tint64 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplMFrom, tplMTo = GenerateFieldScalar(i, field, fieldJSON)
+
+	case reflect.Uint:
+		tplP, tplMFrom, tplMTo = GenerateFieldUint(i, field, fieldJSON)
+	case reflect.Uint8:
+		tplP, tplMFrom, tplMTo = GenerateFieldUint8(i, field, fieldJSON)
+	case reflect.Uint16:
+		tplP, tplMFrom, tplMTo = GenerateFieldUint16(i, field, fieldJSON)
+	case reflect.Uint32:
 		tplP += "\tuint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplMFrom, tplMTo = GenerateFieldScalar(i, field, fieldJSON)
+	case reflect.Uint64:
+		tplP += "\tuint64 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		tplMFrom, tplMTo = GenerateFieldScalar(i, field, fieldJSON)
+
 	case reflect.Slice:
 		if "[]string" == propType {
-			tplP += "\trepeated string " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP, tplMFrom, tplMTo = GenerateFieldStringArray(i, field, fieldJSON)
 		} else if "[]uint8" == propType {
-			tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP, tplMFrom, tplMTo = GenerateFieldBytes(i, field, fieldJSON)
+		} else if "types.StringArray" == propType {
+			tplP, tplMFrom, tplMTo = GenerateFieldStringArray(i, field, fieldJSON)
 		} else {
 			fmt.Println(subjErr)
 		}
-	// custom type
+
 	case reflect.Struct:
 		if "typ.UUID" == propType {
 			tplP, tplMFrom, tplMTo = GenerateFieldUUID(i, field, fieldJSON)
@@ -152,22 +178,112 @@ func ParseField(objValue reflect.Value, i int) (tplP, tplMFrom, tplMTo string) {
 			tplP, tplMFrom, tplMTo = GenerateFieldNullTime(i, field, fieldJSON)
 		} else if "null.String" == propType {
 			tplP, tplMFrom, tplMTo = GenerateFieldNullString(i, field, fieldJSON)
+		} else if "null.Bytes" == propType {
+			tplP, tplMFrom, tplMTo = GenerateFieldNullBytes(i, field, fieldJSON)
 		} else if "null.JSON" == propType {
 			tplP, tplMFrom, tplMTo = GenerateFieldNullJSON(i, field, fieldJSON)
 		} else {
 			fmt.Println(subjErr)
 		}
+
 	default:
 		fmt.Println(subjErr)
 	}
 	return tplP, tplMFrom, tplMTo
 }
 
+// GenerateFieldScalar конвертация туда и обратно
+func GenerateFieldScalar(i int, field, fieldJSON string) (tplMFrom, tplMTo string) {
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s,\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: proto.%s,\n", field, ValidNameField(fieldJSON))
+	return tplMFrom, tplMTo
+}
+
+// GenerateFieldUint8 конвертация туда и обратно
+func GenerateFieldUint8(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tuint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: uint32(o.%s),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: uint8(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldUint16 конвертация туда и обратно
+func GenerateFieldUint16(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tuint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: uint32(o.%s),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: uint16(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldUint конвертация туда и обратно
+func GenerateFieldUint(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tuint64 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: uint64(o.%s),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: uint(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldInt8 конвертация туда и обратно
+func GenerateFieldInt8(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: int32(o.%s),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: int8(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldInt16 конвертация туда и обратно
+func GenerateFieldInt16(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: int32(o.%s),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: int16(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldInt конвертация туда и обратно
+func GenerateFieldInt(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tint64 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: int64(o.%s),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: int(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldNullBytes конвертация туда и обратно
+func GenerateFieldNullBytes(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s.Bytes,\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: null.BytesFrom(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldBytes конвертация туда и обратно
+func GenerateFieldBytes(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s,\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: proto.%s,\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldStringArray конвертация туда и обратно
+func GenerateFieldStringArray(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\trepeated string " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s,\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: proto.%s,\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldBool конвертация туда и обратно
+func GenerateFieldBool(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tbool " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s,\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: proto.%s,\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
 // GenerateFieldNullJSON конвертация туда и обратно
 func GenerateFieldNullJSON(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
 	tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	tplMTo = fmt.Sprintf("\t\t%s: o.%s.JSON,\n", ValidNameField(fieldJSON), field, field)
-	tplMFrom = fmt.Sprintf("\t\t%s: null.JSONFrom(proto.%s),\n", field, field, ValidNameField(fieldJSON))
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s.JSON,\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: null.JSONFrom(proto.%s),\n", field, ValidNameField(fieldJSON))
 	return tplP, tplMFrom, tplMTo
 }
 
@@ -245,6 +361,7 @@ func CreateTypeFile(pkgName string) string {
 
 import (
 	"github.com/shopspring/decimal"
+	"github.com/volatiletech/null"
 
 	"` + pathImport + `/` + tplProtoPkgName + `"
 	"` + pathImport + `/` + tplProtoPkgName + `/typ"

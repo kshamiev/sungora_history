@@ -28,6 +28,8 @@ message User {
 	int64 cnt = 8;
 	string message = 9;
 	bytes metrika = 10;
+	repeated string alias = 11;
+	bytes data = 12;
 	google.protobuf.Timestamp created_at = 13;
 	google.protobuf.Timestamp updated_at = 14;
 	google.protobuf.Timestamp deleted_at = 15;

@@ -91,16 +91,16 @@ func CreateProtoFile(serviceName, pkgProto, pkgType string) (proto string) {
 // ParseType Анализируем тип и формируем его сопряжение с grpc (Object = *TypeName)
 func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err error) {
 	// разбираем тип
-	var objValue = reflect.ValueOf(Object)
-	if objValue.Kind() != reflect.Ptr {
-		return tplP, tplM, errors.New("not ptr")
+	var value = reflect.ValueOf(Object)
+	if value.Kind() != reflect.Ptr {
+		return tplP, tplM, errors.New("error: " + value.Type().String() + " not ptr")
 	}
-	if objValue.IsNil() == true {
-		return tplP, tplM, errors.New("is null")
+	if value.IsNil() == true {
+		return tplP, tplM, errors.New("error: " + value.Type().String() + "is null")
 	}
-	objValue = objValue.Elem()
+	value = value.Elem()
 
-	list := strings.Split(objValue.Type().String(), ".")
+	list := strings.Split(value.Type().String(), ".")
 	tplP = "\nmessage " + list[1] + " {\n"
 
 	tplMFrom := "\nfunc New" + list[1] + "Proto(proto *" + pkgProto + "." + list[1] + ") *" + list[1] + " {\n"
@@ -110,13 +110,13 @@ func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err erro
 	tplMTo += "\treturn &" + pkgProto + "." + list[1] + "{\n"
 
 	// разбираем свойства типа
-	for i := 0; i < objValue.NumField(); i++ {
-		field := objValue.Field(i)
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
 		// пропускаем приватные свойства
 		if false == field.IsValid() || false == field.CanSet() {
 			continue
 		}
-		tplP_, tplMFrom_, tplMTo_ := ParseField(objValue, i)
+		tplP_, tplMFrom_, tplMTo_ := ParseField(value, i)
 		tplP += tplP_
 		tplMFrom += tplMFrom_
 		tplMTo += tplMTo_
@@ -161,7 +161,7 @@ func ParseField(objValue reflect.Value, i int) (tplP, tplMFrom, tplMTo string) {
 	prop := objValue.FieldByName(field)
 	propType := prop.Type().String()
 	propKind := prop.Type().Kind()
-	subjErr := "not implemented undefined property: %s->%s [%s] %s"
+	subjErr := "not implemented undefined property: %s.%s [%s] %s"
 	subjErr = fmt.Sprintf(subjErr, objValue.Type().String(), field, propKind.String(), propType)
 
 	switch propKind {

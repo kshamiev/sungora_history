@@ -46,15 +46,6 @@ types:
     imports:
       third_party:
         - '"github.com/shopspring/decimal"'
-  - match:
-      name: sample_js
-      db_type: jsonb
-      nullable: true
-    replace:
-      type: typ.SampleJs
-    imports:
-      third_party:
-        - '"github.com/kshamiev/sungora/pb/typ"'
 
 #type Column struct {
 #	Name      string `json:"name" toml:"name"`

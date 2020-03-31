@@ -66,8 +66,12 @@ func ParseType(Object interface{}) (tplP, tplM string, err error) {
 
 	list := strings.Split(objValue.Type().String(), ".")
 	tplP = "\nmessage " + list[1] + " {\n"
-	tplM = "\nfunc New" + list[1] + "GRPC(proto *" + tplProtoPkgName + "." + list[1] + ") *" + list[1] + " {\n"
-	tplM += "\n\treturn &" + list[1] + "{\n"
+
+	tplMFrom := "\nfunc New" + list[1] + "Proto(proto *" + tplProtoPkgName + "." + list[1] + ") *" + list[1] + " {\n"
+	tplMFrom += "\treturn &" + list[1] + "{\n"
+
+	tplMTo := "\nfunc (o *" + list[1] + ") Proto() *" + tplProtoPkgName + "." + list[1] + " {\n"
+	tplMTo += "\treturn &" + tplProtoPkgName + "." + list[1] + "{\n"
 
 	// разбираем свойства типа
 	for i := 0; i < objValue.NumField(); i++ {
@@ -76,24 +80,27 @@ func ParseType(Object interface{}) (tplP, tplM string, err error) {
 		if false == field.IsValid() || false == field.CanSet() {
 			continue
 		}
-		tplP_, tplM_ := ParseField(objValue, i)
+		tplP_, tplMFrom_, tplMTo_ := ParseField(objValue, i)
 		tplP += tplP_
-		tplM += tplM_
+		tplMFrom += tplMFrom_
+		tplMTo += tplMTo_
 	}
 	tplP += "}\n"
-	tplM += "\t}\n}\n"
 
-	return tplP, tplM, nil
+	tplMFrom += "\t}\n}\n"
+	tplMTo += "\t}\n}\n"
+
+	return tplP, tplMTo + tplMFrom, nil
 }
 
 // ParseField Анализируем свойство типа и формируем его конвертацию
-func ParseField(objValue reflect.Value, i int) (tplP, tplM string) {
+func ParseField(objValue reflect.Value, i int) (tplP, tplMFrom, tplMTo string) {
 	field := objValue.Type().Field(i).Name
 	fieldJSON := objValue.Type().Field(i).Tag.Get(`json`)
 
 	// пропускаем исключенные и не обозначенные свойства
 	if fieldJSON == `-` || fieldJSON == "" {
-		return tplP, tplM
+		return tplP, tplMFrom, tplMTo
 	}
 	fieldJSON = strings.Split(fieldJSON, ",")[0]
 
@@ -101,12 +108,16 @@ func ParseField(objValue reflect.Value, i int) (tplP, tplM string) {
 	prop := objValue.FieldByName(field)
 	propType := prop.Type().String()
 	propKind := prop.Type().Kind()
-	subjErr := "implemented bytes: %s->%s [%s] %s"
+	subjErr := "not implemented bytes: %s->%s [%s] %s"
 	subjErr = fmt.Sprintf(subjErr, objValue.Type().String(), field, propKind.String(), propType)
 
 	switch propKind {
 	case reflect.String:
-		tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+		if "string" != propType {
+			tplP, tplMFrom, tplMTo = GenerateFieldEnum(i, field, fieldJSON, propType)
+		} else {
+			tplP, tplMFrom, tplMTo = GenerateFieldString(i, field, fieldJSON)
+		}
 	case reflect.Bool:
 		tplP += "\tbool " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	case reflect.Float32:
@@ -127,45 +138,93 @@ func ParseField(objValue reflect.Value, i int) (tplP, tplM string) {
 		} else if "[]uint8" == propType {
 			tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		} else {
-			// google.protobuf.Any
-			tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 			fmt.Println(subjErr)
 		}
 	// custom type
 	case reflect.Struct:
 		if "typ.UUID" == propType {
-			tplP, tplM = GenerateFieldUUID(i, field, fieldJSON)
+			tplP, tplMFrom, tplMTo = GenerateFieldUUID(i, field, fieldJSON)
 		} else if "decimal.Decimal" == propType {
-			tplP, tplM = GenerateFieldDecimal(i, field, fieldJSON)
-		} else if "time.Time" == propType || "null.Time" == propType {
-			tplP += "\tgoogle.protobuf.Timestamp " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP, tplMFrom, tplMTo = GenerateFieldDecimal(i, field, fieldJSON)
+		} else if "time.Time" == propType {
+			tplP, tplMFrom, tplMTo = GenerateFieldTime(i, field, fieldJSON)
+		} else if "null.Time" == propType {
+			tplP, tplMFrom, tplMTo = GenerateFieldNullTime(i, field, fieldJSON)
 		} else if "null.String" == propType {
-			tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+			tplP, tplMFrom, tplMTo = GenerateFieldNullString(i, field, fieldJSON)
+		} else if "null.JSON" == propType {
+			tplP, tplMFrom, tplMTo = GenerateFieldNullJSON(i, field, fieldJSON)
 		} else {
-			// google.protobuf.Any
-			tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 			fmt.Println(subjErr)
 		}
 	default:
-		// google.protobuf.Any
-		tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 		fmt.Println(subjErr)
 	}
-	return tplP, tplM
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldNullJSON конвертация туда и обратно
+func GenerateFieldNullJSON(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tbytes " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s.JSON,\n", ValidNameField(fieldJSON), field, field)
+	tplMFrom = fmt.Sprintf("\t\t%s: null.JSONFrom(proto.%s),\n", field, field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldEnum конвертация туда и обратно
+func GenerateFieldEnum(i int, field, fieldJSON, propType string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tint32 " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: %sValue[o.%s],\n", ValidNameField(fieldJSON), propType, field)
+	tplMFrom = fmt.Sprintf("\t\t%s: %sName[proto.%s],\n", field, propType, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldNullString конвертация туда и обратно
+func GenerateFieldNullString(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s.String,\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: typ.PbToNullString(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldString конвертация туда и обратно
+func GenerateFieldString(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s,\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: proto.%s,\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldTime конвертация туда и обратно
+func GenerateFieldTime(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tgoogle.protobuf.Timestamp " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: typ.PbFromTime(o.%s),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: typ.PbToTime(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
+}
+
+// GenerateFieldNullTime конвертация туда и обратно
+func GenerateFieldNullTime(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
+	tplP += "\tgoogle.protobuf.Timestamp " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
+	tplMTo = fmt.Sprintf("\t\t%s: typ.PbFromTime(o.%s.Time),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: typ.PbToNullTime(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
 }
 
 // GenerateFieldDecimal конвертация туда и обратно
-func GenerateFieldDecimal(i int, field, fieldJSON string) (tplP, tplM string) {
+func GenerateFieldDecimal(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
 	tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	tplM = fmt.Sprintf("\t\t%s: decimal.RequireFromString(proto.%s),\n", field, ValidNameField(fieldJSON))
-	return tplP, tplM
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s.String(),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: decimal.RequireFromString(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
 }
 
 // GenerateFieldUUID конвертация туда и обратно
-func GenerateFieldUUID(i int, field, fieldJSON string) (tplP, tplM string) {
+func GenerateFieldUUID(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
 	tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	tplM = fmt.Sprintf("\t\t%s: typ.UUIDMustParse(proto.%s),\n", field, ValidNameField(fieldJSON))
-	return tplP, tplM
+	tplMTo = fmt.Sprintf("\t\t%s: o.%s.String(),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: typ.UUIDMustParse(proto.%s),\n", field, ValidNameField(fieldJSON))
+	return tplP, tplMFrom, tplMTo
 }
 
 // ValidNameField сопоставление свойств исходного типа с grpc прототипами через тег
@@ -182,8 +241,7 @@ func ValidNameField(field string) string {
 
 // CreateTypeFile инициализация файла с методами конвертации типа
 func CreateTypeFile(pkgName string) string {
-	return `
-package ` + pkgName + `
+	return `package ` + pkgName + `
 
 import (
 	"github.com/shopspring/decimal"

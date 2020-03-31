@@ -91,9 +91,7 @@ proto:
 	@cd $(DIR)/pb; protoc --go_out=plugins=grpc:. *.proto
 .PHONY: proto
 pb:
-    @cd $(DIR)/pb;
-    go run generate/main.go
-    protoc --go_out=plugins=grpc:. *.proto;
+	@cd $(DIR)/pb && go run generate/main.go && protoc --go_out=plugins=grpc:. *.proto;
 .PHONY: pb
 
 # Help

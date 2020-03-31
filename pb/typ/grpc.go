@@ -45,6 +45,21 @@ func PbToTime(d *timestamp.Timestamp) time.Time {
 	return dp
 }
 
+// PbFromJSON перевод в примитив grpc
+func PbFromJSON(d interface{}) []byte {
+	v, _ := json.Marshal(d)
+	return v
+
+
+
+}
+
+// PbToJSON перевод из примитива grpc
+func PbToJSON(d *any.Any, obj interface{}) {
+	_ = json.Unmarshal(d.Value, obj)
+}
+
+
 // PbFromAny перевод в примитив grpc
 func PbFromAny(d interface{}) *any.Any {
 	v, _ := json.Marshal(d)

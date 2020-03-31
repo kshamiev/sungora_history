@@ -22,22 +22,26 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"github.com/volatiletech/sqlboiler/queries/qmhelper"
 	"github.com/volatiletech/sqlboiler/strmangle"
+	"github.com/volatiletech/sqlboiler/types"
 )
 
 // User is an object representing the database table.
 type User struct {
-	ID        typ.UUID        `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Login     string          `boil:"login" json:"login" toml:"login" yaml:"login"`
-	Email     string          `boil:"email" json:"email" toml:"email" yaml:"email"`
-	IsOnline  bool            `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
-	SampleJS  typ.SampleJs    `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
-	Price     decimal.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
-	Summa     float64         `boil:"summa" json:"summa" toml:"summa" yaml:"summa"`
-	CNT       int64           `boil:"cnt" json:"cnt" toml:"cnt" yaml:"cnt"`
-	Message   null.String     `boil:"message" json:"message,omitempty" toml:"message" yaml:"message,omitempty"`
-	CreatedAt time.Time       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt null.Time       `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	ID        typ.UUID          `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Login     string            `boil:"login" json:"login" toml:"login" yaml:"login"`
+	Email     string            `boil:"email" json:"email" toml:"email" yaml:"email"`
+	IsOnline  bool              `boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
+	SampleJS  typ.SampleJs      `boil:"sample_js" json:"sample_js,omitempty" toml:"sample_js" yaml:"sample_js,omitempty"`
+	Price     decimal.Decimal   `boil:"price" json:"price" toml:"price" yaml:"price"`
+	Summa     float64           `boil:"summa" json:"summa" toml:"summa" yaml:"summa"`
+	CNT       int64             `boil:"cnt" json:"cnt" toml:"cnt" yaml:"cnt"`
+	Message   null.String       `boil:"message" json:"message,omitempty" toml:"message" yaml:"message,omitempty"`
+	Metrika   null.JSON         `boil:"metrika" json:"metrika,omitempty" toml:"metrika" yaml:"metrika,omitempty"`
+	Alias     types.StringArray `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
+	Data      null.Bytes        `boil:"data" json:"data,omitempty" toml:"data" yaml:"data,omitempty"`
+	CreatedAt time.Time         `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time         `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time         `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -53,6 +57,9 @@ var UserColumns = struct {
 	Summa     string
 	CNT       string
 	Message   string
+	Metrika   string
+	Alias     string
+	Data      string
 	CreatedAt string
 	UpdatedAt string
 	DeletedAt string
@@ -66,6 +73,9 @@ var UserColumns = struct {
 	Summa:     "summa",
 	CNT:       "cnt",
 	Message:   "message",
+	Metrika:   "metrika",
+	Alias:     "alias",
+	Data:      "data",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 	DeletedAt: "deleted_at",
@@ -155,6 +165,75 @@ func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_JSON struct{ field string }
+
+func (w whereHelpernull_JSON) EQ(x null.JSON) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_JSON) NEQ(x null.JSON) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_JSON) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_JSON) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_JSON) LT(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_JSON) LTE(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_JSON) GT(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_JSON) GTE(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelpertypes_StringArray struct{ field string }
+
+func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelpernull_Bytes struct{ field string }
+
+func (w whereHelpernull_Bytes) EQ(x null.Bytes) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Bytes) NEQ(x null.Bytes) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Bytes) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Bytes) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Bytes) LT(x null.Bytes) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Bytes) LTE(x null.Bytes) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Bytes) GT(x null.Bytes) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Bytes) GTE(x null.Bytes) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var UserWhere = struct {
 	ID        whereHelpertyp_UUID
 	Login     whereHelperstring
@@ -165,6 +244,9 @@ var UserWhere = struct {
 	Summa     whereHelperfloat64
 	CNT       whereHelperint64
 	Message   whereHelpernull_String
+	Metrika   whereHelpernull_JSON
+	Alias     whereHelpertypes_StringArray
+	Data      whereHelpernull_Bytes
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 	DeletedAt whereHelpernull_Time
@@ -178,6 +260,9 @@ var UserWhere = struct {
 	Summa:     whereHelperfloat64{field: "\"users\".\"summa\""},
 	CNT:       whereHelperint64{field: "\"users\".\"cnt\""},
 	Message:   whereHelpernull_String{field: "\"users\".\"message\""},
+	Metrika:   whereHelpernull_JSON{field: "\"users\".\"metrika\""},
+	Alias:     whereHelpertypes_StringArray{field: "\"users\".\"alias\""},
+	Data:      whereHelpernull_Bytes{field: "\"users\".\"data\""},
 	CreatedAt: whereHelpertime_Time{field: "\"users\".\"created_at\""},
 	UpdatedAt: whereHelpertime_Time{field: "\"users\".\"updated_at\""},
 	DeletedAt: whereHelpernull_Time{field: "\"users\".\"deleted_at\""},
@@ -207,8 +292,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "price", "summa", "cnt", "message", "created_at", "updated_at", "deleted_at"}
-	userColumnsWithoutDefault = []string{"login", "email", "sample_js", "message", "deleted_at"}
+	userAllColumns            = []string{"id", "login", "email", "is_online", "sample_js", "price", "summa", "cnt", "message", "metrika", "alias", "data", "created_at", "updated_at", "deleted_at"}
+	userColumnsWithoutDefault = []string{"login", "email", "sample_js", "message", "metrika", "alias", "data", "deleted_at"}
 	userColumnsWithDefault    = []string{"id", "is_online", "price", "summa", "cnt", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )

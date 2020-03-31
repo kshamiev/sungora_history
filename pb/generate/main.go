@@ -1,5 +1,14 @@
-// nolint
 // Генерация описаний прототипов и методов конвертации типа в обе стороны
+// через пакет "typ" можно добавлять свои типы для автоматизации работы с ними через GRPC
+// как это сделать можно увидеть на примере typ.UUID
+// в дальнейшем будет доработано механизм удобного добавления и расширения новых типов
+//
+// Обрабатывает базовые типы golang (string, bool, int..., uint..., float..., []byte, []string)
+// + typ.UUID - реалазия работы с полями UUID
+// + time.Time - дата и время
+// + decimal.Decimal - работа с дробными числами
+// + имеет спецификацию работы с типами библиотеки boiler
+// nolint
 package main
 
 import (
@@ -14,9 +23,12 @@ import (
 	"github.com/kshamiev/sungora/pb/modelsun"
 )
 
-// Конфигурация типов которые нужно обрабатывать
-var source = map[string][]interface{}{
-	"Sungora": { // имя grpc сервиса (ниже типы с которыми он должен уметь работать)
+// Конфигурация реализуемых сервисов и типы с которыми они должны уметь работать
+// "Sungora" - имя grpc сервиса
+// Срез сервиса содержит его рабочие типы (они должны быть из одного пакета)
+// сервис = пакет
+var config = map[string][]interface{}{
+	"Sungora": {
 		&modelsun.User{},
 		&modelsun.Order{},
 		&modelsun.Role{},
@@ -27,16 +39,16 @@ func main() {
 	var err error
 	var tplPFull, tplMFull, tplP, tplM string
 
-	for serviceName := range source {
-		if 0 == len(source[serviceName]) {
+	for serviceName := range config {
+		if 0 == len(config[serviceName]) {
 			continue
 		}
 		// анализируем типы и формируем сопряжение
-		pathImport, pkgProto, pkgType := packageDetected(source[serviceName][0])
+		pathImport, pkgProto, pkgType := packageDetected(config[serviceName][0])
 
 		tplPFull = CreateProtoFile(serviceName, pkgProto, pkgType)
 		tplMFull = CreateTypeFile(pathImport, pkgType)
-		for _, t := range source[serviceName] {
+		for _, t := range config[serviceName] {
 			if tplP, tplM, err = ParseType(t, pkgProto); err != nil {
 				log.Fatal(err)
 			}
@@ -56,19 +68,20 @@ func main() {
 }
 
 // CreateTypeFile инициализация файла с методами конвертации типа
-func CreateTypeFile(pathImport, pkgType string) string {
-	return `// Code generated. DO NOT EDIT
-// Методы сопоставления типов с протофайлами GRPC
-package ` + pkgType + `
-
-import (
-	"github.com/shopspring/decimal"
-	"github.com/volatiletech/null"
-
-	"` + pathImport + `"
-	"` + pathImport + `/typ"
-)
-`
+func CreateTypeFile(pathImport, pkgType string) (proto string) {
+	if data, err := ioutil.ReadFile(pkgType + "/grpc.go"); err == nil {
+		proto = string(data)
+		list := strings.Split(proto, "DO NOT EDIT")
+		proto = list[0] + "DO NOT EDIT" + "\n"
+	} else {
+		if data, err = ioutil.ReadFile("generate/template.gogo"); err != nil {
+			log.Fatal(err)
+		}
+		proto = string(data)
+		proto = strings.ReplaceAll(proto, "TPLpackage", pkgType)
+		proto = strings.ReplaceAll(proto, "TPLImport", `"`+pathImport+"\"\n\t\""+pathImport+`/typ"`)
+	}
+	return proto
 }
 
 // CreateProtoFile инициализация файла с описанием прототипов
@@ -351,7 +364,7 @@ func GenerateFieldEnum(i int, field, fieldJSON, propType string) (tplP, tplMFrom
 func GenerateFieldNullString(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
 	tplP += "\tstring " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
 	tplMTo = fmt.Sprintf("\t\t%s: o.%s.String,\n", ValidNameField(fieldJSON), field)
-	tplMFrom = fmt.Sprintf("\t\t%s: typ.PbToNullString(proto.%s),\n", field, ValidNameField(fieldJSON))
+	tplMFrom = fmt.Sprintf("\t\t%s: pbFromNullString(proto.%s),\n", field, ValidNameField(fieldJSON))
 	return tplP, tplMFrom, tplMTo
 }
 
@@ -366,16 +379,16 @@ func GenerateFieldString(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo
 // GenerateFieldTime конвертация туда и обратно
 func GenerateFieldTime(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
 	tplP += "\tgoogle.protobuf.Timestamp " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	tplMTo = fmt.Sprintf("\t\t%s: typ.PbFromTime(o.%s),\n", ValidNameField(fieldJSON), field)
-	tplMFrom = fmt.Sprintf("\t\t%s: typ.PbToTime(proto.%s),\n", field, ValidNameField(fieldJSON))
+	tplMTo = fmt.Sprintf("\t\t%s: pbToTime(o.%s),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: pbFromTime(proto.%s),\n", field, ValidNameField(fieldJSON))
 	return tplP, tplMFrom, tplMTo
 }
 
 // GenerateFieldNullTime конвертация туда и обратно
 func GenerateFieldNullTime(i int, field, fieldJSON string) (tplP, tplMFrom, tplMTo string) {
 	tplP += "\tgoogle.protobuf.Timestamp " + fieldJSON + " = " + strconv.Itoa(i+1) + ";\n"
-	tplMTo = fmt.Sprintf("\t\t%s: typ.PbFromTime(o.%s.Time),\n", ValidNameField(fieldJSON), field)
-	tplMFrom = fmt.Sprintf("\t\t%s: typ.PbToNullTime(proto.%s),\n", field, ValidNameField(fieldJSON))
+	tplMTo = fmt.Sprintf("\t\t%s: pbToTime(o.%s.Time),\n", ValidNameField(fieldJSON), field)
+	tplMFrom = fmt.Sprintf("\t\t%s: pbFromNullTime(proto.%s),\n", field, ValidNameField(fieldJSON))
 	return tplP, tplMFrom, tplMTo
 }
 

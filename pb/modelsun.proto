@@ -20,36 +20,36 @@ message Test {
 // Code generated. DO NOT EDIT
 
 message User {
-    string id = 1;
-    string login = 2;
-    string email = 3;
-    string price = 4;
-    float summa_one = 5;
-    double summa_two = 6;
-    int32 cnt2 = 7;
-    int64 cnt4 = 8;
-    int64 cnt8 = 9;
-    bool is_online = 10;
-    repeated string alias = 11;
-    bytes data_byte = 12;
-    bytes metrika = 13;
-    google.protobuf.Timestamp created_at = 14;
-    google.protobuf.Timestamp updated_at = 15;
-    google.protobuf.Timestamp deleted_at = 16;
+	string id = 1;
+	string login = 2;
+	string email = 3;
+	string price = 4;
+	float summa_one = 5;
+	double summa_two = 6;
+	int32 cnt2 = 7;
+	int64 cnt4 = 8;
+	int64 cnt8 = 9;
+	bool is_online = 10;
+	repeated string alias = 11;
+	bytes data_byte = 12;
+	bytes metrika = 13;
+	google.protobuf.Timestamp created_at = 14;
+	google.protobuf.Timestamp updated_at = 15;
+	google.protobuf.Timestamp deleted_at = 16;
 }
 
 message Order {
-    string id = 1;
-    string user_id = 2;
-    int64 number = 3;
-    int32 status = 4;
-    google.protobuf.Timestamp created_at = 5;
-    google.protobuf.Timestamp updated_at = 6;
-    google.protobuf.Timestamp deleted_at = 7;
+	string id = 1;
+	string user_id = 2;
+	int64 number = 3;
+	int32 status = 4;
+	google.protobuf.Timestamp created_at = 5;
+	google.protobuf.Timestamp updated_at = 6;
+	google.protobuf.Timestamp deleted_at = 7;
 }
 
 message Role {
-    string id = 1;
-    string code = 2;
-    string description = 3;
+	string id = 1;
+	string code = 2;
+	string description = 3;
 }

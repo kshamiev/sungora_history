@@ -1,0 +1,54 @@
+package TPLpackage
+
+import (
+	"time"
+
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/shopspring/decimal"
+	"github.com/volatiletech/null"
+
+	TPLImport
+)
+
+func init() {
+	_ = decimal.Decimal{}
+	_ = typ.UUID{}
+}
+
+// pbFromNullString перевод из примитива grpc
+func pbFromNullString(s string) null.String {
+	if s == "" {
+		return null.String{}
+	}
+	return null.StringFrom(s)
+}
+
+// pbFromNullTime перевод из примитива grpc
+func pbFromNullTime(d *timestamp.Timestamp) null.Time {
+	dp, err := ptypes.Timestamp(d)
+	if err != nil {
+		return null.Time{}
+	}
+	return null.TimeFrom(dp)
+}
+
+// pbToTime перевод в примитив grpc
+func pbToTime(d time.Time) *timestamp.Timestamp {
+	dp, err := ptypes.TimestampProto(d)
+	if err != nil {
+		dp, _ = ptypes.TimestampProto(time.Time{})
+	}
+	return dp
+}
+
+// pbFromTime перевод из примитива grpc
+func pbFromTime(d *timestamp.Timestamp) time.Time {
+	dp, err := ptypes.Timestamp(d)
+	if err != nil {
+		dp = time.Time{}
+	}
+	return dp
+}
+
+// Code generated. DO NOT EDIT

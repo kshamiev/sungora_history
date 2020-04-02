@@ -7,6 +7,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/kshamiev/sungora/internal/config"
+	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/pb/typsun"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/app/request"
@@ -33,9 +34,18 @@ func (task *GrpcSample) Action(ctx context.Context) error {
 		return errs.NewGRPC(err)
 	}
 
-	us := typsun.NewUserProto(res)
+	user := model.User{
+		Type: typsun.NewUserProto(res),
+	}
 
-	app.Dumper(us.Price.String(), us.CreatedAt.String(), us.Login, us.Metrika, us.ID.String())
+	app.Dumper(
+		user.Type.Price.String(),
+		user.Type.CreatedAt.String(),
+		user.Type.Login,
+		user.Type.Metrika,
+		user.Type.ID.String(),
+		user.Type.Alias,
+	)
 
 	lg.Info("grpc client ok")
 	return nil

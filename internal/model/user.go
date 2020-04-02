@@ -10,21 +10,22 @@ import (
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/kshamiev/sungora/pb/typsun"
+	"github.com/kshamiev/sungora/pkg/models"
 )
 
+// бизнес модель
 type User struct {
-	*config.Component
+	cm    *config.Component // служебный инструментарий
+	Type  *typsun.User      // тип модели для приемки, отправки на фронт по grpc, валидации
+	Model *models.User      // модель для работы с БД
+	Order *Order            // зависимая бизнес модель
 }
 
 // NewUser создания безнес модели
-func NewUser(comp *config.Component) *User {
-	return &User{
-		comp,
-	}
-}
+func NewUser(cm *config.Component) *User { return &User{cm: cm} }
 
-// GetUser получение определенного пользователя
-func (ml *User) GetUser() *typsun.User {
+// Load
+func (ml *User) Load(id typ.UUID) {
 	js := SampleJs{
 		ID:   54687,
 		Name: "Popcorn",
@@ -40,11 +41,12 @@ func (ml *User) GetUser() *typsun.User {
 		},
 	}
 	b, _ := json.Marshal(&js)
-	return &typsun.User{
-		ID:        typ.UUIDNew(),
-		CreatedAt: time.Now(),
+	ml.Type = &typsun.User{
+		ID:        id,
 		Login:     "pupkin",
 		Price:     decimal.NewFromFloat(748.567),
+		Alias:     []string{"one", "two", "tree"},
 		Metrika:   null.JSONFrom(b),
+		CreatedAt: time.Now(),
 	}
 }

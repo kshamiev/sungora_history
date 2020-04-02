@@ -10,6 +10,7 @@ import (
 	"github.com/kshamiev/sungora/internal/config"
 	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/pb"
+	"github.com/kshamiev/sungora/pb/typ"
 	"github.com/kshamiev/sungora/pkg/app/response"
 	"github.com/kshamiev/sungora/pkg/logger"
 )
@@ -33,10 +34,17 @@ func (ser *Server) GetUser(ctx context.Context, _ *empty.Empty) (*pb.User, error
 	_, lg := ser.getContextData(ctx)
 	lg.Info("grpc server ok")
 
-	us := model.NewUser(ser.Component).GetUser()
+	us := model.NewUser(ser.Component)
+	us.Load(typ.UUIDNew())
+
+	//
+
+	//
+
+	//
 
 	// sample OK
-	return us.Proto(), nil
+	return us.Type.Proto(), nil
 
 	// sample error
 	// err := errs.GRPC(codes.InvalidArgument, errors.New("library error"), "ошибка для пользователя")

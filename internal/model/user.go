@@ -16,7 +16,7 @@ import (
 // бизнес модель
 type User struct {
 	cm    *config.Component // служебный инструментарий
-	Type  *typsun.User      // тип модели для приемки, отправки на фронт по grpc, валидации
+	Type  *typsun.User      // тип модели для получения и отправки на фронт, по grpc, валидации и т. д. и т. л.
 	Model *models.User      // модель для работы с БД
 	Order *Order            // зависимая бизнес модель
 }

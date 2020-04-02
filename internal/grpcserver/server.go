@@ -37,12 +37,6 @@ func (ser *Server) GetUser(ctx context.Context, _ *empty.Empty) (*pb.User, error
 	us := model.NewUser(ser.Component)
 	us.Load(typ.UUIDNew())
 
-	//
-
-	//
-
-	//
-
 	// sample OK
 	return us.Type.Proto(), nil
 

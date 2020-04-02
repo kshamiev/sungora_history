@@ -1,3 +1,4 @@
+// nolint
 package TPLpackage
 
 import (
@@ -51,4 +52,4 @@ func pbFromTime(d *timestamp.Timestamp) time.Time {
 	return dp
 }
 
-// Code generated. DO NOT EDIT
+// CODE GENERATED. DO NOT EDIT //

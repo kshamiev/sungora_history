@@ -6,13 +6,13 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
 service TPLservice {
-    rpc Ping (google.protobuf.Empty) returns (Test) {
+    rpc Ping (google.protobuf.Empty) returns (TestTPLservice) {
     }
 }
 
-message Test {
+message TestTPLservice {
     string text = 1;
     google.protobuf.Timestamp created_at = 2;
 }
 
-// Code generated. DO NOT EDIT
+// CODE GENERATED. DO NOT EDIT //

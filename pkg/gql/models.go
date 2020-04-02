@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pb/typ"
+	"github.com/kshamiev/sungora/pkg/models"
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/null"
 )
@@ -95,9 +95,9 @@ type Todo struct {
 	// пример массива элементов
 	Items []*Item `json:"items"`
 	// поле с параметрами
-	Users []*modelsun.User `json:"users"`
+	Users []*models.User `json:"users"`
 	// поле с параметрами
-	Roles []*modelsun.Role `json:"roles"`
+	Roles []*models.Role `json:"roles"`
 }
 
 type Access string

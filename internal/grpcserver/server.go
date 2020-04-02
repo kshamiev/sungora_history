@@ -18,20 +18,20 @@ type Server struct {
 	*config.Component
 }
 
-func New(c *config.Component) pb.SungoraServer {
+func New(c *config.Component) pb.SunServer {
 	return &Server{Component: c}
 }
 
-func (ser *Server) Ping(context.Context, *empty.Empty) (*pb.Test, error) {
-	return &pb.Test{
+func (ser *Server) Ping(context.Context, *empty.Empty) (*pb.TestSun, error) {
+	return &pb.TestSun{
 		Text:      "Pong",
 		CreatedAt: ptypes.TimestampNow(),
 	}, nil
 }
 
-func (ser *Server) GetUser(ctx context.Context, req *pb.Test) (*pb.User, error) {
+func (ser *Server) GetUser(ctx context.Context, _ *empty.Empty) (*pb.User, error) {
 	_, lg := ser.getContextData(ctx)
-	lg.Info("grpc server ok (" + req.Text + ")")
+	lg.Info("grpc server ok")
 
 	us := model.NewUser(ser.Component).GetUser()
 

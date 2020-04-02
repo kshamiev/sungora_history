@@ -1,4 +1,5 @@
-package modelsun
+// nolint
+package typsun
 
 import (
 	"time"
@@ -52,72 +53,14 @@ func pbFromTime(d *timestamp.Timestamp) time.Time {
 	return dp
 }
 
-// Code generated. DO NOT EDIT
-
-func (o *User) Proto() *pb.User {
-	return &pb.User{
-		Id: o.ID.String(),
-		Login: o.Login,
-		Email: o.Email,
-		Price: o.Price.String(),
-		SummaOne: o.SummaOne,
-		SummaTwo: o.SummaTwo,
-		Cnt2: int32(o.CNT2),
-		Cnt4: int64(o.CNT4),
-		Cnt8: o.CNT8,
-		IsOnline: o.IsOnline,
-		Alias: o.Alias,
-		DataByte: o.DataByte.Bytes,
-		Metrika: o.Metrika.JSON,
-		CreatedAt: pbToTime(o.CreatedAt),
-		UpdatedAt: pbToTime(o.UpdatedAt),
-		DeletedAt: pbToTime(o.DeletedAt.Time),
-	}
-}
-
-func (o UserSlice) ProtoS() []*pb.User {
-	res := make([]*pb.User, len(o))
-	for i := range o {
-		res[i] = o[i].Proto()
-	}
-	return res
-}
-
-func NewUserProto(proto *pb.User) *User {
-	return &User{
-		ID: typ.UUIDMustParse(proto.Id),
-		Login: proto.Login,
-		Email: proto.Email,
-		Price: decimal.RequireFromString(proto.Price),
-		SummaOne: proto.SummaOne,
-		SummaTwo: proto.SummaTwo,
-		CNT2: int16(proto.Cnt2),
-		CNT4: int(proto.Cnt4),
-		CNT8: proto.Cnt8,
-		IsOnline: proto.IsOnline,
-		Alias: proto.Alias,
-		DataByte: null.BytesFrom(proto.DataByte),
-		Metrika: null.JSONFrom(proto.Metrika),
-		CreatedAt: pbFromTime(proto.CreatedAt),
-		UpdatedAt: pbFromTime(proto.UpdatedAt),
-		DeletedAt: pbFromNullTime(proto.DeletedAt),
-	}
-}
-
-func NewUserProtoS(protos []*pb.User) []*User {
-	res := make([]*User, len(protos))
-	for i := range protos {
-		res[i] = NewUserProto(protos[i])
-	}
-	return res
-}
+// CODE GENERATED. DO NOT EDIT //
 
 func (o *Order) Proto() *pb.Order {
 	return &pb.Order{
-		Id: o.ID.String(),
-		UserId: o.UserID.String(),
-		Number: int64(o.Number),
-		Status: typ.StatusValue[o.Status],
+		Id:        o.ID.String(),
+		UserId:    o.UserID.String(),
+		Number:    int64(o.Number),
+		Status:    typ.StatusValue[o.Status],
 		CreatedAt: pbToTime(o.CreatedAt),
 		UpdatedAt: pbToTime(o.UpdatedAt),
 		DeletedAt: pbToTime(o.DeletedAt.Time),
@@ -134,10 +77,10 @@ func (o OrderSlice) ProtoS() []*pb.Order {
 
 func NewOrderProto(proto *pb.Order) *Order {
 	return &Order{
-		ID: typ.UUIDMustParse(proto.Id),
-		UserID: typ.UUIDMustParse(proto.UserId),
-		Number: int(proto.Number),
-		Status: typ.StatusName[proto.Status],
+		ID:        typ.UUIDMustParse(proto.Id),
+		UserID:    typ.UUIDMustParse(proto.UserId),
+		Number:    int(proto.Number),
+		Status:    typ.StatusName[proto.Status],
 		CreatedAt: pbFromTime(proto.CreatedAt),
 		UpdatedAt: pbFromTime(proto.UpdatedAt),
 		DeletedAt: pbFromNullTime(proto.DeletedAt),
@@ -152,10 +95,68 @@ func NewOrderProtoS(protos []*pb.Order) []*Order {
 	return res
 }
 
+func (o *User) Proto() *pb.User {
+	return &pb.User{
+		Id:        o.ID.String(),
+		Login:     o.Login,
+		Email:     o.Email,
+		Price:     o.Price.String(),
+		SummaOne:  o.SummaOne,
+		SummaTwo:  o.SummaTwo,
+		Cnt2:      int32(o.CNT2),
+		Cnt4:      int64(o.CNT4),
+		Cnt8:      o.CNT8,
+		IsOnline:  o.IsOnline,
+		Alias:     o.Alias,
+		DataByte:  o.DataByte.Bytes,
+		Metrika:   o.Metrika.JSON,
+		CreatedAt: pbToTime(o.CreatedAt),
+		UpdatedAt: pbToTime(o.UpdatedAt),
+		DeletedAt: pbToTime(o.DeletedAt.Time),
+	}
+}
+
+func (o UserSlice) ProtoS() []*pb.User {
+	res := make([]*pb.User, len(o))
+	for i := range o {
+		res[i] = o[i].Proto()
+	}
+	return res
+}
+
+func NewUserProto(proto *pb.User) *User {
+	return &User{
+		ID:        typ.UUIDMustParse(proto.Id),
+		Login:     proto.Login,
+		Email:     proto.Email,
+		Price:     decimal.RequireFromString(proto.Price),
+		SummaOne:  proto.SummaOne,
+		SummaTwo:  proto.SummaTwo,
+		CNT2:      int16(proto.Cnt2),
+		CNT4:      int(proto.Cnt4),
+		CNT8:      proto.Cnt8,
+		IsOnline:  proto.IsOnline,
+		Alias:     proto.Alias,
+		DataByte:  null.BytesFrom(proto.DataByte),
+		Metrika:   null.JSONFrom(proto.Metrika),
+		CreatedAt: pbFromTime(proto.CreatedAt),
+		UpdatedAt: pbFromTime(proto.UpdatedAt),
+		DeletedAt: pbFromNullTime(proto.DeletedAt),
+	}
+}
+
+func NewUserProtoS(protos []*pb.User) []*User {
+	res := make([]*User, len(protos))
+	for i := range protos {
+		res[i] = NewUserProto(protos[i])
+	}
+	return res
+}
+
 func (o *Role) Proto() *pb.Role {
 	return &pb.Role{
-		Id: o.ID.String(),
-		Code: o.Code,
+		Id:          o.ID.String(),
+		Code:        o.Code,
 		Description: o.Description,
 	}
 }
@@ -170,8 +171,8 @@ func (o RoleSlice) ProtoS() []*pb.Role {
 
 func NewRoleProto(proto *pb.Role) *Role {
 	return &Role{
-		ID: typ.UUIDMustParse(proto.Id),
-		Code: proto.Code,
+		ID:          typ.UUIDMustParse(proto.Id),
+		Code:        proto.Code,
 		Description: proto.Description,
 	}
 }

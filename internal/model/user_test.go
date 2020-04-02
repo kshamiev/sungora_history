@@ -8,8 +8,8 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/boil"
 
-	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pb/typ"
+	"github.com/kshamiev/sungora/pkg/models"
 	"github.com/kshamiev/sungora/test"
 )
 
@@ -19,7 +19,7 @@ func TestUser(t *testing.T) {
 	ctx := context.Background()
 	env := test.GetEnvironment(t)
 
-	var us = &modelsun.User{
+	var us = &models.User{
 		Login: "qwerty",
 		Email: "test-test@test.ru",
 	}
@@ -46,7 +46,7 @@ func TestUser(t *testing.T) {
 
 	us.Price = decimal.NewFromFloat(345.876)
 
-	if _, err = us.Update(ctx, env.DB, boil.Whitelist(modelsun.UserColumns.Price)); err != nil {
+	if _, err = us.Update(ctx, env.DB, boil.Whitelist(models.UserColumns.Price)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -55,7 +55,7 @@ func TestUser(t *testing.T) {
 	}
 
 	// ORDER
-	or := modelsun.Order{
+	or := models.Order{
 		Status: typ.Status_WORK,
 	}
 

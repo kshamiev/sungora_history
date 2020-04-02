@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	middlewareChi "github.com/go-chi/chi/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -34,9 +35,9 @@ func New(comp *config.Component) (router *chi.Mux) {
 	router.Get("/api/docs/*", httpSwagger.Handler()) // swagger
 
 	// GRAPHQL
-	router.Handle("/api/playground", handler.Playground("GraphQL playground", "/api/graphql/gql"))
+	router.Handle("/api/playground", playground.Handler("GraphQL playground", "/api/graphql/gql"))
 	router.Route("/api/graphql", func(r chi.Router) {
-		r.Handle("/gql", handler.GraphQL(gql.NewExecutableSchema(gql.Config{Resolvers: &graphql.Resolver{}})))
+		r.Handle("/gql", handler.New(gql.NewExecutableSchema(gql.Config{Resolvers: &graphql.Resolver{}})))
 	})
 
 	// REST

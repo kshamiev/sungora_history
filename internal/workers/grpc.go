@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/golang/protobuf/ptypes/empty"
+
 	"github.com/kshamiev/sungora/internal/config"
-	"github.com/kshamiev/sungora/pb"
-	"github.com/kshamiev/sungora/pb/modelsun"
+	"github.com/kshamiev/sungora/pb/typsun"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/app/request"
 	"github.com/kshamiev/sungora/pkg/errs"
@@ -27,12 +28,12 @@ func (task *GrpcSample) Action(ctx context.Context) error {
 	lg := logger.GetLogger(ctx)
 	ctx = request.ContextGRPC(ctx, nil)
 
-	res, err := task.SungoraClient.GetUser(ctx, &pb.Test{Text: "serviceName"})
+	res, err := task.SungoraClient.GetUser(ctx, &empty.Empty{})
 	if err != nil {
 		return errs.NewGRPC(err)
 	}
 
-	us := modelsun.NewUserProto(res)
+	us := typsun.NewUserProto(res)
 
 	app.Dumper(us.Price.String(), us.CreatedAt.String(), us.Login, us.Metrika, us.ID.String())
 

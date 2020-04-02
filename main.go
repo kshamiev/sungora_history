@@ -20,9 +20,9 @@ import (
 	"github.com/kshamiev/sungora/internal/model"
 	"github.com/kshamiev/sungora/internal/workers"
 	"github.com/kshamiev/sungora/pb"
-	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pkg/app"
 	"github.com/kshamiev/sungora/pkg/logger"
+	"github.com/kshamiev/sungora/pkg/models"
 )
 
 // @title Sungora API
@@ -77,11 +77,11 @@ func main() {
 		component.Lg.WithError(err).Fatal("new grpc client error")
 	}
 	defer grpcClientName.Wait()
-	component.SungoraClient = pb.NewSungoraClient(grpcClientName.Conn)
+	component.SungoraClient = pb.NewSunClient(grpcClientName.Conn)
 
 	// Server GRPC (sample)
 	srv := grpc.NewServer()
-	pb.RegisterSungoraServer(srv, grpcserver.New(component))
+	pb.RegisterSunServer(srv, grpcserver.New(component))
 
 	if grpcServer, err = app.NewGRPCServer(&component.Cfg.GRPCServer, srv, component.Lg); err != nil {
 		component.Lg.WithError(err).Fatal("new grpc server error")
@@ -104,7 +104,7 @@ func main() {
 	defer server.Wait(component.Lg)
 
 	// general
-	var o modelsun.GooseDBVersion
+	var o models.GooseDBVersion
 
 	if err = queries.Raw(model.SQLAppVersion.String()).Bind(context.Background(), component.Db, &o); err != nil {
 		component.Lg.WithError(err).Fatal("couldn't get version DB")

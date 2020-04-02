@@ -14,5 +14,5 @@ type Component struct {
 	Cfg           *Config
 	Wp            *app.Scheduler
 	WsBus         app.WSBus
-	SungoraClient pb.SungoraClient
+	SungoraClient pb.SunClient
 }

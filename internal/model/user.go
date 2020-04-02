@@ -8,8 +8,8 @@ import (
 	"github.com/volatiletech/null"
 
 	"github.com/kshamiev/sungora/internal/config"
-	"github.com/kshamiev/sungora/pb/modelsun"
 	"github.com/kshamiev/sungora/pb/typ"
+	"github.com/kshamiev/sungora/pb/typsun"
 )
 
 type User struct {
@@ -24,7 +24,7 @@ func NewUser(comp *config.Component) *User {
 }
 
 // GetUser получение определенного пользователя
-func (ml *User) GetUser() *modelsun.User {
+func (ml *User) GetUser() *typsun.User {
 	js := SampleJs{
 		ID:   54687,
 		Name: "Popcorn",
@@ -40,7 +40,7 @@ func (ml *User) GetUser() *modelsun.User {
 		},
 	}
 	b, _ := json.Marshal(&js)
-	return &modelsun.User{
+	return &typsun.User{
 		ID:        typ.UUIDNew(),
 		CreatedAt: time.Now(),
 		Login:     "pupkin",

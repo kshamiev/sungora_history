@@ -19,11 +19,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
 
-	"github.com/kshamiev/sungora/pb/modelsun"
+	"github.com/kshamiev/sungora/pb/typsun"
 )
 
 // Конфигурация реализуемых сервисов и типы с которыми они должны уметь работать
@@ -31,51 +32,78 @@ import (
 // Срез сервиса содержит его рабочие типы (они должны быть из одного пакета)
 // сервис = пакет
 var config = map[string][]interface{}{
-	"Carriers": {
-		&modelsun.User{},
-		&modelsun.Order{},
-		&modelsun.Role{},
+	"Sun": {
+		&typsun.Order{},
+		&typsun.User{},
+		&typsun.Role{},
 	},
 }
 
+const separator = "// CODE GENERATED. DO NOT EDIT //"
+const fileGrpc = "/advanced_grpc"
+
+// sample run:
+//	@cd $(DIR) && go run generate/main.go;
+//	@cd $(DIR) && protoc --go_out=plugins=grpc:. *.proto;
+//	@cd $(DIR) && go run generate/main.go finish;
 func main() {
 	var err error
 	var tplPFull, tplMFull, tplP, tplM string
+	gen := Generate{controlType: map[string]bool{}}
 
 	for serviceName := range config {
 		if 0 == len(config[serviceName]) {
 			continue
 		}
-		// анализируем типы и формируем сопряжение
-		pathImport, pkgProto, pkgType := packageDetected(config[serviceName][0])
+		gen.controlType[serviceName] = true
 
-		tplPFull = CreateProtoFile(serviceName, pkgProto, pkgType)
-		tplMFull = CreateTypeFile(pathImport, pkgType)
+		// анализируем типы и формируем сопряжение
+		pathImport, pkgProto, pkgType := PackageDetected(config[serviceName][0])
+
+		// применение сгенерированных Golang файлов после успешной генерации прототипов
+		if len(os.Args) == 2 {
+			gen.RenameTypeFile(pathImport, pkgProto, pkgType)
+			continue
+		}
+
+		tplPFull = gen.CreateProtoFile(serviceName, pkgProto, pkgType)
+		tplMFull = gen.CreateTypeFile(pathImport, pkgType)
 		for _, t := range config[serviceName] {
-			if tplP, tplM, err = ParseType(t, pkgProto); err != nil {
+			if tplP, tplM, err = gen.ParseType(t, pkgProto); err != nil {
 				log.Fatal(err)
 			}
 			tplPFull += tplP
 			tplMFull += tplM
 		}
 		// описание прототипов
-		if err = ioutil.WriteFile(pkgType+".proto", []byte(tplPFull), 0666); err != nil {
+		if err = ioutil.WriteFile(strings.ToLower(serviceName)+".proto", []byte(tplPFull), 0666); err != nil {
 			log.Fatal(err)
 		}
-		// тметоды конвертации
-		if err = ioutil.WriteFile(pkgType+"/grpc.go", []byte(tplMFull), 0666); err != nil {
+		// методы конвертации Golang файлы
+		if err = ioutil.WriteFile(pkgType+fileGrpc, []byte(tplMFull), 0666); err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println(pkgType + ".proto OK")
 	}
-	fmt.Println("OK")
+}
+
+type Generate struct {
+	controlType map[string]bool
+}
+
+// RenameTypeFile применение сгенированных Go файлов после успешной генерации протофайлов
+func (gen *Generate) RenameTypeFile(pathImport, pkgProto, pkgType string) {
+	_ = os.Rename(pkgType+fileGrpc, pkgType+fileGrpc+".go")
+	fmt.Println(pkgType + ".pb.go OK")
+	fmt.Println(pkgType + fileGrpc + ".go OK")
 }
 
 // CreateTypeFile инициализация файла с методами конвертации типа
-func CreateTypeFile(pathImport, pkgType string) (proto string) {
-	if data, err := ioutil.ReadFile(pkgType + "/grpc.go"); err == nil {
+func (gen *Generate) CreateTypeFile(pathImport, pkgType string) (proto string) {
+	if data, err := ioutil.ReadFile(pkgType + fileGrpc + ".go"); err == nil {
 		proto = string(data)
-		list := strings.Split(proto, "DO NOT EDIT")
-		proto = list[0] + "DO NOT EDIT" + "\n"
+		list := strings.Split(proto, separator)
+		proto = list[0] + separator + "\n"
 	} else {
 		if data, err = ioutil.ReadFile("generate/template.gogo"); err != nil {
 			log.Fatal(err)
@@ -88,11 +116,11 @@ func CreateTypeFile(pathImport, pkgType string) (proto string) {
 }
 
 // CreateProtoFile инициализация файла с описанием прототипов
-func CreateProtoFile(serviceName, pkgProto, pkgType string) (proto string) {
-	if data, err := ioutil.ReadFile(pkgType + ".proto"); err == nil {
+func (gen *Generate) CreateProtoFile(serviceName, pkgProto, pkgType string) (proto string) {
+	if data, err := ioutil.ReadFile(strings.ToLower(serviceName) + ".proto"); err == nil {
 		proto = string(data)
-		list := strings.Split(proto, "DO NOT EDIT")
-		proto = list[0] + "DO NOT EDIT" + "\n"
+		list := strings.Split(proto, separator)
+		proto = list[0] + separator + "\n"
 	} else {
 		if data, err = ioutil.ReadFile("generate/template.proto"); err != nil {
 			log.Fatal(err)
@@ -105,7 +133,7 @@ func CreateProtoFile(serviceName, pkgProto, pkgType string) (proto string) {
 }
 
 // ParseType Анализируем тип и формируем его сопряжение с grpc (Object = *TypeName)
-func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err error) {
+func (gen *Generate) ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err error) {
 	// разбираем тип
 	var value = reflect.ValueOf(Object)
 	if value.Kind() != reflect.Ptr {
@@ -117,6 +145,11 @@ func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err erro
 	value = value.Elem()
 
 	list := strings.Split(value.Type().String(), ".")
+	if _, ok := gen.controlType[list[1]]; ok {
+		return tplP, tplM, errors.New("error: type '" + list[1] + "' duplicate (is already type or service )")
+	}
+	gen.controlType[list[1]] = true
+
 	tplP = "\nmessage " + list[1] + " {\n"
 
 	tplMFrom := "\nfunc New" + list[1] + "Proto(proto *" + pkgProto + "." + list[1] + ") *" + list[1] + " {\n"
@@ -132,7 +165,7 @@ func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err erro
 		if false == field.IsValid() || false == field.CanSet() {
 			continue
 		}
-		tplP_, tplMFrom_, tplMTo_ := ParseField(value, i)
+		tplP_, tplMFrom_, tplMTo_ := gen.ParseField(value, i)
 		tplP += tplP_
 		tplMFrom += tplMFrom_
 		tplMTo += tplMTo_
@@ -163,7 +196,7 @@ func ParseType(Object interface{}, pkgProto string) (tplP, tplM string, err erro
 }
 
 // ParseField Анализируем свойство типа и формируем его конвертацию
-func ParseField(objValue reflect.Value, i int) (tplP, tplMFrom, tplMTo string) {
+func (gen *Generate) ParseField(objValue reflect.Value, i int) (tplP, tplMFrom, tplMTo string) {
 	field := objValue.Type().Field(i).Name
 	fieldJSON := objValue.Type().Field(i).Tag.Get(`json`)
 
@@ -424,7 +457,7 @@ func ValidNameField(field string) string {
 }
 
 // Получение информация оп пакекте
-func packageDetected(obj interface{}) (pathImport, pkgProto, pkgType string) {
+func PackageDetected(obj interface{}) (pathImport, pkgProto, pkgType string) {
 	var rt = reflect.TypeOf(obj)
 	if rt.Kind() == reflect.Ptr {
 		rt = rt.Elem()
